@@ -1,0 +1,35 @@
+{
+  "name": "apt-maint-acct-server",
+  "version": "0.0.0",
+  "description": "NodeJS Server side coding of Apartment Maintenance Account",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Apartment",
+    "Maintenance",
+    "NodeJS",
+    "bookshelf",
+    "knex",
+    "MYSQL"
+  ],
+  "author": "Mohankumar Anna <armk100@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^0.8.7",
+    "body-parser": "^1.15.2",
+    "bookshelf": "^0.10.2",
+    "cors": "^2.8.1",
+    "dotenv": "^2.0.0",
+    "express": "^4.14.0",
+    "express-jwt": "^5.1.0",
+    "jsonwebtoken": "^7.1.9",
+    "knex": "^0.12.6",
+    "mysql": "^2.12.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mohankumaranna/apt-maintenance-accounts.git/backend"
+  }
+}
