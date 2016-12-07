@@ -1,3 +1,3 @@
-# apt-maintenance-account-server
+# apt-maintenance-account-backend (server side)
 
-Apartment Maintenance Account Tracking App in Angular 2, Node JS, MySQL
+Apartment Maintenance Account Tracking Backend built in Node JS, MySQL, Knex, Bookshelf
