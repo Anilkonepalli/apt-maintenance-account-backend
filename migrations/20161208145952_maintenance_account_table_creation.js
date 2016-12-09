@@ -14,11 +14,11 @@ exports.up = function(knex, Promise) {
   		table.decimal('amount');
   		table.decimal('balance');
   		table.string('category', 25);
-  		table.timestamp('date').nullable();
+  		table.timestamp('recorded_at').nullable();
   		table.string('remarks', 254);
-		table.timestamp('created_at').nullable();
-		table.timestamp('updated_at').nullable();
-		table.timestamp('deleted_at').nullable();
+		  table.timestamp('created_at').nullable();
+		  table.timestamp('updated_at').nullable();
+		  table.timestamp('deleted_at').nullable();
   	});
 };
 

@@ -17,7 +17,7 @@ exports.seed = function(knex, Promise) {
                         amount: 600.00,
                         balance: 600.00,
                         category: 'Monthly maintenance',
-                        date: '2016-12-08T00:00:00',
+                        recorded_at: '2016-12-08T00:00:00',
                         remarks: 'testing new app', 
                         created_at: knex.fn.now(),
                         updated_at: knex.fn.now()
@@ -33,7 +33,7 @@ exports.seed = function(knex, Promise) {
                         amount: 600.00,
                         balance: 600.00,
                         category: 'Monthly maintenance',
-                        date: '2016-12-08T00:00:00',
+                        recorded_at: '2016-12-08T00:00:00',
                         remarks: 'testing new app', 
                         created_at: knex.fn.now(),
                         updated_at: knex.fn.now()
@@ -49,7 +49,7 @@ exports.seed = function(knex, Promise) {
                         amount: 600.00,
                         balance: 600.00,
                         category: 'Monthly maintenance',
-                        date: '2016-12-08T00:00:00',
+                        recorded_at: '2016-12-08T00:00:00',
                         remarks: 'testing new app', 
                         created_at: knex.fn.now(),
                         updated_at: knex.fn.now()
