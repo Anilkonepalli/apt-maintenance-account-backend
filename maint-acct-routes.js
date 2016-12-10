@@ -13,7 +13,33 @@ var MaintenanceAccounts = Bookshelf.Collection.extend({
 
 // application routing
 var router = module.exports = express.Router();
-router.route('/maintenance-accounts').get(maintenance_account_list);  // fetches all records
+
+// middleware to use for all requests
+router.use(function(req, res, next){
+	// do logging
+	console.log('Maintenance Account is happening...');
+	next(); // make sure we go to the next routes and don't stop here
+});
+
+// test route to make sure everything is working (accessed at GET http://localhost:3002/api)
+router.get('/', function(req, res){
+	res.json({message: 'Welcome to MaintenanceAccount module api'});
+});
+
+// more routes for the API will happen here
+
+// on routes that end in /maintenance-accounts
+// ---------------------------------------------------------------------
+router.route('/maintenance-accounts')
+	// get all the maintenance account records (accessed at GET http://localhost:3002/api/maintenance-accounts)
+	.get(function(req, res){
+		MaintenanceAccounts.forge().fetch()
+			.then(records => res.json(records))
+			.catch(err => res.send(err));
+	})
+
+
+//router.route('/maintenance-accounts').get(maintenance_account_list);  // fetches all records
 //router.route('/users').post(new_user); // creates a new user
 //router.route('/users/:id').get(user_obj); // fetch an user's details
 //router.route('/users/:id').put(update_user_obj); // update user's details
@@ -22,6 +48,12 @@ router.route('/maintenance-accounts').get(maintenance_account_list);  // fetches
 //router.route('/sessions/create').post(login_user);
 
 
+// on routes that end in /maintenance-accounts
+// -----------------------------------------------------------------
+
+
+
+/*
 // private functions
 var retrieved_maintenance_accounts = null;  // yet to retrieve records
 
@@ -44,7 +76,6 @@ var retrieved_maintenance_accounts = null;  // yet to retrieve records
 //	return result;
 })();
 
-
 // functions referred in router above
 
 function maintenance_account_list(request, response){
@@ -64,6 +95,8 @@ function maintenance_account_list(request, response){
 	}
 
 }
+*/
+
 
 /*
 function new_user(request, response){
