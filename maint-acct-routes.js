@@ -36,7 +36,44 @@ router.route('/maintenance-accounts')
 		MaintenanceAccounts.forge().fetch()
 			.then(records => res.json(records))
 			.catch(err => res.send(err));
-	})
+	});
+
+
+router.route('/maintenance-accounts/:id')
+	.get(function(req, res) {
+		//console.log('Request object is: ');
+		//console.log(req);
+		MaintenanceAccount.forge( {id: req.params.id} ).fetch()
+			.then(record =>  {
+								console.log('Account Details found...');
+								console.log(record);
+								res.json(record);
+							}
+			)
+			.catch(err => res.send(err));
+/*		MaintenanceAccounts.forge({id: req.params.id})
+			.fetch()
+			.then(acct_obj_success)
+			.catch(acct_obj_error);
+
+		function acct_obj_success(acct) {
+			if(!acct){
+				console.log('No Account Details found');
+				res.status(404).json({ error: true, data:{} });
+			} else {
+				console.log('Account Details is found');
+				console.log(acct.toJSON());
+				res.json({ error: false, data: acct.toJSON() });
+			}
+		}
+
+		function acct_obj_error(err) {
+			console.log('Error in finding account details');
+			console.log(err);
+			res.status(500).json({ error: true, data:{message: err.message} });
+		}  */
+
+	});
 
 
 //router.route('/maintenance-accounts').get(maintenance_account_list);  // fetches all records
