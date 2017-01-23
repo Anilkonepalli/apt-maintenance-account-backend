@@ -42,20 +42,11 @@ router.route('/maintenance-accounts')
 // ---------------------------------------------------------------------
 router.route('/maintenance-accounts/:id')
 	.get(function(req, res) {
-		console.log('Request object id is: ');
-		console.log(req.params.id);
-		if(req.params.id === '0') {
-			console.log('create an account object');
-			let acct = new MaintenanceAccount();
-			res.json(acct);
-		} else {
+		if(req.params.id === '0') { // respond with a new account
+			res.json(new MaintenanceAccount());
+		} else { // respond with fetched account
 			MaintenanceAccount.forge( {id: req.params.id} ).fetch()
-				.then(record =>  {
-									console.log('Account Details found...');
-									console.log(record);
-									res.json(record);
-								}
-				)
+				.then(record => res.json(record))
 				.catch(err => res.send(err));
 		}
 	});
@@ -99,6 +90,26 @@ router.route('/maintenance-accounts')
 		.save()
 		.then( acct => res.json({error: false, data:{acct}}))
 		.catch( err => res.status(500).json({error: true, data:{message: err.message}}));
+	});
+
+
+// on routes that end in /maintenance-accounts/:id to delete an account
+// ---------------------------------------------------------------------
+
+router.route('/maintenance-accounts/:id')
+	.delete(function(req, res){
+		MaintenanceAccount.forge({id: req.params.id}).fetch({require: true})
+			.then(doDelete)
+			.catch(notifyError);
+
+		function doDelete(acct){
+			acct.destroy()
+				.then( () => res.json({error: true, data: {message: 'User successfully deleted'} }))
+				.catch( (err) => res.status(500).json({error: true, data: {message: err.message}}));
+		}
+		function notifyError(err){
+			res.status(500).json({error: true, data: {message: err.message}});
+		}
 	});
 
 //router.route('/maintenance-accounts').get(maintenance_account_list);  // fetches all records
