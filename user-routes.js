@@ -13,11 +13,100 @@ var Users = Bookshelf.Collection.extend({
 
 // application routing
 var router = module.exports = express.Router();
-router.route('/users').get(user_list);  // fetches all users
-router.route('/users').post(new_user); // creates a new user
-router.route('/users/:id').get(user_obj); // fetch an user's details
-router.route('/users/:id').put(update_user_obj); // update user's details
-router.route('/users/:id').delete(delete_user_obj); // delete an user
+
+// api routes
+
+// on routes that end in /users
+// ---------------------------------------------------------------------
+router.route('/users')
+	// get all the user records (accessed at GET http://localhost:3002/api/users)
+	.get(function(req, res){
+		Users.forge().fetch()
+			.then(records => res.json(records))
+			.catch(err => res.send(err));
+	});
+
+// on routes that end in /users/:id to get an user
+// ---------------------------------------------------------------------
+router.route('/users/:id')
+	.get(function(req, res) {
+		if(req.params.id === '0') { // respond with a new user
+			res.json(new User());
+		} else { // respond with fetched user
+			User.forge( {id: req.params.id} ).fetch()
+				.then(record => res.json(record))
+				.catch(err => res.send(err));
+		}
+	});
+// on routes that end in /users/:id to update an existing user
+// ---------------------------------------------------------------------
+router.route('/users/:id')
+	.put(function(req, res) {
+		User.forge({id: req.params.id}).fetch({require: true})
+			.then(doUpdate)
+			.catch(notifyError);
+
+		function doUpdate(user){
+			user.save({
+				name: req.body.name || user.get('name')
+			})
+			.then(function(){
+				res.json({error: false, data:{message: 'user Details Updated'}});
+			})
+			.catch(function(){
+				res.status(500).json({error: true, data: {message: err.message}});
+			});
+		}
+		function notifyError(err){
+			res.status(500).json({error: true, data: {message: err.message}});
+		}
+
+	});
+
+// on routes that end in /users to post (to add) a new user
+// ---------------------------------------------------------------------
+
+router.route('/users')
+	.post(function(req, res) {
+		console.log('New user being added...');
+		console.log(req.body);
+		console.log(req.query);
+
+		User.forge({
+			name: req.body.name,
+		})
+		.save()
+		.then( acct => res.json({error: false, data:{acct}}))
+		.catch( err => res.status(500).json({error: true, data:{message: err.message}}));
+	});
+
+
+// on routes that end in /users/:id to delete an user
+// ---------------------------------------------------------------------
+
+router.route('/users/:id')
+	.delete(function(req, res){
+		User.forge({id: req.params.id}).fetch({require: true})
+			.then(doDelete)
+			.catch(notifyError);
+
+		function doDelete(acct){
+			acct.destroy()
+				.then( () => res.json({error: true, data: {message: 'User successfully deleted'} }))
+				.catch( (err) => res.status(500).json({error: true, data: {message: err.message}}));
+		}
+		function notifyError(err){
+			res.status(500).json({error: true, data: {message: err.message}});
+		}
+	});
+
+
+
+//router.route('/users').get(user_list);  // fetches all users
+//router.route('/users').post(new_user); // creates a new user
+//router.route('/users/:id').get(user_obj); // fetch an user's details
+//router.route('/users/:id').put(update_user_obj); // update user's details
+//router.route('/users/:id').delete(delete_user_obj); // delete an user
 
 router.route('/sessions/create').post(login_user);
 
@@ -46,7 +135,7 @@ var retrieved_users = null;  // yet to retrieve users
 
 
 // functions referred in router above
-
+/*
 function user_list(request, response){
 	console.log('Get User List');
 	Users.forge().fetch()
@@ -159,7 +248,7 @@ function delete_user_obj(request, response){
 		response.status(500).json({error: true, data: {message: err.message}});
 	}
 }
-
+*/
 
 function create_token(user){
 	return jwt.sign(_.omit(user, 'password'), constants.secret, {expiresIn: 60*60*2});
