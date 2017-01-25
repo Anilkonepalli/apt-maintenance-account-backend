@@ -9,8 +9,9 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(cors());
 
-app.use('/api', require('./user-routes'));
-app.use('/api', require('./maint-acct-routes'));
+app.use('/api', require('./login-routes'));
+app.use('/api/users', require('./user-routes'));
+app.use('/api/maintenance-accounts', require('./maint-acct-routes'));
 
 // Launch NodeJS server with port #3002
 app.listen(3002, function(){
