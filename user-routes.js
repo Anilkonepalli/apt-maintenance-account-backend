@@ -12,8 +12,8 @@ var Users = Bookshelf.Collection.extend({
 });
 
 // application routing
-//var userRoutes = module.exports = express.Router();
-var userRoutes = express.Router();
+var userRoutes = module.exports = express.Router();
+//var userRoutes = express.Router();
 
 //userRoutes.route('/sessions/create').post(login_user);
 
@@ -80,36 +80,10 @@ userRoutes.route('/:id')
 userRoutes.route('/:id')
 	.put(function(req, res) {
 		User.forge({id: req.params.id}).fetch({require: true})
-			.then(user => {
-				user
-				  .save({ 
-					name: req.body.name || user.get('name')
-				  })
-				  .then( 
-				  	() => res
-				  			.json({
-				  				error:false, 
-				  				data: { message: 'User Details updated'}})
-				  )
-				  .catch( 
-				  	err => res
-				  			.status(500)
-				  			.json({
-				  				error: true, 
-				  				data: { messsage: err.message}
-				  			})
-				  );
-			})
-			.catch(
-				err => res
-						.status(500)
-						.json({
-								error: true, 
-								data: { message: err.message}
-						})
-			);
+			.then(doUpdate)
+			.catch(notifyError);
 
-/*		function doUpdate(user){
+		function doUpdate(user){
 			user.save({
 				name: req.body.name || user.get('name')
 			})
@@ -123,7 +97,7 @@ userRoutes.route('/:id')
 		function notifyError(err){
 			res.status(500).json({error: true, data: {message: err.message}});
 		}
-*/
+
 	});
 
 // on routes that end in /users to post (to add) a new user
@@ -357,4 +331,4 @@ function login_user(request, response){
 */
 
 
-module.exports = userRoutes;
+//module.exports = userRoutes;

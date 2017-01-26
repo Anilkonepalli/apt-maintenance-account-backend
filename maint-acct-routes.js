@@ -12,8 +12,8 @@ var MaintenanceAccounts = Bookshelf.Collection.extend({
 });
 
 // application routing
-//var maintAcctRoutes = module.exports = express.Router();
-var maintAcctRoutes = express.Router();
+var maintAcctRoutes = module.exports = express.Router();
+//var maintAcctRoutes = express.Router();
 
 
 // middleware to use for all requests
@@ -56,6 +56,11 @@ maintAcctRoutes.use(function(req, res, next){
 maintAcctRoutes.route('/')
 	// get all the maintenance account records (accessed at GET http://localhost:3002/api/maintenance-accounts)
 	.get(function(req, res){
+		console.log('Check availability of decoded token...');
+		if(req.decoded) {
+			console.log('Decoded token...');
+			console.log(req.decoded);
+		}
 		MaintenanceAccounts.forge().fetch()
 			.then(records => res.json(records))
 			.catch(err => res.send(err));
@@ -136,4 +141,4 @@ maintAcctRoutes.route('/:id')
 	});
 
 
-module.exports = maintAcctRoutes;
+//module.exports = maintAcctRoutes;
