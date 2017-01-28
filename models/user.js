@@ -5,6 +5,7 @@ var Bookshelf = require('../config/database');
 var User = Bookshelf.Model.extend({
 	tableName: 'users',
 	hasTimestamps: true,
+	softDelete: true,
 
 	hello: function(){
 		console.log('Hello, this is User Model');

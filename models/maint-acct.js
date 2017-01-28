@@ -5,6 +5,7 @@ var Bookshelf = require('../config/database');
 var MaintenanceAccount = Bookshelf.Model.extend({
 	tableName: 'maintenance_accounts',
 	hasTimestamps: true,
+	softDelete: true,
 
 	hello: function(){
 		console.log('Hello, this is MaintenanceAccount Model');

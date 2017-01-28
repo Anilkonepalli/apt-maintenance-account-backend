@@ -12,8 +12,8 @@ var Users = Bookshelf.Collection.extend({
 });
 
 // application routing
-var userRoutes = module.exports = express.Router();
-//var loginRoutes = express.Router();
+//var userRoutes = module.exports = express.Router();
+var loginRoutes = module.exports = express.Router();
 
 loginRoutes.route('/sessions/create').post(function(request, response){
 	console.log('Login user...');
