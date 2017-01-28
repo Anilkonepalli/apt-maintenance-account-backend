@@ -16,7 +16,8 @@ exports.up = function(knex, Promise) {
   		table.string('category', 25);
   		table.timestamp('recorded_at').nullable();
   		table.string('remarks', 254);
-		  table.timestamp('created_at').nullable();
+      table.integer('owner_id');
+		  table.timestamp('created_at').nullable().defaultTo(knex.fn.now());
 		  table.timestamp('updated_at').nullable();
 		  table.timestamp('deleted_at').nullable();
   	});

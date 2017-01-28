@@ -13,7 +13,6 @@ var MaintenanceAccounts = Bookshelf.Collection.extend({
 
 // application routing
 var maintAcctRoutes = module.exports = express.Router();
-//var maintAcctRoutes = express.Router();
 
 
 // middleware to use for all requests
@@ -44,7 +43,7 @@ maintAcctRoutes.use(function(req, res, next){
 			message: 'No token provided in MaintAcctRoutes.'
 		});
 	}
-	//next(); // make sure we go to the next routes and don't stop here
+
 });
 
 
@@ -140,5 +139,3 @@ maintAcctRoutes.route('/:id')
 		}
 	});
 
-
-//module.exports = maintAcctRoutes;
