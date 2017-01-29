@@ -6,12 +6,12 @@ exports.up = function(knex, Promise) {
 	return knex.schema.createTable('users', function(table){
 		table.increments().primary();
 		table.string('name', 50).notNull();
-		table.string('first_name', 25);
-		table.string('last_name', 25);
+		table.string('first_name', 25).nullable();
+		table.string('last_name', 25).nullable();
 		table.string('email', 50).notNull().unique();
 		table.string('password', 60).notNull();
 		table.integer('confirmed');
-		table.string('confirmation_code', 50);
+		table.string('confirmation_code', 50).nullable();
 		table.timestamp('created_at').nullable().defaultTo(knex.fn.now());
 		table.timestamp('updated_at').nullable();
 		table.timestamp('deleted_at').nullable();	

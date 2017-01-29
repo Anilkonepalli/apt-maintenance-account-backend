@@ -19,9 +19,6 @@ exports.seed = function(knex, Promise) {
                         category: 'Monthly maintenance',
                         recorded_at: '2016-12-08T00:00:00',
                         remarks: 'testing new app',
-                        owner_id: 0,
-                        created_at: knex.fn.now(),
-                        updated_at: knex.fn.now()
                       }),
 
         knex('maintenance_accounts').insert({
@@ -35,10 +32,7 @@ exports.seed = function(knex, Promise) {
                         balance: 600.00,
                         category: 'Monthly maintenance',
                         recorded_at: '2016-12-08T00:00:00',
-                        remarks: 'testing new app', 
-                        owner_id: 0,
-                        created_at: knex.fn.now(),
-                        updated_at: knex.fn.now()
+                        remarks: 'testing new app'
                       }),
 
         knex('maintenance_accounts').insert({
@@ -52,10 +46,7 @@ exports.seed = function(knex, Promise) {
                         balance: 600.00,
                         category: 'Monthly maintenance',
                         recorded_at: '2016-12-08T00:00:00',
-                        remarks: 'testing new app', 
-                        owner_id: 0,
-                        created_at: knex.fn.now(),
-                        updated_at: knex.fn.now()
+                        remarks: 'testing new app'
                       })        
 
       ]);

@@ -1,9 +1,9 @@
 
 exports.up = function(knex, Promise) {
 
-	knex.schema.dropTableIfExists('role_user');
+	knex.schema.dropTableIfExists('roles_users');
 
-  	return knex.schema.createTable('role_user', function(table){
+  	return knex.schema.createTable('roles_users', function(table){
   		table.increments().primary();
   		table.integer('user_id').unsigned().references('users.id').onDelete('CASCADE');
   		table.integer('role_id').unsigned().references('roles.id').onDelete('CASCADE');
@@ -15,5 +15,5 @@ exports.up = function(knex, Promise) {
 };
 
 exports.down = function(knex, Promise) {
-  return knex.schema.dropTable('role_user');
+  return knex.schema.dropTable('roles_users');
 };

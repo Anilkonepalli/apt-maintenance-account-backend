@@ -17,9 +17,7 @@ exports.seed = function(knex, Promise) {
                         email: 'user1@eastgate.in',
                         password: bcrypt.hashSync('user1secret', 10),
                         confirmed: 1,
-                        confirmation_code: '',
-                        created_at: knex.fn.now(),
-                        updated_at: knex.fn.now()
+                        confirmation_code: ''
                       }),
 
         knex('users').insert({
@@ -29,9 +27,7 @@ exports.seed = function(knex, Promise) {
                         email: 'user2@eastgate.in',
                         password: bcrypt.hashSync('user2secret', 10),
                         confirmed: 1,
-                        confirmation_code: '',
-                        created_at: knex.fn.now(),
-                        updated_at: knex.fn.now()
+                        confirmation_code: ''
                       }),
 
         knex('users').insert({
@@ -41,9 +37,7 @@ exports.seed = function(knex, Promise) {
                         email: 'user3@eastgate.in',
                         password: bcrypt.hashSync('user3secret', 10),
                         confirmed: 1,
-                        confirmation_code: '',
-                        created_at: knex.fn.now(),
-                        updated_at: knex.fn.now()
+                        confirmation_code: ''
                       })        
 
       ]);
