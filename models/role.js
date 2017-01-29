@@ -11,7 +11,7 @@ var Role = Bookshelf.Model.extend({
 	},
 	permissions: function() {
 		return this.belongsToMany(Permission);
-	}
+	},
 
 	hello: function(){
 		console.log('Hello, this is Role Model');

@@ -1,24 +1,26 @@
 var _ 			= require('lodash'),
 	express 	= require('express'),
-	MaintenanceAccount 		= require('./models/maint-acct'),
+	Permission 		= require('./models/permission'),
 	Bookshelf 	= require('./config/database'),
 	jwt			= require('jsonwebtoken'),
 	constants	= require('./config/constants'),
 	bcrypt 		= require('bcrypt');
 
 
-var MaintenanceAccounts = Bookshelf.Collection.extend({
-	model: MaintenanceAccount
+var Permissions = Bookshelf.Collection.extend({
+	model: Permission
 });
 
 // application routing
-var maintAcctRoutes = module.exports = express.Router();
+var permissionRoutes = module.exports = express.Router();
 
+
+// api routes
 
 // middleware to use for all requests
-maintAcctRoutes.use(function(req, res, next){
+permissionRoutes.use(function(req, res, next){
 	// do logging
-	console.log('Maintenance Account Access is happening...');
+	console.log('Permission Access is happening...');
 
 	let token = req.body.token || req.query.token || req.headers['x-access-token'];
 	console.log('JWT Token from client: ...');
@@ -40,57 +42,49 @@ maintAcctRoutes.use(function(req, res, next){
 		// if there is no token, return an error
 		return res.status(403).send({
 			success: false,
-			message: 'No token provided in MaintAcctRoutes.'
+			message: 'No token provided in permissionRoutes.'
 		});
 	}
-
+	//next(); // make sure we go to the next routes and don't stop here
 });
 
 
-
-// more routes for the API will happen here
-
-// on routes that end in /maintenance-accounts
+// on routes that end in /Permissions
 // ---------------------------------------------------------------------
-maintAcctRoutes.route('/')
-	// get all the maintenance account records (accessed at GET http://localhost:3002/api/maintenance-accounts)
+permissionRoutes.route('/')
+	// get all the permission records (accessed at GET http://localhost:3002/api/Permissions)
 	.get(function(req, res){
-		console.log('Check availability of decoded token...');
-		if(req.decoded) {
-			console.log('Decoded token...');
-			console.log(req.decoded);
-		}
-		MaintenanceAccounts.forge().fetch()
+		Permissions.forge().fetch()
 			.then(records => res.json(records))
 			.catch(err => res.send(err));
 	});
 
-// on routes that end in /maintenance-accounts/:id to get an account
+// on routes that end in /Permissions/:id to get an permission
 // ---------------------------------------------------------------------
-maintAcctRoutes.route('/:id')
+permissionRoutes.route('/:id')
 	.get(function(req, res) {
-		if(req.params.id === '0') { // respond with a new account
-			res.json(new MaintenanceAccount());
-		} else { // respond with fetched account
-			MaintenanceAccount.forge( {id: req.params.id} ).fetch()
+		if(req.params.id === '0') { // respond with a new permission
+			res.json(new Permission());
+		} else { // respond with fetched permission
+			Permission.forge( {id: req.params.id} ).fetch()
 				.then(record => res.json(record))
 				.catch(err => res.send(err));
 		}
 	});
-// on routes that end in /maintenance-accounts/:id to update an existing account
+// on routes that end in /Permissions/:id to update an existing permission
 // ---------------------------------------------------------------------
-maintAcctRoutes.route('/:id')
+permissionRoutes.route('/:id')
 	.put(function(req, res) {
-		MaintenanceAccount.forge({id: req.params.id}).fetch({require: true})
+		Permission.forge({id: req.params.id}).fetch({require: true})
 			.then(doUpdate)
 			.catch(notifyError);
 
-		function doUpdate(account){
-			account.save({
-				name: req.body.name || account.get('name')
+		function doUpdate(permission){
+			permission.save({
+				resource: req.body.resource || permission.get('resource')
 			})
 			.then(function(){
-				res.json({error: false, data:{message: 'Account Details Updated'}});
+				res.json({error: false, data:{message: 'Permission Details Updated'}});
 			})
 			.catch(function(err){
 				res.status(500).json({error: true, data: {message: err.message}});
@@ -102,40 +96,39 @@ maintAcctRoutes.route('/:id')
 
 	});
 
-// on routes that end in /maintenance-accounts to post (to add) a new account
+// on routes that end in /Permissions to post (to add) a new permission
 // ---------------------------------------------------------------------
 
-maintAcctRoutes.route('/')
+permissionRoutes.route('/')
 	.post(function(req, res) {
-		console.log('New Account being added...');
+		console.log('New permission being added...');
 		console.log(req.body);
 		console.log(req.query);
 
-		MaintenanceAccount.forge({
-			name: req.body.name,
+		Permission.forge({
+			resource: req.body.resource,
 		})
 		.save()
-		.then( acct => res.json({error: false, data:{acct}}))
+		.then( record => res.json({error: false, data:{record}}))
 		.catch( err => res.status(500).json({error: true, data:{message: err.message}}));
 	});
 
 
-// on routes that end in /maintenance-accounts/:id to delete an account
+// on routes that end in /Permissions/:id to delete an permission
 // ---------------------------------------------------------------------
 
-maintAcctRoutes.route('/:id')
+permissionRoutes.route('/:id')
 	.delete(function(req, res){
-		MaintenanceAccount.forge({id: req.params.id}).fetch({require: true})
+		Permission.forge({id: req.params.id}).fetch({require: true})
 			.then(doDelete)
 			.catch(notifyError);
 
-		function doDelete(acct){
-			acct.destroy()
-				.then( () => res.json({error: true, data: {message: 'User successfully deleted'} }))
+		function doDelete(record){
+			record.destroy()
+				.then( () => res.json({error: true, data: {message: 'Permission successfully deleted'} }))
 				.catch( (err) => res.status(500).json({error: true, data: {message: err.message}}));
 		}
 		function notifyError(err){
 			res.status(500).json({error: true, data: {message: err.message}});
 		}
 	});
-
