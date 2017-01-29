@@ -1,4 +1,5 @@
 
+
 exports.seed = function(knex, Promise) {
   var bcrypt = require('bcrypt');
   
