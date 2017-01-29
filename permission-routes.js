@@ -1,6 +1,6 @@
 var _ 			= require('lodash'),
 	express 	= require('express'),
-	Permission 		= require('./models/permission'),
+	Permission 	= require('./models/permission'),
 	Bookshelf 	= require('./config/database'),
 	jwt			= require('jsonwebtoken'),
 	constants	= require('./config/constants'),
@@ -52,10 +52,10 @@ permissionRoutes.use(function(req, res, next){
 // on routes that end in /Permissions
 // ---------------------------------------------------------------------
 permissionRoutes.route('/')
-	// get all the permission records (accessed at GET http://localhost:3002/api/Permissions)
+	// get all the permission models (accessed at GET http://localhost:3002/api/Permissions)
 	.get(function(req, res){
 		Permissions.forge().fetch()
-			.then(records => res.json(records))
+			.then(models => res.json(models))
 			.catch(err => res.send(err));
 	});
 
@@ -63,11 +63,11 @@ permissionRoutes.route('/')
 // ---------------------------------------------------------------------
 permissionRoutes.route('/:id')
 	.get(function(req, res) {
-		if(req.params.id === '0') { // respond with a new permission
+		if(req.params.id === '0') { // respond with a new permission model
 			res.json(new Permission());
-		} else { // respond with fetched permission
+		} else { // respond with fetched permission model
 			Permission.forge( {id: req.params.id} ).fetch()
-				.then(record => res.json(record))
+				.then(model => res.json(model))
 				.catch(err => res.send(err));
 		}
 	});
@@ -79,9 +79,9 @@ permissionRoutes.route('/:id')
 			.then(doUpdate)
 			.catch(notifyError);
 
-		function doUpdate(permission){
-			permission.save({
-				resource: req.body.resource || permission.get('resource')
+		function doUpdate(model){
+			model.save({
+				resource: req.body.resource || model.get('resource')
 			})
 			.then(function(){
 				res.json({error: false, data:{message: 'Permission Details Updated'}});
@@ -109,7 +109,7 @@ permissionRoutes.route('/')
 			resource: req.body.resource,
 		})
 		.save()
-		.then( record => res.json({error: false, data:{record}}))
+		.then( model => res.json({error: false, data:{model}}))
 		.catch( err => res.status(500).json({error: true, data:{message: err.message}}));
 	});
 
@@ -123,9 +123,9 @@ permissionRoutes.route('/:id')
 			.then(doDelete)
 			.catch(notifyError);
 
-		function doDelete(record){
-			record.destroy()
-				.then( () => res.json({error: true, data: {message: 'Permission successfully deleted'} }))
+		function doDelete(model){
+			model.destroy()
+				.then( () => res.json({error: true, data: {message: 'Permission model successfully deleted'} }))
 				.catch( (err) => res.status(500).json({error: true, data: {message: err.message}}));
 		}
 		function notifyError(err){

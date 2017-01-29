@@ -52,10 +52,10 @@ roleRoutes.use(function(req, res, next){
 // on routes that end in /Roles
 // ---------------------------------------------------------------------
 roleRoutes.route('/')
-	// get all the Role records (accessed at GET http://localhost:3002/api/Roles)
+	// get all the Role models (accessed at GET http://localhost:3002/api/Roles)
 	.get(function(req, res){
 		Roles.forge().fetch()
-			.then(records => res.json(records))
+			.then(models => res.json(models))
 			.catch(err => res.send(err));
 	});
 
@@ -63,11 +63,11 @@ roleRoutes.route('/')
 // ---------------------------------------------------------------------
 roleRoutes.route('/:id')
 	.get(function(req, res) {
-		if(req.params.id === '0') { // respond with a new Role
+		if(req.params.id === '0') { // respond with a new Role model
 			res.json(new Role());
-		} else { // respond with fetched Role
+		} else { // respond with fetched Role model
 			Role.forge( {id: req.params.id} ).fetch()
-				.then(record => res.json(record))
+				.then(model => res.json(model))
 				.catch(err => res.send(err));
 		}
 	});
@@ -79,9 +79,9 @@ roleRoutes.route('/:id')
 			.then(doUpdate)
 			.catch(notifyError);
 
-		function doUpdate(Role){
-			Role.save({
-				name: req.body.name || Role.get('name')
+		function doUpdate(model){
+			model.save({
+				name: req.body.name || model.get('name')
 			})
 			.then(function(){
 				res.json({error: false, data:{message: 'Role Details Updated'}});
@@ -109,7 +109,7 @@ roleRoutes.route('/')
 			name: req.body.name,
 		})
 		.save()
-		.then( aRole => res.json({error: false, data:{aRole}}))
+		.then( model => res.json({error: false, data:{model}}))
 		.catch( err => res.status(500).json({error: true, data:{message: err.message}}));
 	});
 
@@ -123,9 +123,9 @@ roleRoutes.route('/:id')
 			.then(doDelete)
 			.catch(notifyError);
 
-		function doDelete(aRole){
-			aRole.destroy()
-				.then( () => res.json({error: true, data: {message: 'Role successfully deleted'} }))
+		function doDelete(model){
+			model.destroy()
+				.then( () => res.json({error: true, data: {message: 'Role model successfully deleted'} }))
 				.catch( (err) => res.status(500).json({error: true, data: {message: err.message}}));
 		}
 		function notifyError(err){

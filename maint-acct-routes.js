@@ -53,7 +53,7 @@ maintAcctRoutes.use(function(req, res, next){
 // on routes that end in /maintenance-accounts
 // ---------------------------------------------------------------------
 maintAcctRoutes.route('/')
-	// get all the maintenance account records (accessed at GET http://localhost:3002/api/maintenance-accounts)
+	// get all the maintenance account models (accessed at GET http://localhost:3002/api/maintenance-accounts)
 	.get(function(req, res){
 		console.log('Check availability of decoded token...');
 		if(req.decoded) {
@@ -61,7 +61,7 @@ maintAcctRoutes.route('/')
 			console.log(req.decoded);
 		}
 		MaintenanceAccounts.forge().fetch()
-			.then(records => res.json(records))
+			.then(models => res.json(models))
 			.catch(err => res.send(err));
 	});
 
@@ -69,11 +69,11 @@ maintAcctRoutes.route('/')
 // ---------------------------------------------------------------------
 maintAcctRoutes.route('/:id')
 	.get(function(req, res) {
-		if(req.params.id === '0') { // respond with a new account
+		if(req.params.id === '0') { // respond with a new account model
 			res.json(new MaintenanceAccount());
-		} else { // respond with fetched account
+		} else { // respond with fetched account model
 			MaintenanceAccount.forge( {id: req.params.id} ).fetch()
-				.then(record => res.json(record))
+				.then(model => res.json(model))
 				.catch(err => res.send(err));
 		}
 	});
@@ -85,9 +85,9 @@ maintAcctRoutes.route('/:id')
 			.then(doUpdate)
 			.catch(notifyError);
 
-		function doUpdate(account){
-			account.save({
-				name: req.body.name || account.get('name')
+		function doUpdate(model){
+			model.save({
+				name: req.body.name || model.get('name')
 			})
 			.then(function(){
 				res.json({error: false, data:{message: 'Account Details Updated'}});
@@ -115,7 +115,7 @@ maintAcctRoutes.route('/')
 			name: req.body.name,
 		})
 		.save()
-		.then( acct => res.json({error: false, data:{acct}}))
+		.then( model => res.json({error: false, data:{model}}))
 		.catch( err => res.status(500).json({error: true, data:{message: err.message}}));
 	});
 
@@ -129,9 +129,9 @@ maintAcctRoutes.route('/:id')
 			.then(doDelete)
 			.catch(notifyError);
 
-		function doDelete(acct){
-			acct.destroy()
-				.then( () => res.json({error: true, data: {message: 'User successfully deleted'} }))
+		function doDelete(model){
+			model.destroy()
+				.then( () => res.json({error: true, data: {message: 'Account Model successfully deleted'} }))
 				.catch( (err) => res.status(500).json({error: true, data: {message: err.message}}));
 		}
 		function notifyError(err){

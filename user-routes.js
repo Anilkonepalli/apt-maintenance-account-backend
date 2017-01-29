@@ -52,10 +52,10 @@ userRoutes.use(function(req, res, next){
 // on routes that end in /users
 // ---------------------------------------------------------------------
 userRoutes.route('/')
-	// get all the user records (accessed at GET http://localhost:3002/api/users)
+	// get all the user models (accessed at GET http://localhost:3002/api/users)
 	.get(function(req, res){
 		Users.forge().fetch()
-			.then(records => res.json(records))
+			.then(models => res.json(models))
 			.catch(err => res.send(err));
 	});
 
@@ -63,11 +63,11 @@ userRoutes.route('/')
 // ---------------------------------------------------------------------
 userRoutes.route('/:id')
 	.get(function(req, res) {
-		if(req.params.id === '0') { // respond with a new user
+		if(req.params.id === '0') { // respond with a new user model
 			res.json(new User());
-		} else { // respond with fetched user
+		} else { // respond with fetched user model
 			User.forge( {id: req.params.id} ).fetch()
-				.then(record => res.json(record))
+				.then(model => res.json(model))
 				.catch(err => res.send(err));
 		}
 	});
@@ -79,9 +79,9 @@ userRoutes.route('/:id')
 			.then(doUpdate)
 			.catch(notifyError);
 
-		function doUpdate(user){
-			user.save({
-				name: req.body.name || user.get('name')
+		function doUpdate(model){
+			model.save({
+				name: req.body.name || model.get('name')
 			})
 			.then(function(){
 				res.json({error: false, data:{message: 'user Details Updated'}});
@@ -109,7 +109,7 @@ userRoutes.route('/')
 			name: req.body.name,
 		})
 		.save()
-		.then( acct => res.json({error: false, data:{acct}}))
+		.then( model => res.json({error: false, data:{model}}))
 		.catch( err => res.status(500).json({error: true, data:{message: err.message}}));
 	});
 
@@ -123,9 +123,9 @@ userRoutes.route('/:id')
 			.then(doDelete)
 			.catch(notifyError);
 
-		function doDelete(acct){
-			acct.destroy()
-				.then( () => res.json({error: true, data: {message: 'User successfully deleted'} }))
+		function doDelete(model){
+			model.destroy()
+				.then( () => res.json({error: true, data: {message: 'User model successfully deleted'} }))
 				.catch( (err) => res.status(500).json({error: true, data: {message: err.message}}));
 		}
 		function notifyError(err){
