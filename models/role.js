@@ -1,6 +1,8 @@
-// models/user.js
+// models/role.js
 
 var Bookshelf = require('../config/database');
+
+var PermissionRole = Bookshelf.Model.extend({tableName: 'permissions_roles'});
 
 var Role = Bookshelf.Model.extend({
 	tableName: 'roles',
@@ -10,6 +12,7 @@ var Role = Bookshelf.Model.extend({
 		return this.belongsToMany(User);
 	},
 	permissions: function() {
+		//return this.belongsToMany(Permission).through(PermissionRole);
 		return this.belongsToMany(Permission);
 	},
 
@@ -17,5 +20,10 @@ var Role = Bookshelf.Model.extend({
 		console.log('Hello, this is Role Model');
 	}
 });
+
+var Permission = Bookshelf.Model.extend({
+	tableName: 'permissions'
+});
+
 
 module.exports = Bookshelf.model('Role', Role);

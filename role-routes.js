@@ -71,6 +71,25 @@ roleRoutes.route('/:id')
 				.catch(err => res.send(err));
 		}
 	});
+
+// on routes that end in /Roles/myPermissions/:id to get an Role
+// ---------------------------------------------------------------------
+roleRoutes.route('/mypermissions/:id')
+	.get(function(req, res) {
+		console.log('req.params...');
+		console.log(req.params);
+		Role.forge( {id: req.params.id} ).fetch({withRelated: ['permissions']})
+			.then(model => {
+				console.log('model is...');
+				console.log(model.toJSON());
+				let modelJson = model.toJSON();
+				console.log('myPermissions are:....'); 
+				console.log(modelJson.permissions); 
+				res.json(modelJson.permissions); 
+			})
+			.catch(err => res.send(err));
+	});
+
 // on routes that end in /Roles/:id to update an existing Role
 // ---------------------------------------------------------------------
 roleRoutes.route('/:id')

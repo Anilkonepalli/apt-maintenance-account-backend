@@ -1,4 +1,4 @@
-// models/user.js
+// models/maint-acct.js
 
 var Bookshelf = require('../config/database');
 
