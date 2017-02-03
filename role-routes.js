@@ -128,7 +128,7 @@ roleRoutes.route('/mypermissions/:id')
 console.log('attaching mypermissions...');
 console.log(req.body.mypermissionsIds);
 			model.permissions().detach().then( // remove the existing permissions first
-				model.permissions().attach(req.body.mypermissionsIds)); // attach new permissions
+				() => model.permissions().attach(req.body.mypermissionsIds)); // attach new permissions
 			res.json({error:false, data:{ message: 'My Permissions are attached to Role'}});
 		}
 		function notifyError(err){

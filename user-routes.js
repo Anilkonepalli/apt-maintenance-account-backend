@@ -127,8 +127,8 @@ userRoutes.route('/myroles/:id')
 console.log('attaching my roles...');
 console.log(req.body.myrolesIds);
 			model.roles().detach().then( // remove the existing roles first
-				model.roles().attach(req.body.myrolesIds)); // attach new roles
-			res.json({error:false, data:{ message: 'My Roles are attache'}});
+				() => model.roles().attach(req.body.myrolesIds)); // attach new roles
+			res.json({error:false, data:{ message: 'My Roles are attached'}});
 		}
 		function notifyError(err){
 			res.status(500).json({error: true, data: {message: err.message}});
