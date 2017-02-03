@@ -115,6 +115,29 @@ roleRoutes.route('/:id')
 
 	});
 
+
+// on routes that end in /roles/mypermissions/:id to update an existing Role with mypermissions
+// --------------------------------------------------------------------------------------------
+roleRoutes.route('/mypermissions/:id')
+	.put(function(req, res) {
+		Role.forge({id: req.params.id}).fetch({require: true, withRelated:['permissions']})
+			.then(doUpdate)
+			.catch(notifyError);
+
+		function doUpdate(model){
+console.log('attaching mypermissions...');
+console.log(req.body.mypermissionsIds);
+			model.permissions().detach().then( // remove the existing permissions first
+				model.permissions().attach(req.body.mypermissionsIds)); // attach new permissions
+			res.json({error:false, data:{ message: 'My Permissions are attached to Role'}});
+		}
+		function notifyError(err){
+			res.status(500).json({error: true, data: {message: err.message}});
+		}
+
+	});
+
+
 // on routes that end in /Roles to post (to add) a new Role
 // ---------------------------------------------------------------------
 

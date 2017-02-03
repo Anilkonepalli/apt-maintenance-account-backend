@@ -71,6 +71,24 @@ userRoutes.route('/:id')
 				.catch(err => res.send(err));
 		}
 	});
+
+// on routes that end in /Users/myroles/:id to get an User with associated roles
+// ---------------------------------------------------------------------
+userRoutes.route('/myroles/:id')
+	.get(function(req, res) {
+console.log('req.params...');console.log(req.params);
+		User.forge( {id: req.params.id} ).fetch({withRelated: ['roles']})
+			.then(model => {
+console.log('model is...'); console.log(model.toJSON());
+				let modelJson = model.toJSON();
+console.log('my Roles are:....'); console.log(modelJson.roles); 
+				res.json(modelJson.roles); 
+			})
+			.catch(err => res.send(err));
+	});
+
+
+
 // on routes that end in /users/:id to update an existing user
 // ---------------------------------------------------------------------
 userRoutes.route('/:id')
@@ -95,6 +113,30 @@ userRoutes.route('/:id')
 		}
 
 	});
+
+
+// on routes that end in /roles/myroles/:id to update an existing User with myroles
+// --------------------------------------------------------------------------------------------
+userRoutes.route('/myroles/:id')
+	.put(function(req, res) {
+		User.forge({id: req.params.id}).fetch({require: true, withRelated:['roles']})
+			.then(doUpdate)
+			.catch(notifyError);
+
+		function doUpdate(model){
+console.log('attaching my roles...');
+console.log(req.body.myrolesIds);
+			model.roles().detach().then( // remove the existing roles first
+				model.roles().attach(req.body.myrolesIds)); // attach new roles
+			res.json({error:false, data:{ message: 'My Roles are attache'}});
+		}
+		function notifyError(err){
+			res.status(500).json({error: true, data: {message: err.message}});
+		}
+
+	});
+
+
 
 // on routes that end in /users to post (to add) a new user
 // ---------------------------------------------------------------------
