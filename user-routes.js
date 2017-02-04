@@ -88,6 +88,24 @@ console.log('my Roles are:....'); console.log(modelJson.roles);
 	});
 
 
+// on routes that end in /Users/mypermissions/:name to get an User with associated Permissions
+// ---------------------------------------------------------------------
+userRoutes.route('/mypermissions/:name')
+	.get(function(req, res) {
+console.log('module name: '); console.log(req);		
+console.log('req.decoded...');console.log(req.decoded);
+		
+		User.forge( {id: req.decoded.id} ).fetch({withRelated: ['roles']})
+			.then(model => {
+				let modelJson = model.toJSON();
+console.log('logged user: '); console.log(modelJson);				
+				res.json(modelJson.roles); 
+			})
+			.catch(err => res.send(err)); 
+	});
+
+
+
 
 // on routes that end in /users/:id to update an existing user
 // ---------------------------------------------------------------------
