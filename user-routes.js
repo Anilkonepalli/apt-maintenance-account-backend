@@ -118,14 +118,23 @@ userRoutes.route('/mypermissions/:name')
 	.get(function(req, res) {
 //console.log('module name: '); console.log(req);		
 console.log('module names - req.decoded...');console.log(req.decoded);
+		roleIds = req.decoded.roles.map(eachRole => { return {id: eachRole.id}; });
+console.log('rold ids: '); console.log(roleIds);
+		roleIds = [1, 2];
+		Roles.query(qb => qb.where('id', 'in', roleIds)).fetch({withRelated: ['permissions']})
+			.then(model => {
+console.log('Permissions...');	console.log(model.toJSON());
+				res.json(model);
+			})
+			.catch(err => res.send(err));
 		
-		User.forge( {id: req.decoded.id} ).fetch({withRelated: ['roles']})
+/*		User.forge( {id: req.decoded.id} ).fetch({withRelated: ['roles']})
 			.then(model => {
 				let modelJson = model.toJSON();
 
 				res.json(modelJson.roles); 
 			})
-			.catch(err => res.send(err)); 
+			.catch(err => res.send(err)); */
 	});
 
 
