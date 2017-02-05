@@ -62,13 +62,14 @@ var retrieved_users = null;  // yet to retrieve users
 
 (function retrieve_users(){
 //console.log('Retrieve User List');
-	Users.forge().fetch()
+	Users.forge().fetch({withRelated: ['roles']})
 		.then(user_fetch_success)
 		.catch(user_fetch_error);
 //	var result = {error:true, data:{message: 'Incomplete Retrieve'}};
 
 	function user_fetch_success(collection){
-//console.log('User Fetch Success...');
+console.log('User Fetch Success...');
+console.log(collection.toJSON());
 		retrieved_users = { error: false, data: collection.toJSON() };
 	}
 	function user_fetch_error(err){

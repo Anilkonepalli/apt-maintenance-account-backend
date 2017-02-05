@@ -21,8 +21,8 @@ maintAcctRoutes.use(function(req, res, next){
 	console.log('Maintenance Account Access is happening...');
 
 	let token = req.body.token || req.query.token || req.headers['x-access-token'];
-	console.log('JWT Token from client: ...');
-	console.log(token);
+//console.log('JWT Token from client: ...');
+//console.log(token);
 
 	// decode token
 	if(token) {
@@ -55,11 +55,11 @@ maintAcctRoutes.use(function(req, res, next){
 maintAcctRoutes.route('/')
 	// get all the maintenance account models (accessed at GET http://localhost:3002/api/maintenance-accounts)
 	.get(function(req, res){
-		console.log('Check availability of decoded token...');
-		if(req.decoded) {
-			console.log('Decoded token...');
-			console.log(req.decoded);
-		}
+//		console.log('Check availability of decoded token...');
+//		if(req.decoded) {
+//			console.log('Decoded token...');
+//			console.log(req.decoded);
+//		}
 		MaintenanceAccounts.forge().fetch()
 			.then(models => res.json(models))
 			.catch(err => res.send(err));
@@ -107,9 +107,9 @@ maintAcctRoutes.route('/:id')
 
 maintAcctRoutes.route('/')
 	.post(function(req, res) {
-		console.log('New Account being added...');
-		console.log(req.body);
-		console.log(req.query);
+//		console.log('New Account being added...');
+//		console.log(req.body);
+//		console.log(req.query);
 
 		MaintenanceAccount.forge({
 			name: req.body.name,
