@@ -118,13 +118,25 @@ userRoutes.route('/mypermissions/:name')
 	.get(function(req, res) {
 //console.log('module name: '); console.log(req);		
 console.log('module names - req.decoded...');console.log(req.decoded);
-		roleIds = req.decoded.roles.map(eachRole => { return {id: eachRole.id}; });
+		//roleIds = req.decoded.roles.map(eachRole => eachRole.id);
+		roleIds = req.decoded.roles;
 console.log('rold ids: '); console.log(roleIds);
-		roleIds = [1, 2];
-		Roles.query(qb => qb.where('id', 'in', roleIds)).fetch({withRelated: ['permissions']})
+//		roleIds = [1, 2];
+		Roles
+			.query(qb => qb.where('id', 'in', roleIds))
+			.fetch({withRelated: ['permissions']})
 			.then(model => {
-console.log('Permissions...');	console.log(model.toJSON());
-				res.json(model);
+				let models = model.toJSON();
+				let permissions = [];
+				models.forEach(eachModel => {
+console.log('Roles w Permissions...');	console.log(eachModel);
+console.log('Resource is ------> '+req.params.name);
+					permissionsForResource = eachModel.permissions
+											.filter(perms => perms.resource === req.params.name);
+					permissions = permissions.concat(permissionsForResource); 
+				});
+console.log('Permissions...'); console.log(permissions);				
+				res.json(permissions);
 			})
 			.catch(err => res.send(err));
 		

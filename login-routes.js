@@ -65,12 +65,16 @@ var retrieved_users = null;  // yet to retrieve users
 	Users.forge().fetch({withRelated: ['roles']})
 		.then(user_fetch_success)
 		.catch(user_fetch_error);
-//	var result = {error:true, data:{message: 'Incomplete Retrieve'}};
 
-	function user_fetch_success(collection){
+	function user_fetch_success(allUsers){
 console.log('User Fetch Success...');
-console.log(collection.toJSON());
-		retrieved_users = { error: false, data: collection.toJSON() };
+		let usersWithRoles = allUsers.toJSON();
+		usersWithRoles.forEach(eachUser => { // reduce the role object to mere its id, 
+											 // so that it reduces JWT token size
+			eachUser.roles = eachUser.roles.map(eachRole => eachRole.id);
+		});
+console.log('Modified Users with Roles...'); console.log(usersWithRoles);		
+		retrieved_users = { error: false, data: usersWithRoles };
 	}
 	function user_fetch_error(err){
 //console.log('User error...');
