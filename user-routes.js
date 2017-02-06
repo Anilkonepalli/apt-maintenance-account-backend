@@ -112,16 +112,12 @@ userRoutes.route('/rolesfor/:id')
 	});
 
 
-// on routes that end in /Users/mypermissions/:name to get an User with associated Permissions
+// on routes that end in /Users/mypermissions/all to get permissions for all modules
 // ---------------------------------------------------------------------
-userRoutes.route('/mypermissions/:name')
+userRoutes.route('/mypermissions/all')
 	.get(function(req, res) {
-//console.log('module name: '); console.log(req);		
-console.log('module names - req.decoded...');console.log(req.decoded);
-		//roleIds = req.decoded.roles.map(eachRole => eachRole.id);
 		roleIds = req.decoded.roles;
-console.log('rold ids: '); console.log(roleIds);
-//		roleIds = [1, 2];
+console.log('Role Ids...'); console.log(roleIds);
 		Roles
 			.query(qb => qb.where('id', 'in', roleIds))
 			.fetch({withRelated: ['permissions']})
@@ -129,24 +125,33 @@ console.log('rold ids: '); console.log(roleIds);
 				let models = model.toJSON();
 				let permissions = [];
 				models.forEach(eachModel => {
-console.log('Roles w Permissions...');	console.log(eachModel);
-console.log('Resource is ------> '+req.params.name);
+					permissions = permissions.concat(eachModel.permissions); 
+				});
+console.log('All permissions...'); console.log(permissions);				
+				res.json(permissions);
+			})
+			.catch(err => res.send(err));
+	});
+
+// on routes that end in /Users/mypermissions/:name to get permissions of 'name' module
+// ---------------------------------------------------------------------
+userRoutes.route('/mypermissions/:name')
+	.get(function(req, res) {
+		roleIds = req.decoded.roles;
+		Roles
+			.query(qb => qb.where('id', 'in', roleIds))
+			.fetch({withRelated: ['permissions']})
+			.then(model => {
+				let models = model.toJSON();
+				let permissions = [];
+				models.forEach(eachModel => {
 					permissionsForResource = eachModel.permissions
 											.filter(perms => perms.resource === req.params.name);
 					permissions = permissions.concat(permissionsForResource); 
 				});
-console.log('Permissions...'); console.log(permissions);				
 				res.json(permissions);
 			})
 			.catch(err => res.send(err));
-		
-/*		User.forge( {id: req.decoded.id} ).fetch({withRelated: ['roles']})
-			.then(model => {
-				let modelJson = model.toJSON();
-
-				res.json(modelJson.roles); 
-			})
-			.catch(err => res.send(err)); */
 	});
 
 
