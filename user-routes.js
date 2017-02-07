@@ -28,8 +28,6 @@ userRoutes.use(function(req, res, next){
 	console.log('User Access is happening...');
 
 	let token = req.body.token || req.query.token || req.headers['x-access-token'];
-//	console.log('JWT Token from client: ...');
-//	console.log(token);
 
 	// decode token
 	if(token) {
@@ -77,35 +75,14 @@ userRoutes.route('/:id')
 		}
 	});
 
-/*
-// on routes that end in /Users/my/roles to get roles of logged User
-// ---------------------------------------------------------------------
-userRoutes.route('/my/roles')
-	.get(function(req, res) {
-
-console.log('module names - req.decoded...');console.log(req.decoded);
-		
-		User.forge( {id: req.decoded.id} ).fetch({withRelated: ['roles']})
-			.then(model => {
-				let modelJson = model.toJSON();
-				let roles = modelJson.roles;
-				res.json(roles); 
-			})
-			.catch(err => res.send(err)); 
-	});
-*/
-
 
 // on routes that end in /Users/rolesfor/:id to get an User with associated roles
 // ---------------------------------------------------------------------
 userRoutes.route('/rolesfor/:id')
 	.get(function(req, res) {
-//console.log('req.params...');console.log(req.params);
 		User.forge( {id: req.params.id} ).fetch({withRelated: ['roles']})
 			.then(model => {
-//console.log('model is...'); console.log(model.toJSON());
 				let modelJson = model.toJSON();
-//console.log('my Roles are:....'); console.log(modelJson.roles); 
 				res.json(modelJson.roles); 
 			})
 			.catch(err => res.send(err));
@@ -117,7 +94,6 @@ userRoutes.route('/rolesfor/:id')
 userRoutes.route('/mypermissions/all')
 	.get(function(req, res) {
 		roleIds = req.decoded.roles;
-console.log('Role Ids...'); console.log(roleIds);
 		Roles
 			.query(qb => qb.where('id', 'in', roleIds))
 			.fetch({withRelated: ['permissions']})
@@ -127,7 +103,6 @@ console.log('Role Ids...'); console.log(roleIds);
 				models.forEach(eachModel => {
 					permissions = permissions.concat(eachModel.permissions); 
 				});
-console.log('All permissions...'); console.log(permissions);				
 				res.json(permissions);
 			})
 			.catch(err => res.send(err));
@@ -153,8 +128,6 @@ userRoutes.route('/mypermissions/:name')
 			})
 			.catch(err => res.send(err));
 	});
-
-
 
 // on routes that end in /users/:id to update an existing user
 // ---------------------------------------------------------------------
@@ -191,8 +164,6 @@ userRoutes.route('/myroles/:id')
 			.catch(notifyError);
 
 		function doUpdate(model){
-//console.log('attaching my roles...');
-//console.log(req.body.myrolesIds);
 			model.roles().detach().then( // remove the existing roles first
 				() => model.roles().attach(req.body.myrolesIds)); // attach new roles
 			res.json({error:false, data:{ message: 'My Roles are attached'}});
@@ -210,9 +181,6 @@ userRoutes.route('/myroles/:id')
 
 userRoutes.route('/')
 	.post(function(req, res) {
-//		console.log('New user being added...');
-//		console.log(req.body);
-//		console.log(req.query);
 
 		User.forge({
 			name: req.body.name,

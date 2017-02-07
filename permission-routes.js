@@ -45,7 +45,7 @@ permissionRoutes.use(function(req, res, next){
 			message: 'No token provided in permissionRoutes.'
 		});
 	}
-	//next(); // make sure we go to the next routes and don't stop here
+
 });
 
 
@@ -101,10 +101,6 @@ permissionRoutes.route('/:id')
 
 permissionRoutes.route('/')
 	.post(function(req, res) {
-		console.log('New permission being added...');
-		console.log(req.body);
-		console.log(req.query);
-
 		Permission.forge({
 			resource: req.body.resource,
 		})
