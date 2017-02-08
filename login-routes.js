@@ -34,7 +34,8 @@ loginRoutes.route('/sessions/create').post(function(request, response){
 		return response.status(401).send("Email or Password don't match");
 	}
 	response.status(201).send({
-		id_token: jwt.sign(_.omit(user, 'password'), constants.secret, {expiresIn: 60*60*2})
+		id_token: jwt.sign(_.omit(user, 'password'), constants.secret, {expiresIn: 60*60*2}),
+		user: { id: user.id, firstName: user.first_name, lastName: user.last_name }
 	})	
 });
 
