@@ -26,7 +26,7 @@ loginRoutes.route('/sessions/create').post(function(request, response){
 		return response.status(400).send("Error in User List");	
 	}
 	user = _.find(retrieved_users.data, {email: request.body.email});
-
+console.log('Login user is: '); console.log(user);
 	if(!user){
 		return response.status(401).send("Email or Password do not match");
 	}
@@ -56,6 +56,7 @@ var retrieved_users = null;  // yet to retrieve users
 											 // so that it reduces JWT token size
 			eachUser.roles = eachUser.roles.map(eachRole => eachRole.id);
 		});
+console.log('Retrieved Users are... '); console.log(usersWithRoles);
 		retrieved_users = { error: false, data: usersWithRoles };
 	}
 

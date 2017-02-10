@@ -88,7 +88,7 @@ userRoutes.route('/rolesfor/:id')
 			.catch(err => res.send(err));
 	});
 
-
+/*  Not in use, as of now, hence commented out
 // on routes that end in /Users/mypermissions/all to get permissions for all modules
 // ---------------------------------------------------------------------
 userRoutes.route('/mypermissions/all')
@@ -108,11 +108,14 @@ userRoutes.route('/mypermissions/all')
 			.catch(err => res.send(err));
 	});
 
+*/
+
 // on routes that end in /Users/mypermissions/:name to get permissions of 'name' module
 // ---------------------------------------------------------------------
 userRoutes.route('/mypermissions/:name')
 	.get(function(req, res) {
 		roleIds = req.decoded.roles;
+		inheritedRoleIds = getInheritedRoleIdsFor(roleIds);
 		Roles
 			.query(qb => qb.where('id', 'in', roleIds))
 			.fetch({withRelated: ['permissions']})
@@ -209,3 +212,27 @@ userRoutes.route('/:id')
 			res.status(500).json({error: true, data: {message: err.message}});
 		}
 	});
+
+function getInheritedRoleIdsFor(roleIds) {
+	Roles
+		.query(qb => qb.where('id', 'in', roleIds))
+		.fetch()
+		.then(model => {
+			let models = model.toJSON();
+console.log('Models for roles Ids...'); console.log(models);			
+			let separator = ',';
+			let inheritedIds = [];
+			let temp;
+			let inherits; 
+			models.forEach(each => {
+				inherits = each.inherits;
+				if(inherits !== null && inherits !== '') {
+					temp = each.inherits.split(separator);
+console.log('Temp now: '); console.log(temp);					
+					temp = temp.map(each => +each);
+					inheritedIds = inheritedIds.concat(temp);
+				}
+			});
+console.log('Inherited Role Ids: ...'); console.log(inheritedIds);
+		});
+}
