@@ -59,6 +59,7 @@ var retrieved_roles = null; // yet to retrieve all roles
 
 	function role_fetch_success(allRoles){
 		let roles = allRoles.toJSON();
+//console.log('Roles with permissions...'); console.log(roles);		
 		retrieved_roles = { error: false, data: roles};
 	}
 	function role_fetch_error(err){
@@ -77,7 +78,7 @@ var retrieved_permissions = null; // yet to retrieve all permissions
 
 	function permission_fetch_success(allPermissions){
 		let permissions = allPermissions.toJSON();
-console.log('All Permissions....'); console.log(permissions);
+//console.log('All Permissions....'); console.log(permissions);
 		retrieved_permissions = { error: false, data: permissions};
 	}
 	function permission_fetch_error(err){
@@ -101,13 +102,27 @@ var retrieved_users = null;  // yet to retrieve all users
 		usersWithRoles.forEach(eachUser => { // reduce the role object to mere its id, 
 											 // so that it reduces JWT token size
 			let roleIds = []; 
-			eachUser.roles.forEach(eachRole => { // include inherited role ids
+			eachUser.roles.forEach(eachRole => { 
+				// collect inherited role ids
 				roleIds.push(eachRole.id);
 				let inhIds = getInheritedIds(eachRole);
 				roleIds = roleIds.concat(inhIds);
+				// collect permission ids
+				//tempPerms = eachRole.permissions.map(eachPerm => eachPerm.id);
+				//permsIds = permsIds.concat(tempPerms);
 			});
 			eachUser.roles = roleIds;
-
+/*
+			let permsIds = [];
+			let tempIds;
+			let roles = retrieved_roles.filter(each => (roleIds).includes(each.id));
+console.log('Role objects to attch perms...'); console.log(roles);
+			roles.forEach(eachRole => {
+				tempIds = eachRole.permissions.map(each => each.id);
+				permsIds = permsIds.concat(tempIds);
+			});
+console.log(' Permissions attached to User...'); console.log(permsIds);
+			eachUser.permissions = permsIds;  */
 		});
 		retrieved_users = { error: false, data: usersWithRoles };
 	}
@@ -144,6 +159,16 @@ var retrieved_users = null;  // yet to retrieve all users
 		let arr = inherits.split(separator); // example: inherits column value '1,5,11' becomes '1', '5', '11'
 		arr = arr.map(each => +each); // converts into number; example above becomes: 1, 5, 11
 		return arr;
+	}
+
+	function getPermissions(roleIds) {
+
+		let result;
+
+		roleIds.forEach(each => {
+
+		});
+
 	}
 
 })();
