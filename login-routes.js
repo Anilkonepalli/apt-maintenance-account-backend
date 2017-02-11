@@ -53,7 +53,7 @@ loginRoutes.route('/sessions/create').post(function(request, response){
 var retrieved_roles = null; // yet to retrieve all roles 
 
 (function retrieve_roles() {
-	Roles.forge().fetch()
+	Roles.forge().fetch({withRelated: ['permissions']})
 		.then(role_fetch_success)
 		.catch(role_fetch_error);
 
@@ -99,31 +99,31 @@ var retrieved_users = null;  // yet to retrieve all users
 
 	function user_fetch_success(allUsers){
 		let usersWithRoles = allUsers.toJSON();
+//console.log('All users...'); console.log(usersWithRoles);
 		usersWithRoles.forEach(eachUser => { // reduce the role object to mere its id, 
 											 // so that it reduces JWT token size
 			let roleIds = []; 
-			eachUser.roles.forEach(eachRole => { 
-				// collect inherited role ids
+			eachUser.roles.forEach(eachRole => { // collect inherited role ids
 				roleIds.push(eachRole.id);
 				let inhIds = getInheritedIds(eachRole);
 				roleIds = roleIds.concat(inhIds);
-				// collect permission ids
-				//tempPerms = eachRole.permissions.map(eachPerm => eachPerm.id);
-				//permsIds = permsIds.concat(tempPerms);
 			});
 			eachUser.roles = roleIds;
-/*
+//console.log('Role Ids...'); console.log(roleIds);
 			let permsIds = [];
 			let tempIds;
-			let roles = retrieved_roles.filter(each => (roleIds).includes(each.id));
-console.log('Role objects to attch perms...'); console.log(roles);
-			roles.forEach(eachRole => {
+//console.log('Retrieved roles...'); console.log(retrieved_roles);			
+			let roles = retrieved_roles.data.filter(each => roleIds.includes(each.id));
+//console.log('Role objects to attach perms...'); console.log(roles);
+			roles.forEach(eachRole => { // collect permission ids
 				tempIds = eachRole.permissions.map(each => each.id);
 				permsIds = permsIds.concat(tempIds);
 			});
 console.log(' Permissions attached to User...'); console.log(permsIds);
-			eachUser.permissions = permsIds;  */
+			eachUser.permissions = permsIds;
+
 		});
+console.log('Retrieved Users: '); console.log(usersWithRoles);		
 		retrieved_users = { error: false, data: usersWithRoles };
 	}
 
