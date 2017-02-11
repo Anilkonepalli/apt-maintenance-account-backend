@@ -213,6 +213,8 @@ userRoutes.route('/:id')
 		}
 	});
 
+
+/*
 function getInheritedRoleIdsFor(roleIds) {
 	Roles
 		.query(qb => qb.where('id', 'in', roleIds))
@@ -240,3 +242,5 @@ console.log('Inherited Role Ids: ...'); console.log(inheritedIds);
 			return inheritedIds.concat(recusiveIds);
 		});
 }
+
+*/

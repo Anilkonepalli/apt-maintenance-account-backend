@@ -12,31 +12,31 @@ exports.seed = function(knex, Promise) {
                         operations: 'R',
                         resource: 'accounts',
                         condition: null,
-                        description: 'Authorize to read/view Account records'
+                        description: 'Grants permissions to read/view Account records'
                       }),
         knex('permissions').insert({
                         operations: 'CRUD',
                         resource: 'users',
                         condition: '(params)=>{return params.user.id === params.loggedUser.id;}',
-                        description: 'Authorize to create/read/update/delete own user profile'
+                        description: 'Grants permissions to create/read/update/delete own user profile'
                       }),
         knex('permissions').insert({
                         operations: 'CRUD',
                         resource: 'accounts',
                         condition: null,
-                        description: 'Authorize to create/read/update/delete any account record'
+                        description: 'Grants permissions to create/read/update/delete any account record'
                       }),
         knex('permissions').insert({ 
                         operations: 'UD',
                         resource: 'accounts',
                         condition: '(params)=>{return params.user.id === params.account.owner_id;}',
-                        description: 'Authorize to update/delete own account record'
+                        description: 'Grants permissions to update/delete own account record'
                       }),
         knex('permissions').insert({
                         operations: 'CRUD',
                         resource: 'roles',
                         condition: null,
-                        description: 'Authorize to create/read/update/delete any role'
+                        description: 'Grants permissions to create/read/update/delete any role'
                       }),        
       ]);
     });
