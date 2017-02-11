@@ -116,20 +116,23 @@ userRoutes.route('/mypermissions/:name')
 	.get(function(req, res) {
 		roleIds = req.decoded.roles;
 		inheritedRoleIds = getInheritedRoleIdsFor(roleIds);
-		Roles
-			.query(qb => qb.where('id', 'in', roleIds))
-			.fetch({withRelated: ['permissions']})
-			.then(model => {
-				let models = model.toJSON();
-				let permissions = [];
-				models.forEach(eachModel => {
-					permissionsForResource = eachModel.permissions
-											.filter(perms => perms.resource === req.params.name);
-					permissions = permissions.concat(permissionsForResource); 
-				});
-				res.json(permissions);
-			})
-			.catch(err => res.send(err));
+console.log('All Inherited Role Ids are:'); console.log(inheritedRoleIds);
+		setTimeout( () => {
+			Roles
+				.query(qb => qb.where('id', 'in', roleIds))
+				.fetch({withRelated: ['permissions']})
+				.then(model => {
+					let models = model.toJSON();
+					let permissions = [];
+					models.forEach(eachModel => {
+						permissionsForResource = eachModel.permissions
+												.filter(perms => perms.resource === req.params.name);
+						permissions = permissions.concat(permissionsForResource); 
+					});
+					res.json(permissions);
+				})
+				.catch(err => res.send(err));
+			}, 1000);
 	});
 
 // on routes that end in /users/:id to update an existing user
@@ -234,5 +237,9 @@ console.log('Temp now: '); console.log(temp);
 				}
 			});
 console.log('Inherited Role Ids: ...'); console.log(inheritedIds);
+			let recusiveIds = [];
+			if(inheritedIds.length > 0) 
+				recusiveIds = getInheritedRoleIdsFor(inheritedIds); // recursive calls		
+			return inheritedIds.concat(recusiveIds);
 		});
 }
