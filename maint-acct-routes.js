@@ -98,6 +98,7 @@ maintAcctRoutes.route('/:id')
 
 maintAcctRoutes.route('/')
 	.post(function(req, res) {
+console.log('maintenance-accounts accessed by Logged User...'); console.log(req.decoded);
 		MaintenanceAccount.forge({
 			name: req.body.name,
 		})

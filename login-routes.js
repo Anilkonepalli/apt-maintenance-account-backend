@@ -2,6 +2,7 @@ var _ 			= require('lodash'),
 	express 	= require('express'),
 	User 		= require('./models/user'),
 	Role 		= require('./models/role'),
+	Permission 	= require('./models/permission'),	
 	Bookshelf 	= require('./config/database'),
 	jwt			= require('jsonwebtoken'),
 	constants	= require('./config/constants'),
@@ -14,6 +15,9 @@ var Users = Bookshelf.Collection.extend({
 var Roles = Bookshelf.Collection.extend({
 	model: Role
 });
+var Permissions = Bookshelf.Collection.extend({
+	model: Permission
+});
 
 // application routing
 var loginRoutes = module.exports = express.Router();
@@ -23,15 +27,13 @@ loginRoutes.route('/sessions/create').post(function(request, response){
 	if( !request.body.email || !request.body.password){
 		return response.status(400).send("Email and Password needed");
 	}
-	
 	var user;
 
 	if(retrieved_users.error){
-console.log('Retreived Users...'); console.log(retrieved_users);
 		return response.status(400).send("Error in User List");	
 	}
 	user = _.find(retrieved_users.data, {email: request.body.email});
-console.log('Login user is: '); console.log(user);
+
 	if(!user){
 		return response.status(401).send("Email or Password do not match");
 	}
@@ -41,13 +43,15 @@ console.log('Login user is: '); console.log(user);
 	response.status(201).send({
 		id_token: jwt.sign(_.omit(user, 'password'), constants.secret, {expiresIn: 60*60*2}),
 		user: { id: user.id, firstName: user.first_name, lastName: user.last_name }
-	})	
+	});
+	
 });
 
 // api routes
 
 // private functions
 var retrieved_roles = null; // yet to retrieve all roles 
+
 (function retrieve_roles() {
 	Roles.forge().fetch()
 		.then(role_fetch_success)
@@ -63,6 +67,27 @@ var retrieved_roles = null; // yet to retrieve all roles
 
 })();
 
+
+var retrieved_permissions = null; // yet to retrieve all permissions 
+
+(function retrieve_permissions() {
+	Permissions.forge().fetch()
+		.then(permission_fetch_success)
+		.catch(permission_fetch_error);
+
+	function permission_fetch_success(allPermissions){
+		let permissions = allPermissions.toJSON();
+console.log('All Permissions....'); console.log(permissions);
+		retrieved_permissions = { error: false, data: permissions};
+	}
+	function permission_fetch_error(err){
+		retrieved_permissions = { error: true, data: {message: err.message} };
+	}
+
+})();
+
+
+
 var retrieved_users = null;  // yet to retrieve all users
 
 (function retrieve_users(){
@@ -75,18 +100,15 @@ var retrieved_users = null;  // yet to retrieve all users
 		let usersWithRoles = allUsers.toJSON();
 		usersWithRoles.forEach(eachUser => { // reduce the role object to mere its id, 
 											 // so that it reduces JWT token size
-			//eachUser.roles = eachUser.roles.map(eachRole => eachRole.id);
-			tempArrays = []; 
-			eachUser.roles.forEach(eachRole => {
-				tempArrays.push(eachRole.id);
-				let inhIds = getRoleIdsWithInherits(eachRole);
-				tempArrays = tempArrays.concat(inhIds);
+			let roleIds = []; 
+			eachUser.roles.forEach(eachRole => { // include inherited role ids
+				roleIds.push(eachRole.id);
+				let inhIds = getInheritedIds(eachRole);
+				roleIds = roleIds.concat(inhIds);
 			});
-			eachUser.roles = tempArrays;
+			eachUser.roles = roleIds;
 
 		});
-console.log('Retrieved Users are... '); console.log(usersWithRoles);
-
 		retrieved_users = { error: false, data: usersWithRoles };
 	}
 
@@ -94,7 +116,7 @@ console.log('Retrieved Users are... '); console.log(usersWithRoles);
 		retrieved_users = { error: true, data: {message: err.message} };
 	}
 
-	function getRoleIdsWithInherits(role) {
+	function getInheritedIds(role) {
 
 		let inheritedIds = getIds(role.inherits);
 
@@ -108,7 +130,7 @@ console.log('Retrieved Users are... '); console.log(usersWithRoles);
 			.filter(each => inheritedIds.includes(each.id));
 		inhertiedRoles
 			.forEach(each => { // check for inherits of inherits
-				let idsOfIds = getRoleIdsWithInherits(each); // recursive call
+				let idsOfIds = getInheritedIds(each); // recursive call
 				inheritedIds = inheritedIds.concat(idsOfIds);
 			});
 		return inheritedIds;
