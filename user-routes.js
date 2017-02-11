@@ -115,24 +115,21 @@ userRoutes.route('/mypermissions/all')
 userRoutes.route('/mypermissions/:name')
 	.get(function(req, res) {
 		roleIds = req.decoded.roles;
-		inheritedRoleIds = getInheritedRoleIdsFor(roleIds);
-console.log('All Inherited Role Ids are:'); console.log(inheritedRoleIds);
-		setTimeout( () => {
-			Roles
-				.query(qb => qb.where('id', 'in', roleIds))
-				.fetch({withRelated: ['permissions']})
-				.then(model => {
-					let models = model.toJSON();
-					let permissions = [];
-					models.forEach(eachModel => {
-						permissionsForResource = eachModel.permissions
-												.filter(perms => perms.resource === req.params.name);
-						permissions = permissions.concat(permissionsForResource); 
-					});
-					res.json(permissions);
-				})
-				.catch(err => res.send(err));
-			}, 1000);
+		Roles
+			.query(qb => qb.where('id', 'in', roleIds))
+			.fetch({withRelated: ['permissions']})
+			.then(model => {
+				let models = model.toJSON();
+				let permissions = [];
+				models.forEach(eachModel => {
+					permissionsForResource = eachModel.permissions
+											.filter(perms => perms.resource === req.params.name);
+					permissions = permissions.concat(permissionsForResource); 
+				});
+				res.json(permissions);
+			})
+			.catch(err => res.send(err));
+
 	});
 
 // on routes that end in /users/:id to update an existing user
