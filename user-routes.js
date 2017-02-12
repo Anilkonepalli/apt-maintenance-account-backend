@@ -96,22 +96,34 @@ userRoutes.route('/rolesfor/:id')
 userRoutes.route('/mypermissions/:name')
 	.get(function(req, res) {
 //console.log('Decoded data...'); console.log(req.decoded);
-		getUser(req.decoded.id).then(model => {
-			user = model.toJSON();
-//console.log('Retrieved User...'); console.log(user);
-			let roleIds = []; 
-			user.roles.forEach(eachRole => { // collect inherited role ids
-				roleIds.push(eachRole.id);
-				let inhIds = getInheritedIds(eachRole);
-				roleIds = roleIds.concat(inhIds);
-			});
-//console.log('all my role ids are: '); console.log(roleIds);
-			getRoles(roleIds).then(models => {
-				let roles = models.toJSON();
-console.log('My roles are: '); console.log(roles);				
-			});
-		});
-		roleIds = req.decoded.roles;
+		getUser(req.decoded.id)
+			.then(model => {
+				user = model.toJSON();
+	//console.log('Retrieved User...'); console.log(user);
+				let roleIds = []; 
+				user.roles.forEach(eachRole => { // collect inherited role ids
+					roleIds.push(eachRole.id);
+					let inhIds = getInheritedIds(eachRole);
+					roleIds = roleIds.concat(inhIds);
+				});
+	//console.log('all my role ids are: '); console.log(roleIds);
+				getRoles(roleIds)
+					.then(models => {
+						let roles = models.toJSON();
+console.log('My roles are: '); console.log(roles);		
+						let permissions = [];
+						roles.forEach(eachModel => {
+							perms = eachModel.permissions
+									.filter(perms => perms.resource === req.params.name);
+							permissions = permissions.concat(perms); 
+						});
+console.log('My permissions are: '); console.log(permissions);						
+						res.json(permissions);
+					})
+					.catch(err => res.send(err));
+			})
+			.catch(err => res.send(err));
+/*		roleIds = req.decoded.roles;
 		Roles
 			.query(qb => qb.where('id', 'in', roleIds))
 			.fetch({withRelated: ['permissions']})
@@ -125,7 +137,7 @@ console.log('My roles are: '); console.log(roles);
 				});
 				res.json(permissions);
 			})
-			.catch(err => res.send(err));
+			.catch(err => res.send(err)); */
 
 	});
 

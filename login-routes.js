@@ -78,8 +78,8 @@ loginRoutes.route('/sessions/create').post(function(request, response){
 							 'deleted_at'
 						];
 			return response.status(201).send({
-				id_token: jwt.sign(_.omit(user, omitList), constants.secret, {expiresIn: 60*60*2}),
-				user: { id: user.id, firstName: user.first_name, lastName: user.last_name }
+				id_token: jwt.sign(_.omit(user, omitList), constants.secret, {expiresIn: 60*60*2})
+				//user: { id: user.id, firstName: user.first_name, lastName: user.last_name }
 			});
 
 		})
