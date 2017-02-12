@@ -1,15 +1,14 @@
 var _ 			= require('lodash'),
-	express 	= require('express'),
+//	express 	= require('express'),
 	User 		= require('./models/user'),
-//	Role 		= require('./models/role'),
-//	Permission 	= require('./models/permission'),	
+	Role 		= require('./models/role'),
+	Permission 	= require('./models/permission'),	
 	Bookshelf 	= require('./config/database'),
-	jwt			= require('jsonwebtoken'),
-	constants	= require('./config/constants'),
-	bcrypt 		= require('bcrypt');
-	//rbac		= require('./rbac-functions');  // rbac stands for role based access control
+//	jwt			= require('jsonwebtoken'),
+	constants	= require('./config/constants');
+//	bcrypt 		= require('bcrypt');
 
-/*
+
 var Users = Bookshelf.Collection.extend({
 	model: User
 });
@@ -18,13 +17,12 @@ var Roles = Bookshelf.Collection.extend({
 });
 var Permissions = Bookshelf.Collection.extend({
 	model: Permission
-});  
-*/
+});
 
+/*
 // application routing
 var loginRoutes = module.exports = express.Router();
 
-/*
 loginRoutes.route('/sessions/create').post(function(request, response){
 
 	if( !request.body.email || !request.body.password){
@@ -32,10 +30,10 @@ loginRoutes.route('/sessions/create').post(function(request, response){
 	}
 	var user;
 
-	if(rbac.users.error){
+	if(retrieved_users.error){
 		return response.status(400).send("Error in User List");	
 	}
-	user = _.find(rbac.users.data, {email: request.body.email});
+	user = _.find(retrieved_users.data, {email: request.body.email});
 
 	if(!user){
 		return response.status(401).send("Email or Password do not match");
@@ -49,63 +47,8 @@ loginRoutes.route('/sessions/create').post(function(request, response){
 	});
 	
 });
+
 */
-
-loginRoutes.route('/sessions/create').post(function(request, response){
-
-	if( !request.body.email || !request.body.password){
-		return response.status(400).send("Email and Password needed");
-	}
-	//var user;
-
-	//if(rbac.users.error){
-	//	return response.status(400).send("Error in User List");	
-	//}
-	//user = _.find(rbac.users.data, {email: request.body.email});
-
-	User.forge( {email: request.body.email} ).fetch()
-		.then(model => {
-			let user = model.toJSON();
-			if(! bcrypt.compareSync(request.body.password, user.password)) {
-				return response.status(401).send("Email or Password don't match");
-			}
-			let omitList = [
-							 'password',
-							 'confirmed',
-							 'confirmation_code',
-							 'created_at',
-							 'updated_at',
-							 'deleted_at'
-						];
-			return response.status(201).send({
-				id_token: jwt.sign(_.omit(user, omitList), constants.secret, {expiresIn: 60*60*2}),
-				user: { id: user.id, firstName: user.first_name, lastName: user.last_name }
-			});
-
-		})
-		.catch(err => {
-			console.log('Error occurred in retrived log in user details');
-			console.log(err);
-			return response.status(401).send('Email or Password do not match');
-		});
-
-/*	if(!user){
-		return response.status(401).send("Email or Password do not match");
-	}
-	if(! bcrypt.compareSync(request.body.password, user.password)) {
-		return response.status(401).send("Email or Password don't match");
-	}
-	response.status(201).send({
-		id_token: jwt.sign(_.omit(user, 'password'), constants.secret, {expiresIn: 60*60*2}),
-		user: { id: user.id, firstName: user.first_name, lastName: user.last_name }
-	});  */
-	
-});
-
-
-
-
-/*
 // api routes
 
 // private functions
@@ -230,4 +173,12 @@ console.log('Retrieved Users: '); console.log(usersWithRoles);
 	}
 
 })();
-*/
+
+
+var rbac = {  // rbac - role based access control
+	users: retrieved_users,
+	roles: retrieved_roles,
+	permissions: retrieved_permissions
+};
+
+module.exports = rbac;

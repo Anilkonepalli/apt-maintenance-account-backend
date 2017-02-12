@@ -1,12 +1,14 @@
 var _ 			= require('lodash'),
 	express 	= require('express'),
 	User 		= require('./models/user'),
+	Role        = require('./models/role'),
 	Bookshelf 	= require('./config/database'),
 	jwt			= require('jsonwebtoken'),
 	constants	= require('./config/constants'),
-	bcrypt 		= require('bcrypt');
-
-	Role        = require('./models/role');
+	bcrypt 		= require('bcrypt'),
+	getUser		= require('./user-with-roles'),
+	getInheritedIds = require('./inherited-roles');
+	getRoles    = require('./roles-with-permissions');
 
 var Users = Bookshelf.Collection.extend({
 	model: User
@@ -88,32 +90,27 @@ userRoutes.route('/rolesfor/:id')
 			.catch(err => res.send(err));
 	});
 
-/*  Not in use, as of now, hence commented out
-// on routes that end in /Users/mypermissions/all to get permissions for all modules
-// ---------------------------------------------------------------------
-userRoutes.route('/mypermissions/all')
-	.get(function(req, res) {
-		roleIds = req.decoded.roles;
-		Roles
-			.query(qb => qb.where('id', 'in', roleIds))
-			.fetch({withRelated: ['permissions']})
-			.then(model => {
-				let models = model.toJSON();
-				let permissions = [];
-				models.forEach(eachModel => {
-					permissions = permissions.concat(eachModel.permissions); 
-				});
-				res.json(permissions);
-			})
-			.catch(err => res.send(err));
-	});
-
-*/
 
 // on routes that end in /Users/mypermissions/:name to get permissions of 'name' module
 // ---------------------------------------------------------------------
 userRoutes.route('/mypermissions/:name')
 	.get(function(req, res) {
+//console.log('Decoded data...'); console.log(req.decoded);
+		getUser(req.decoded.id).then(model => {
+			user = model.toJSON();
+//console.log('Retrieved User...'); console.log(user);
+			let roleIds = []; 
+			user.roles.forEach(eachRole => { // collect inherited role ids
+				roleIds.push(eachRole.id);
+				let inhIds = getInheritedIds(eachRole);
+				roleIds = roleIds.concat(inhIds);
+			});
+//console.log('all my role ids are: '); console.log(roleIds);
+			getRoles(roleIds).then(models => {
+				let roles = models.toJSON();
+console.log('My roles are: '); console.log(roles);				
+			});
+		});
 		roleIds = req.decoded.roles;
 		Roles
 			.query(qb => qb.where('id', 'in', roleIds))
@@ -212,35 +209,3 @@ userRoutes.route('/:id')
 			res.status(500).json({error: true, data: {message: err.message}});
 		}
 	});
-
-
-/*
-function getInheritedRoleIdsFor(roleIds) {
-	Roles
-		.query(qb => qb.where('id', 'in', roleIds))
-		.fetch()
-		.then(model => {
-			let models = model.toJSON();
-console.log('Models for roles Ids...'); console.log(models);			
-			let separator = ',';
-			let inheritedIds = [];
-			let temp;
-			let inherits; 
-			models.forEach(each => {
-				inherits = each.inherits;
-				if(inherits !== null && inherits !== '') {
-					temp = each.inherits.split(separator);
-console.log('Temp now: '); console.log(temp);					
-					temp = temp.map(each => +each);
-					inheritedIds = inheritedIds.concat(temp);
-				}
-			});
-console.log('Inherited Role Ids: ...'); console.log(inheritedIds);
-			let recusiveIds = [];
-			if(inheritedIds.length > 0) 
-				recusiveIds = getInheritedRoleIdsFor(inheritedIds); // recursive calls		
-			return inheritedIds.concat(recusiveIds);
-		});
-}
-
-*/

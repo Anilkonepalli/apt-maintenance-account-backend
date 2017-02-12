@@ -5,7 +5,7 @@ var _ 			= require('lodash'),
 	jwt			= require('jsonwebtoken'),
 	constants	= require('./config/constants'),
 	bcrypt 		= require('bcrypt');
-
+	
 
 var MaintenanceAccounts = Bookshelf.Collection.extend({
 	model: MaintenanceAccount
