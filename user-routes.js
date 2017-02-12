@@ -1,23 +1,23 @@
-var _ 			= require('lodash'),
-	express 	= require('express'),
+//var _ 			= require('lodash'),
+var	express 	= require('express'),
 	User 		= require('./models/user'),
-	Role        = require('./models/role'),
+//	Role        = require('./models/role'),
 	Bookshelf 	= require('./config/database'),
 	jwt			= require('jsonwebtoken'),
 	constants	= require('./config/constants'),
-	bcrypt 		= require('bcrypt'),
+//	bcrypt 		= require('bcrypt'),
 	getUser		= require('./user-with-roles'),
-	getInheritedIds = require('./inherited-roles');
+	getInheritedIds = require('./inherited-roles'),
 	getRoles    = require('./roles-with-permissions');
 
 var Users = Bookshelf.Collection.extend({
 	model: User
 });
-
+/*
 var Roles = Bookshelf.Collection.extend({
 	model: Role
 });
-
+*/
 // application routing
 var userRoutes = module.exports = express.Router();
 

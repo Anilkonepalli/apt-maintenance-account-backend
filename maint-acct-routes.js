@@ -3,9 +3,10 @@ var _ 			= require('lodash'),
 	MaintenanceAccount 		= require('./models/maint-acct'),
 	Bookshelf 	= require('./config/database'),
 	jwt			= require('jsonwebtoken'),
-	constants	= require('./config/constants'),
-	bcrypt 		= require('bcrypt');
+	constants	= require('./config/constants');
+//	bcrypt 		= require('bcrypt');
 	
+var getPermissions = require('./user-permissions');	
 
 var MaintenanceAccounts = Bookshelf.Collection.extend({
 	model: MaintenanceAccount
@@ -31,6 +32,7 @@ maintAcctRoutes.use(function(req, res, next){
 			} else {
 				// if everything is good, save to request for use in other routes
 				req.decoded = decoded;
+				getPermissions(decoded.id); // test retrieval of permissions for user id
 				next();
 			}
 		});
