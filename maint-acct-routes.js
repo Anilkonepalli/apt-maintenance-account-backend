@@ -6,7 +6,8 @@ var _ 			= require('lodash'),
 	constants	= require('./config/constants');
 //	bcrypt 		= require('bcrypt');
 	
-var getPermissions = require('./user-permissions');	
+var getPermissions = require('./user-permissions');
+var auth = require('./authorization');
 
 var MaintenanceAccounts = Bookshelf.Collection.extend({
 	model: MaintenanceAccount
@@ -32,7 +33,7 @@ maintAcctRoutes.use(function(req, res, next){
 			} else {
 				// if everything is good, save to request for use in other routes
 				req.decoded = decoded;
-				getPermissions(decoded.id); // test retrieval of permissions for user id
+				//getPermissions(decoded.id); // test retrieval of permissions for user id
 				next();
 			}
 		});
@@ -100,13 +101,34 @@ maintAcctRoutes.route('/:id')
 
 maintAcctRoutes.route('/')
 	.post(function(req, res) {
-console.log('maintenance-accounts accessed by Logged User...'); console.log(req.decoded);
+//console.log('maintenance-accounts accessed by Logged User...'); console.log(req.decoded);
+		let p = Promise.resolve(auth.allowsAdd(req.decoded.id, 'accounts'));
+		p
+		.then( isPermittedPromise => {
+			isPermittedPromise.then(isPermitted => {
+			if(!isPermitted) {
+				console.log('-------------------------------------');
+				console.log('Addition in Accounts is NOT permitted');
+				console.log('-------------------------------------');
+	//			return res.status(500).json( // respond with error
+	//				{error: true, data:{message: 'Unauthorized Access'}});
+			} else {
+				console.log('-------------------------------------');
+				console.log('Addition in Accounts is permitted');
+				console.log('-------------------------------------');
+			} });
+		})
+		.catch(err => console.log(err));
+		
 		MaintenanceAccount.forge({
 			name: req.body.name,
 		})
 		.save()
-		.then( model => res.json({error: false, data:{model}}))
-		.catch( err => res.status(500).json({error: true, data:{message: err.message}}));
+		.then( (model) => res.json({error: false, data:{model}}))
+		.catch( (err) => {
+			console.log('Error in MaintAcct...'); console.log(err);
+			//return res.status(500).json({error: true, data:{message: err.message}});
+		});
 	});
 
 
