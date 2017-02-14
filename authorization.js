@@ -9,6 +9,40 @@ var	getRoles    = require('./roles-with-permissions');
  */
 module.exports = {
 	allowsAdd: function(userId, resource) {
+	return new Promise( function(resolve, reject) {
+		getUser(userId)
+			.then(model => {
+				let user = model.toJSON();
+				let roleIds = [];
+				user.roles.forEach(eachRole => {
+					roleIds.push(eachRole.id);
+					let inhIds = getInheritedIds(eachRole);
+					roleIds = roleIds.concat(inhIds);
+				});
+				if( roleIds.length < 1) return [];
+				return getRoles(roleIds);
+			})
+			.then(models => {
+				let roles = models.toJSON();
+				let permissions = []; // holds all permission objects of the logged in user
+				roles.forEach(eachModel => {
+					perms = eachModel.permissions;
+					permissions = permissions.concat(perms); 
+				});
+//console.log('Identified Permissions...'); console.log(permissions);
+				let myPermsOnResource = permissions.filter(each => each.resource == resource);
+//console.log('My permissions on "'+resource+'" is...'); console.log(myPermsOnResource);
+				let myAddPerm = myPermsOnResource.find(each => each.operations.indexOf('C') > -1);
+console.log('My Add Permission ...'); console.log(myAddPerm);
+				//return myAddPerm != undefined;
+				resolve(myAddPerm !== undefined);
+			})
+			.cancel(err => {
+				console.log('Error occurred in getting roles/perms...'); console.log(err);
+				reject(err);
+			});
+	});
+/*
 		getUser(userId)
 			.then(model => {
 				let user = model.toJSON();
@@ -41,6 +75,7 @@ console.log('My Add Permission ...'); console.log(myAddPerm);
 			.cancel(err => {
 				console.log('Error occurred in getting roles/perms...'); console.log(err);
 			});
+*/
 
 /*		let myPermissions = getPermissions(userId);
 console.log('My permissions are: '); console.log(myPermissions);
