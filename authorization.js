@@ -14,9 +14,16 @@ module.exports = {
 			getUserPermissions(userId, resource)
 				.then(perms => {
 					let myAddPerm = perms.find(each => each.operations.indexOf('C') > -1);
-					myAddPerm !== undefined ? resolve(true) : reject('Unauthorized Access');
+					myAddPerm !== undefined ? resolve(true) : reject(new Error('Unauthorized Access!'));
 				})
 				.catch(err => reject(err));
+		});
+	},
+
+	allowsEdit: function(userId, resource, model) {
+console.log('Allows Edit ?');		
+		return new Promise( function(resolve, reject) {
+			1 == 0 ? resolve(model) : reject(new Error('Unauthorized Access!!'));
 		});
 	}
 

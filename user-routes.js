@@ -4,11 +4,13 @@ var	express 	= require('express'),
 //	Role        = require('./models/role'),
 	Bookshelf 	= require('./config/database'),
 	jwt			= require('jsonwebtoken'),
-	constants	= require('./config/constants'),
+	constants	= require('./config/constants');
 //	bcrypt 		= require('bcrypt'),
-	getUser		= require('./user-with-roles'),
-	getInheritedIds = require('./inherited-roles'),
-	getRoles    = require('./roles-with-permissions');
+//	getUser		= require('./user-with-roles'),
+//	getInheritedIds = require('./inherited-roles'),
+//	getRoles    = require('./roles-with-permissions');
+
+var getUserPermissions = require('./userPermissionsOnResource');
 
 var Users = Bookshelf.Collection.extend({
 	model: User
@@ -95,50 +97,11 @@ userRoutes.route('/rolesfor/:id')
 // ---------------------------------------------------------------------
 userRoutes.route('/mypermissions/:name')
 	.get(function(req, res) {
-//console.log('Decoded data...'); console.log(req.decoded);
-		getUser(req.decoded.id)
-			.then(model => {
-				user = model.toJSON();
-	//console.log('Retrieved User...'); console.log(user);
-				let roleIds = []; 
-				user.roles.forEach(eachRole => { // collect inherited role ids
-					roleIds.push(eachRole.id);
-					let inhIds = getInheritedIds(eachRole);
-					roleIds = roleIds.concat(inhIds);
-				});
-	//console.log('all my role ids are: '); console.log(roleIds);
-				getRoles(roleIds)
-					.then(models => {
-						let roles = models.toJSON();
-//console.log('My roles are: '); console.log(roles);		
-						let permissions = [];
-						roles.forEach(eachModel => {
-							perms = eachModel.permissions
-									.filter(perms => perms.resource === req.params.name);
-							permissions = permissions.concat(perms); 
-						});
-//console.log('My permissions are: '); console.log(permissions);						
-						res.json(permissions);
-					})
-					.catch(err => res.send(err));
-			})
-			.catch(err => res.send(err));
-/*		roleIds = req.decoded.roles;
-		Roles
-			.query(qb => qb.where('id', 'in', roleIds))
-			.fetch({withRelated: ['permissions']})
-			.then(model => {
-				let models = model.toJSON();
-				let permissions = [];
-				models.forEach(eachModel => {
-					permissionsForResource = eachModel.permissions
-											.filter(perms => perms.resource === req.params.name);
-					permissions = permissions.concat(permissionsForResource); 
-				});
-				res.json(permissions);
-			})
-			.catch(err => res.send(err)); */
-
+			let userId = req.decoded.id;
+			let resource = req.params.name;
+			getUserPermissions(userId, resource)
+				.then(perms => res.json(perms))
+				.catch(err => res.send(err));
 	});
 
 // on routes that end in /users/:id to update an existing user

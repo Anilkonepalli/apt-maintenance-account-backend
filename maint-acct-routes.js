@@ -6,7 +6,7 @@ var _ 			= require('lodash'),
 	constants	= require('./config/constants');
 //	bcrypt 		= require('bcrypt');
 	
-var getPermissions = require('./user-permissions');
+//var getPermissions = require('./user-permissions');
 var auth = require('./authorization');
 
 var MaintenanceAccounts = Bookshelf.Collection.extend({
@@ -75,11 +75,33 @@ maintAcctRoutes.route('/:id')
 // ---------------------------------------------------------------------
 maintAcctRoutes.route('/:id')
 	.put(function(req, res) {
-		MaintenanceAccount.forge({id: req.params.id}).fetch({require: true})
-			.then(doUpdate)
-			.catch(notifyError);
 
+		MaintenanceAccount
+			.forge({id: req.params.id})
+			.fetch({require: true})
+			.then(doAuth)
+			.then(doUpdate)
+			.then(sendResponse)
+			.catch(sendError);
+
+		function doAuth(model) {
+			let userId = req.decoded.id;
+			let resource = 'accounts';
+			return auth.allowsEdit(req.decoded.id, 'accounts', model);
+		}
 		function doUpdate(model){
+			return model.save({
+				name: req.body.name || model.get('name')
+			});
+		}
+		function sendResponse() {
+			return res.json({error: false, data:{message: 'Account Details Updated'}});
+		}
+		function sendError(err) {
+			return res.status(500).json({error: true, data: {message: err.message}});
+		}
+
+/*		function doUpdate(model){
 			model.save({
 				name: req.body.name || model.get('name')
 			})
@@ -89,10 +111,11 @@ maintAcctRoutes.route('/:id')
 			.catch(function(err){
 				res.status(500).json({error: true, data: {message: err.message}});
 			});
-		}
+		} 
 		function notifyError(err){
 			res.status(500).json({error: true, data: {message: err.message}});
 		}
+*/		
 
 	});
 
@@ -114,7 +137,7 @@ maintAcctRoutes.route('/')
 				});
 			})
 			.catch(err => {
-				return res.status(500).json({error: true, data:{message: err}});
+				return res.status(500).json({error: true, data:{message: err.message}});
 			});
 
 	});
