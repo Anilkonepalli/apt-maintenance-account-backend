@@ -110,14 +110,14 @@ userRoutes.route('/mypermissions/:name')
 				getRoles(roleIds)
 					.then(models => {
 						let roles = models.toJSON();
-console.log('My roles are: '); console.log(roles);		
+//console.log('My roles are: '); console.log(roles);		
 						let permissions = [];
 						roles.forEach(eachModel => {
 							perms = eachModel.permissions
 									.filter(perms => perms.resource === req.params.name);
 							permissions = permissions.concat(perms); 
 						});
-console.log('My permissions are: '); console.log(permissions);						
+//console.log('My permissions are: '); console.log(permissions);						
 						res.json(permissions);
 					})
 					.catch(err => res.send(err));

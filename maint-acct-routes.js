@@ -102,25 +102,33 @@ maintAcctRoutes.route('/:id')
 maintAcctRoutes.route('/')
 	.post(function(req, res) {
 //console.log('maintenance-accounts accessed by Logged User...'); console.log(req.decoded);
-		let p = Promise.resolve(auth.allowsAdd(req.decoded.id, 'accounts'));
-		p
-		.then( isPermittedPromise => {
-			isPermittedPromise.then(isPermitted => {
-			if(!isPermitted) {
-				console.log('-------------------------------------');
-				console.log('Addition in Accounts is NOT permitted');
-				console.log('-------------------------------------');
-	//			return res.status(500).json( // respond with error
-	//				{error: true, data:{message: 'Unauthorized Access'}});
-			} else {
-				console.log('-------------------------------------');
-				console.log('Addition in Accounts is permitted');
-				console.log('-------------------------------------');
-			} });
-		})
-		.catch(err => console.log(err));
-		
-		MaintenanceAccount.forge({
+		auth.allowsAdd(req.decoded.id, 'accounts')
+			.then( isPermitted => {
+				if(!isPermitted) {
+					console.log('-------------------------------------');
+					console.log('Addition in Accounts is NOT permitted');
+					console.log('-------------------------------------');
+		//			return res.status(500).json( // respond with error
+		//				{error: true, data:{message: 'Unauthorized Access'}});
+				} else {
+					console.log('-------------------------------------');
+					console.log('Addition in Accounts is permitted');
+					console.log('-------------------------------------');
+
+					MaintenanceAccount.forge({
+						name: req.body.name,
+					})
+					.save()
+					.then( (model) => res.json({error: false, data:{model}}))
+					.catch( (err) => {
+						console.log('Error in MaintAcct...'); console.log(err);
+						//return res.status(500).json({error: true, data:{message: err.message}});
+					});
+				}
+			})
+			.catch(err => console.log(err));
+
+/*		MaintenanceAccount.forge({
 			name: req.body.name,
 		})
 		.save()
@@ -128,7 +136,8 @@ maintAcctRoutes.route('/')
 		.catch( (err) => {
 			console.log('Error in MaintAcct...'); console.log(err);
 			//return res.status(500).json({error: true, data:{message: err.message}});
-		});
+		});  */
+
 	});
 
 

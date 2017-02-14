@@ -35,19 +35,12 @@ module.exports = {
 				let myAddPerm = myPermsOnResource.find(each => each.operations.indexOf('C') > -1);
 console.log('My Add Permission ...'); console.log(myAddPerm);
 				//return myAddPerm != undefined;
-				return myAddPerm !== undefined;
+				return true;
 
 			})
 			.cancel(err => {
 				console.log('Error occurred in getting roles/perms...'); console.log(err);
 			});
-
-
-/*		getPermissions(userId).then(models => {
-			perms = models.toJSON();
-console.log('My permissions, for userId: '+userId+', are: '); console.log(perms);
-			return true;			
-		}); */
 
 /*		let myPermissions = getPermissions(userId);
 console.log('My permissions are: '); console.log(myPermissions);

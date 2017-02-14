@@ -124,7 +124,7 @@ var retrieved_users = null;  // yet to retrieve all users
 			eachUser.permissions = permsIds;
 
 		});
-console.log('Retrieved Users: '); console.log(usersWithRoles);		
+//console.log('Retrieved Users: '); console.log(usersWithRoles);		
 		retrieved_users = { error: false, data: usersWithRoles };
 	}
 
