@@ -7,6 +7,12 @@ var Users = Bookshelf.Collection.extend({
 	model: User
 });
 
+/**
+ * Answers RoleIds For the given userId
+ * @param  {number} userId
+ * @return Promise<number[]>
+ */
+
 module.exports = function(userId) {
 	return new Promise(function(resolve, reject){
 		User

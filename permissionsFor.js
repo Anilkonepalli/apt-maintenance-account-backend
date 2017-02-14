@@ -5,6 +5,11 @@ var Roles = Bookshelf.Collection.extend({
 	model: Role
 });
 
+/**
+ * Answers Permissions for the given roleIds
+ * @param  number[] roleIds
+ * @return Promise<Permission[]>
+ */
 module.exports = function(roleIds){
 	return new Promise( function(resolve, reject){
 		Roles
@@ -12,7 +17,7 @@ module.exports = function(roleIds){
 			.fetch({withRelated: ['permissions']})
 			.then(models => {
 				let roles = models.toJSON();
-				let permissions = []; // holds all permission objects of the logged in user
+				let permissions = [];
 				roles.forEach(eachModel => {
 					perms = eachModel.permissions;
 					permissions = permissions.concat(perms); 
