@@ -19,7 +19,8 @@ module.exports = {
 				.then(perms => {
 					console.log('Permissions on resource...'); console.log(perms);
 					let myAddPerm = perms.find(each => each.operations.indexOf('C') > -1);
-					resolve(myAddPerm !== undefined);
+					//resolve(myAddPerm !== undefined);
+					myAddPerm !== undefined ? resolve(true) : reject('Unauthorized Access');
 				})
 				.catch(err => reject(err));
 /*			getUserRoleIds(userId)
