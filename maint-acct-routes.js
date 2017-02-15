@@ -4,9 +4,7 @@ var _ 			= require('lodash'),
 	Bookshelf 	= require('./config/database'),
 	jwt			= require('jsonwebtoken'),
 	constants	= require('./config/constants');
-//	bcrypt 		= require('bcrypt');
 	
-//var getPermissions = require('./user-permissions');
 var auth = require('./authorization');
 
 var MaintenanceAccounts = Bookshelf.Collection.extend({
@@ -15,7 +13,6 @@ var MaintenanceAccounts = Bookshelf.Collection.extend({
 
 // application routing
 var maintAcctRoutes = module.exports = express.Router();
-
 
 // middleware to use for all requests
 maintAcctRoutes.use(function(req, res, next){
@@ -69,9 +66,6 @@ maintAcctRoutes.route('/')
 		function sendError(err) {
 			return res.status(500).json({error: true, data: {message: err.message}});
 		}
-/*		MaintenanceAccounts.forge().fetch()
-			.then(models => res.json(models))
-			.catch(err => res.send(err)); */
 
 	});
 
@@ -87,11 +81,14 @@ maintAcctRoutes.route('/:id')
 			MaintenanceAccount
 				.forge( {id: req.params.id} )
 				.fetch()
-				.then(model => auth.allowsView(req.decoded.id, 'accounts', model)) // is authorized to view?
+				//.then(model => auth.allowsView(req.decoded.id, 'accounts', model)) // is authorized to view?
+				.then(doAuth) // is authorized to view?
 				.then(model => res.json(model))
 				.catch(sendError);
 		}
-
+		function doAuth(model) {
+			return auth.allowsView(req.decoded.id, 'accounts', model);
+		}
 		function sendError(err) {
 			return res.status(500).json({error: true, data: {message: err.message}});
 		}
@@ -132,8 +129,24 @@ maintAcctRoutes.route('/:id')
 
 maintAcctRoutes.route('/')
 	.post(function(req, res) {
-
 		auth.allowsAdd(req.decoded.id, 'accounts')
+			.then(doSave)
+			.then(sendResponse)
+			.catch(sendError);
+
+		function doSave(granted) {
+			return MaintenanceAccount.forge({
+				name: req.body.name
+			}).save()
+		}
+		function sendResponse(model) {
+			return res.json({error: false, data:{model}});
+		}
+		function sendError(err) {
+			return res.status(500).json({error: true, data: {message: err.message}});
+		}
+
+/*		auth.allowsAdd(req.decoded.id, 'accounts')
 			.then( granted => {
 				MaintenanceAccount.forge({
 					name: req.body.name,
@@ -146,7 +159,7 @@ maintAcctRoutes.route('/')
 			})
 			.catch(err => {
 				return res.status(500).json({error: true, data:{message: err.message}});
-			});
+			}); */
 
 	});
 
@@ -156,17 +169,36 @@ maintAcctRoutes.route('/')
 
 maintAcctRoutes.route('/:id')
 	.delete(function(req, res){
-		MaintenanceAccount.forge({id: req.params.id}).fetch({require: true})
+		MaintenanceAccount
+			.forge({id: req.params.id})
+			.fetch({require: true})
+			.then(doAuth)
 			.then(doDelete)
-			.catch(notifyError);
+			.then(sendResponse)
+			.catch(sendError);
+			//.catch(notifyError);
 
+		function doAuth(model) {
+			return auth.allowsDelete(req.decoded.id, 'accounts', model);
+		}
 		function doDelete(model){
+			return model.destroy(); 
+		}
+		function sendResponse() {
+			return res.json({error: false, data:{message: 'Account Details Successfully Deleted'}});
+		}
+		function sendError(err) {
+			return res.status(500).json({error: true, data: {message: err.message}});
+		}
+
+
+/*		function doDelete(model){
 			model.destroy()
 				.then( () => res.json({error: true, data: {message: 'Account Model successfully deleted'} }))
 				.catch( (err) => res.status(500).json({error: true, data: {message: err.message}}));
 		}
 		function notifyError(err){
 			res.status(500).json({error: true, data: {message: err.message}});
-		}
+		} */
 	});
 

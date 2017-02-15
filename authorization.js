@@ -37,10 +37,16 @@ module.exports = {
 }
 
 // private functions
+/**
+ * Authorize a model for the given userId, resource, and action
+ * @param  {number} userId
+ * @param  {string} resource 
+ * @param  {Any} model
+ * @param  {string} action 
+ * @return {Promise<Any>} 
+ */
 function allows(userId, resource, model, action) {
 	
-console.log('authorization process...');
-
 	return new Promise( function(resolve, reject) {
 		getUserPermissions(userId, resource)
 			.then(perms => {
@@ -55,9 +61,6 @@ console.log('authorization process...');
 
 				// find permissions with condition
 				let permissionsWithCondition = pwc(permissions);
-/*				let permissionsWithCondition = permissions.filter(perm => {
-					return perm.condition != null && perm.condition != '';
-				}); */
 				let pwcCount = permissionsWithCondition.length;
 
 				// if permission(s) exist but has no condition, pass the model for futher processing
@@ -71,37 +74,26 @@ console.log('authorization process...');
 				hasEvaluatedPerms(permissionsWithCondition, modelJson, userId)
 					? resolve(model)
 					: reject(new Error('Unauthorized Access!!!')); // three !!! here; all conditions evaluated to false, return error with message
-//console.log('Model for update is:...'); console.log(model);
-/*				let fn;
-				let data;
-				let evaluatedPerms = permissionsWithCondition.filter(perm => { 	// filter for permission that 
-					fn = new Function("data", perm.condition);					// evaluates its condition to true
-					data = { userId: userId, ownerId: modelJson.owner_id };
-					return fn(data);
-				});
-				evaluatedPerms.length > 0 
-					? resolve(model) // if at least one condition is evaluated to true, pass the model for futher processing
-					: reject(new Error('Unauthorized Access!!!')); // three !!! here; all conditions evaluated to false, return error with message
-*/					
 			})
 			.catch(err => reject(err));
 	});
 	
 } 
 
-
+/**
+ * Answers filtered out models that are view authorized
+ * @param  {number} userId 
+ * @param  {string} resource 
+ * @param  {[Any]} models 
+ * @return {Promise<[Any]>}
+ */
 function viewables(userId, resource, models) {
 	
-console.log('authorization process on list...');
-
 	return new Promise( function(resolve, reject) {
 		getUserPermissions(userId, resource)
 			.then(perms => {
 
 				// find permissions with condition
-/*				let permissionsWithCondition = perms.filter(perm => {
-					return perm.condition != null && perm.condition != '';
-				}); */
 				let permissionsWithCondition = pwc(perms);
 				let pwcCount = permissionsWithCondition.length;
 
@@ -113,15 +105,6 @@ console.log('authorization process on list...');
 				if(pCount > pwcCount) resolve(models);
 
 				// evaluate condition in each of the permissionsWithCondition
-/*				let viewables = models.filter(eachModel => {
-					let modelJson = eachModel.toJSON();
-					let evaluatedPerms = permissionsWithCondition.filter(perm => { 	// filter for permission that 
-						let fn = new Function("data", perm.condition);					// evaluates its condition to true
-						let data = { userId: userId, ownerId: modelJson.owner_id };
-						return fn(data);
-					});
-					return evaluatedPerms.length > 0;
-				}); */
 				let viewables = models.filter(eachModel => {
 					let modelJson = eachModel.toJSON();
 					return hasEvaluatedPerms(permissionsWithCondition, modelJson, userId);
@@ -133,9 +116,23 @@ console.log('authorization process on list...');
 	
 }
 
+/**
+ * Filters out permissions with no condition in it
+ * @param  {[Permission]} perms
+ * @return {[Permission]} 
+ */
 function pwc(perms) {
 	return perms.filter(perm => perm.condition != null && perm.condition != '');
 }
+
+/**
+ * Answers a boolean indicating whether there is at least 
+ * one permission whose condition is evaluated to true
+ * @param  {[Permission]}  permissionsWithCondition 
+ * @param  {Model}  modelJson
+ * @param  {number}  userId
+ * @return {Boolean}
+ */
 function hasEvaluatedPerms(permissionsWithCondition, modelJson, userId) {
 	let evaluatedPerms = permissionsWithCondition.filter(perm => { 	// filter for permission that 
 		let fn = new Function("data", perm.condition);					// evaluates its condition to true
