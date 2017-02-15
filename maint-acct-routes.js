@@ -30,7 +30,6 @@ maintAcctRoutes.use(function(req, res, next){
 			} else {
 				// if everything is good, save to request for use in other routes
 				req.decoded = decoded;
-				//getPermissions(decoded.id); // test retrieval of permissions for user id
 				next();
 			}
 		});
@@ -81,7 +80,6 @@ maintAcctRoutes.route('/:id')
 			MaintenanceAccount
 				.forge( {id: req.params.id} )
 				.fetch()
-				//.then(model => auth.allowsView(req.decoded.id, 'accounts', model)) // is authorized to view?
 				.then(doAuth) // is authorized to view?
 				.then(model => res.json(model))
 				.catch(sendError);
@@ -146,21 +144,6 @@ maintAcctRoutes.route('/')
 			return res.status(500).json({error: true, data: {message: err.message}});
 		}
 
-/*		auth.allowsAdd(req.decoded.id, 'accounts')
-			.then( granted => {
-				MaintenanceAccount.forge({
-					name: req.body.name,
-				})
-				.save()
-				.then( (model) => res.json({error: false, data:{model}}))
-				.catch( (err) => {
-					return res.status(500).json({error: true, data:{message: err.message}});
-				});
-			})
-			.catch(err => {
-				return res.status(500).json({error: true, data:{message: err.message}});
-			}); */
-
 	});
 
 
@@ -176,7 +159,6 @@ maintAcctRoutes.route('/:id')
 			.then(doDelete)
 			.then(sendResponse)
 			.catch(sendError);
-			//.catch(notifyError);
 
 		function doAuth(model) {
 			return auth.allowsDelete(req.decoded.id, 'accounts', model);
@@ -191,14 +173,5 @@ maintAcctRoutes.route('/:id')
 			return res.status(500).json({error: true, data: {message: err.message}});
 		}
 
-
-/*		function doDelete(model){
-			model.destroy()
-				.then( () => res.json({error: true, data: {message: 'Account Model successfully deleted'} }))
-				.catch( (err) => res.status(500).json({error: true, data: {message: err.message}}));
-		}
-		function notifyError(err){
-			res.status(500).json({error: true, data: {message: err.message}});
-		} */
 	});
 

@@ -48,6 +48,7 @@ module.exports = {
 function allows(userId, resource, model, action) {
 	
 	return new Promise( function(resolve, reject) {
+
 		getUserPermissions(userId, resource)
 			.then(perms => {
 				// find permissions with granted 'action'
@@ -76,6 +77,7 @@ function allows(userId, resource, model, action) {
 					: reject(new Error('Unauthorized Access!!!')); // three !!! here; all conditions evaluated to false, return error with message
 			})
 			.catch(err => reject(err));
+
 	});
 	
 } 
@@ -90,6 +92,7 @@ function allows(userId, resource, model, action) {
 function viewables(userId, resource, models) {
 	
 	return new Promise( function(resolve, reject) {
+
 		getUserPermissions(userId, resource)
 			.then(perms => {
 
@@ -112,12 +115,13 @@ function viewables(userId, resource, models) {
 				resolve(viewables);
 			})
 			.catch(err => reject(err));
+
 	});
 	
 }
 
 /**
- * Filters out permissions with no condition in it
+ * Answers permissions with valid condition
  * @param  {[Permission]} perms
  * @return {[Permission]} 
  */
