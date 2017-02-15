@@ -64,12 +64,22 @@ maintAcctRoutes.route('/')
 maintAcctRoutes.route('/:id')
 	.get(function(req, res) {
 		if(req.params.id === '0') { // respond with a new account model
-			res.json(new MaintenanceAccount());
+			auth.allowsAdd(req.decoded.id, 'accounts') // is authorized to add ?
+				.then(granted => res.json(new MaintenanceAccount()))
+				.catch(sendError);
 		} else { // respond with fetched account model
-			MaintenanceAccount.forge( {id: req.params.id} ).fetch()
+			MaintenanceAccount
+				.forge( {id: req.params.id} )
+				.fetch()
+				.then(model => auth.allowsView(req.decoded.id, 'accounts', model)) // is authorized to view?
 				.then(model => res.json(model))
-				.catch(err => res.send(err));
+				.catch(sendError);
 		}
+
+		function sendError(err) {
+			return res.status(500).json({error: true, data: {message: err.message}});
+		}
+
 	});
 // on routes that end in /maintenance-accounts/:id to update an existing account
 // ---------------------------------------------------------------------
@@ -98,22 +108,6 @@ maintAcctRoutes.route('/:id')
 		function sendError(err) {
 			return res.status(500).json({error: true, data: {message: err.message}});
 		}
-
-/*		function doUpdate(model){
-			model.save({
-				name: req.body.name || model.get('name')
-			})
-			.then(function(){
-				res.json({error: false, data:{message: 'Account Details Updated'}});
-			})
-			.catch(function(err){
-				res.status(500).json({error: true, data: {message: err.message}});
-			});
-		} 
-		function notifyError(err){
-			res.status(500).json({error: true, data: {message: err.message}});
-		}
-*/		
 
 	});
 

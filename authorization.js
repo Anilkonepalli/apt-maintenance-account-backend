@@ -5,7 +5,7 @@ var getUserPermissions = require('./userPermissionsOnResource');
  * authorization grants for the request - 'true' indicates granted
  * 
  * @param  {number, string} userId, resource
- * @return Promise<boolean>
+ * @return Promise<boolean> for 'Add'; Promise<Permission> for read/update/delete
  */
 module.exports = {
 
@@ -13,26 +13,28 @@ module.exports = {
 		return new Promise( function(resolve, reject) {
 			getUserPermissions(userId, resource)
 				.then(perms => {
-					let myAddPerm = perms.find(each => each.operations.indexOf('C') > -1);
+					let myAddPerm = perms.find(each => each.operations.indexOf('C') > -1); // find first permission that satisfies this condition
 					myAddPerm !== undefined ? resolve(true) : reject(new Error('Unauthorized Access!')); // one ! here
 				})
 				.catch(err => reject(err));
 		});
 	},
-
+	allowsView: function(userId, resource, model) {
+		return allows(userId, resource, model, 'R');
+	},
 	allowsEdit: function(userId, resource, model) {
 		return allows(userId, resource, model, 'U');
-/*		return new Promise( function(resolve, reject) {
-			allows(userId, resource, model.owner, 'U'); // U stands for Update/Edit 
-			1 == 0 ? resolve(model) : reject(new Error('Unauthorized Access!!'));
-		}); */
+	},
+	allowsDelete: function(userId, resource, model) {
+		return allows(userId, resource, model, 'D');
 	}
 
 }
 
+// private functions
 function allows(userId, resource, model, action) {
 	
-	console.log('authorization process...');
+console.log('authorization process...');
 
 	return new Promise( function(resolve, reject) {
 		getUserPermissions(userId, resource)
@@ -60,7 +62,7 @@ function allows(userId, resource, model, action) {
 
 				// evaluate condition in each of the permissionsWithCondition
 				let modelJson = model.toJSON();
-console.log('Model for update is:...'); console.log(model);
+//console.log('Model for update is:...'); console.log(model);
 				let fn;
 				let data;
 				let evaluatedPerms = permissionsWithCondition.filter(perm => { 	// filter for permission that 
@@ -76,36 +78,3 @@ console.log('Model for update is:...'); console.log(model);
 	});
 	
 } 
-
-
-/*
-function allows(userId, resource, ownerId, action) {
-	console.log('authorization process...');
-	getUserPermissions(userId, resource)
-		.then(models => {
-			let permissions = models.filter(perm => {
-				return perm.operations.indexOf(action) > -1;
-			});
-			let pCount = permissions.length;
-			if(pCount < 1) return false;
-
-			let permissionsWithCondition = permissions.filter(perm => {
-				return perm.condition != null && perm.condition != '';
-			});
-			let pwcCount = permissionsWithCondition.length;
-			if(pwcCount < 1) return true;
-
-			if(pCount > pwcCount) return true; 
-
-			// evaluate condition in each of the permissionsWithCondition
-			let fn;
-			let data;
-			let evaluatedPerms = permissionsWithCondition.filter(perm => {
-				fn = new Function("data", perm.condition);
-				data = { userId: userId, ownerId: ownerId };
-				return fn(data);
-			});
-			return evaluatedPerms.length > 0;
-		})
-		.catch(err => reject(err));	
-} */
