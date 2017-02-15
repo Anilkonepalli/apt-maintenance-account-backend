@@ -85,8 +85,6 @@ maintAcctRoutes.route('/:id')
 			.catch(sendError);
 
 		function doAuth(model) {
-			let userId = req.decoded.id;
-			let resource = 'accounts';
 			return auth.allowsEdit(req.decoded.id, 'accounts', model);
 		}
 		function doUpdate(model){
