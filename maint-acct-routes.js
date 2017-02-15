@@ -52,11 +52,27 @@ maintAcctRoutes.use(function(req, res, next){
 // on routes that end in /maintenance-accounts
 // ---------------------------------------------------------------------
 maintAcctRoutes.route('/')
-	// get all the maintenance account models (accessed at GET http://localhost:3002/api/maintenance-accounts)
+	// get all the maintenance account models 
+	// (accessed at GET http://localhost:3002/api/maintenance-accounts)
 	.get(function(req, res){
-		MaintenanceAccounts.forge().fetch()
+		MaintenanceAccounts
+			.forge()
+			.fetch()
+			.then(doAuth)
 			.then(models => res.json(models))
-			.catch(err => res.send(err));
+			.catch(sendError);
+
+		function doAuth(models) {
+			return auth.allowedList(req.decoded.id, 'accounts', models);
+		}
+
+		function sendError(err) {
+			return res.status(500).json({error: true, data: {message: err.message}});
+		}
+/*		MaintenanceAccounts.forge().fetch()
+			.then(models => res.json(models))
+			.catch(err => res.send(err)); */
+
 	});
 
 // on routes that end in /maintenance-accounts/:id to get an account
