@@ -14,7 +14,7 @@ module.exports = {
 			getUserPermissions(userId, resource)
 				.then(perms => {
 					let myAddPerm = perms.find(each => each.operations.indexOf('C') > -1);
-					myAddPerm !== undefined ? resolve(true) : reject(new Error('Unauthorized Access!'));
+					myAddPerm !== undefined ? resolve(true) : reject(new Error('Unauthorized Access!')); // one ! here
 				})
 				.catch(err => reject(err));
 		});
@@ -44,7 +44,7 @@ function allows(userId, resource, model, action) {
 				let pCount = permissions.length;
 
 				// if no permissions found, then reject it with error message
-				if(pCount < 1) reject(new Error('Unauthorized Access!!'));
+				if(pCount < 1) reject(new Error('Unauthorized Access!!')); // two !! here
 
 				// find permissions with condition
 				let permissionsWithCondition = permissions.filter(perm => {
@@ -59,16 +59,18 @@ function allows(userId, resource, model, action) {
 				if(pCount > pwcCount) resolve(model); 
 
 				// evaluate condition in each of the permissionsWithCondition
+				let modelJson = model.toJSON();
+console.log('Model for update is:...'); console.log(model);
 				let fn;
 				let data;
 				let evaluatedPerms = permissionsWithCondition.filter(perm => { 	// filter for permission that 
 					fn = new Function("data", perm.condition);					// evaluates its condition to true
-					data = { userId: userId, ownerId: model.owner };
+					data = { userId: userId, ownerId: modelJson.owner_id };
 					return fn(data);
 				});
 				evaluatedPerms.length > 0 
 					? resolve(model) // if at least one condition is evaluated to true, pass the model for futher processing
-					: reject(new Error('Unauthorized Access!!!')); // all conditions evaluated to false, return error with message
+					: reject(new Error('Unauthorized Access!!!')); // three !!! here; all conditions evaluated to false, return error with message
 			})
 			.catch(err => reject(err));
 	});
