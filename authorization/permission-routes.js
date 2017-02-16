@@ -1,11 +1,11 @@
-var _ 			= require('lodash'),
-	express 	= require('express'),
-	Permission 	= require('./models/permission'),
-	Bookshelf 	= require('./config/database'),
-	jwt			= require('jsonwebtoken'),
-	constants	= require('./config/constants'),
-	bcrypt 		= require('bcrypt');
+//var _ 			= require('lodash');
+var	express 	= require('express');
+var	jwt			= require('jsonwebtoken');
+//var	bcrypt 		= require('bcrypt');
 
+var	Permission 	= require('./permission-model');
+var	Bookshelf 	= require('../config/database');
+var	constants	= require('../config/constants');
 
 var Permissions = Bookshelf.Collection.extend({
 	model: Permission

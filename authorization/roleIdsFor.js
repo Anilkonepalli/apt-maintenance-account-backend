@@ -1,6 +1,6 @@
-var	User 		= require('./models/user');
-var	Bookshelf 	= require('./config/database');
-var	constants	= require('./config/constants');
+var	User 		= require('../users/user-model');
+var	Bookshelf 	= require('../config/database');
+var	constants	= require('../config/constants');
 var	getInheritedIds = require('./inherited-roles');
 
 var Users = Bookshelf.Collection.extend({

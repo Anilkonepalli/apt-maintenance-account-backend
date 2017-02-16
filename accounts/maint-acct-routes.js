@@ -1,11 +1,11 @@
-var _ 			= require('lodash'),
-	express 	= require('express'),
-	MaintenanceAccount 		= require('./models/maint-acct'),
-	Bookshelf 	= require('./config/database'),
-	jwt			= require('jsonwebtoken'),
-	constants	= require('./config/constants');
-	
-var auth = require('./authorization');
+var _ 			= require('lodash');
+var	express 	= require('express');
+var	jwt			= require('jsonwebtoken');
+
+var	constants	= require('../config/constants');
+var	Bookshelf 	= require('../config/database');
+var	MaintenanceAccount 		= require('./maint-acct-model');
+var auth = require('../authorization/authorization');
 
 var MaintenanceAccounts = Bookshelf.Collection.extend({
 	model: MaintenanceAccount

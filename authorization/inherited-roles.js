@@ -1,31 +1,13 @@
-//var _ 			= require('lodash'),
-//	express 	= require('express'),
-//	User 		= require('./models/user'),
-var	Role 		= require('./models/role');
-//	Permission 	= require('./models/permission'),	
-var	Bookshelf 	= require('./config/database');
-//	jwt			= require('jsonwebtoken'),
-//	constants	= require('./config/constants');
-//	bcrypt 		= require('bcrypt');
-
-/*
-var Users = Bookshelf.Collection.extend({
-	model: User
-});
-*/
+var	Role 		= require('./role-model');
+var	Bookshelf 	= require('../config/database');
 
 var Roles = Bookshelf.Collection.extend({
 	model: Role
 });
 
-/*
-var Permissions = Bookshelf.Collection.extend({
-	model: Permission
-});
-*/
 
 // api routes
-// 
+ 
 // private functions
 var retrieved_roles = null; // yet to retrieve all roles 
 
@@ -36,7 +18,6 @@ var retrieved_roles = null; // yet to retrieve all roles
 
 	function role_fetch_success(allRoles){
 		let roles = allRoles.toJSON();
-//console.log('Roles with permissions...'); console.log(roles);		
 		retrieved_roles = { error: false, data: roles};
 	}
 	function role_fetch_error(err){
@@ -48,14 +29,12 @@ var retrieved_roles = null; // yet to retrieve all roles
 
 module.exports = function(role) {
 	let ids = getInheritedIds(role);
-//console.log('inh ids are: '); console.log(ids);
 	return ids;
 }
 
 function getInheritedIds(role) {
-//console.log('getInheritedIds for role...'); console.log(role);
+
 	let inheritedIds = getIds(role.inherits);
-//console.log('inheritedIds are: ...');console.log(inheritedIds);
 	if(inheritedIds.length < 1){
 	 	return [];
 	}

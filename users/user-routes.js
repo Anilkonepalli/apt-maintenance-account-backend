@@ -1,25 +1,15 @@
-//var _ 			= require('lodash'),
-var	express 	= require('express'),
-	User 		= require('./models/user'),
-//	Role        = require('./models/role'),
-	Bookshelf 	= require('./config/database'),
-	jwt			= require('jsonwebtoken'),
-	constants	= require('./config/constants');
-//	bcrypt 		= require('bcrypt'),
-//	getUser		= require('./user-with-roles'),
-//	getInheritedIds = require('./inherited-roles'),
-//	getRoles    = require('./roles-with-permissions');
+var	express 	= require('express');
+var	jwt			= require('jsonwebtoken');
 
-var getUserPermissions = require('./userPermissionsOnResource');
+var	constants	= require('../config/constants');
+var	User 		= require('./user-model');
+var	Bookshelf 	= require('../config/database');
+var getUserPermissions = require('../authorization/userPermissionsOnResource');
 
 var Users = Bookshelf.Collection.extend({
 	model: User
 });
-/*
-var Roles = Bookshelf.Collection.extend({
-	model: Role
-});
-*/
+
 // application routing
 var userRoutes = module.exports = express.Router();
 
@@ -52,7 +42,7 @@ userRoutes.use(function(req, res, next){
 			message: 'No token provided in UserRoutes.'
 		});
 	}
-	//next(); // make sure we go to the next routes and don't stop here
+
 });
 
 

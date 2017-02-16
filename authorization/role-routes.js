@@ -1,11 +1,11 @@
-var _ 			= require('lodash'),
-	express 	= require('express'),
-	Role 		= require('./models/role'),
-	Bookshelf 	= require('./config/database'),
-	jwt			= require('jsonwebtoken'),
-	constants	= require('./config/constants'),
-	bcrypt 		= require('bcrypt');
+//var _ 			= require('lodash');
+var	express 	= require('express');
+var	jwt			= require('jsonwebtoken');
+//var	bcrypt 		= require('bcrypt');
 
+var	Role 		= require('./role-model');
+var	Bookshelf 	= require('../config/database');
+var	constants	= require('../config/constants');
 
 var Roles = Bookshelf.Collection.extend({
 	model: Role
@@ -76,15 +76,9 @@ roleRoutes.route('/:id')
 // ---------------------------------------------------------------------
 roleRoutes.route('/mypermissions/:id')
 	.get(function(req, res) {
-		console.log('req.params...');
-		console.log(req.params);
 		Role.forge( {id: req.params.id} ).fetch({withRelated: ['permissions']})
 			.then(model => {
-				console.log('model is...');
-				console.log(model.toJSON());
 				let modelJson = model.toJSON();
-				console.log('myPermissions are:....'); 
-				console.log(modelJson.permissions); 
 				res.json(modelJson.permissions); 
 			})
 			.catch(err => res.send(err));
@@ -141,9 +135,6 @@ roleRoutes.route('/mypermissions/:id')
 
 roleRoutes.route('/')
 	.post(function(req, res) {
-		console.log('New Role being added...');
-		console.log(req.body);
-		console.log(req.query);
 
 		Role.forge({
 			name: req.body.name,
