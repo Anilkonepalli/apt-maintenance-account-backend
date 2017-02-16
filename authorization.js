@@ -19,7 +19,9 @@ module.exports = {
 			getUserPermissions(userId, resource)
 				.then(perms => {
 					let myAddPerm = perms.find(each => each.operations.indexOf('C') > -1); // find first permission that satisfies this condition
-					myAddPerm !== undefined ? resolve(true) : reject(new Error('Unauthorized Access!')); // one ! here
+					myAddPerm !== undefined 
+						? resolve(true) 
+						: reject(new Error('Unauthorized Access!')); // one ! here
 				})
 				.catch(err => reject(err));
 		});
