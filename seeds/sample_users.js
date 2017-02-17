@@ -1,4 +1,3 @@
-
 exports.seed = function(knex, Promise) {
   var bcrypt = require('bcrypt');
   //var saltRounds = 10;

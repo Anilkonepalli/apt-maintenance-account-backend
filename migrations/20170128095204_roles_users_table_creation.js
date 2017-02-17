@@ -1,4 +1,3 @@
-
 exports.up = function(knex, Promise) {
 
 	knex.schema.dropTableIfExists('roles_users');

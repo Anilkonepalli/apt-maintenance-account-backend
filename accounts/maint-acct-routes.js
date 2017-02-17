@@ -1,18 +1,18 @@
-var _ 			= require('lodash');
-var	express 	= require('express');
-var	jwt			= require('jsonwebtoken');
+var _ 					= require('lodash');
+var	express 			= require('express');
+var	jwt					= require('jsonwebtoken');
 
-var	constants	= require('../config/constants');
-var	Bookshelf 	= require('../config/database');
-var	MaintenanceAccount 		= require('./maint-acct-model');
-var auth = require('../authorization/authorization');
+var	constants			= require('../config/constants');
+var	Bookshelf 			= require('../config/database');
+var	MaintenanceAccount 	= require('./maint-acct-model');
+var auth 				= require('../authorization/authorization');
 
 var MaintenanceAccounts = Bookshelf.Collection.extend({
 	model: MaintenanceAccount
 });
 
 // application routing
-var maintAcctRoutes = module.exports = express.Router();
+var maintAcctRoutes 	= module.exports = express.Router();
 
 // middleware to use for all requests
 maintAcctRoutes.use(function(req, res, next){

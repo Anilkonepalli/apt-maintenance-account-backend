@@ -1,5 +1,5 @@
-var getRoleIdsFor = require('./roleIdsFor');
-var getPermissionsFor = require('./permissionsFor');
+var getRoleIdsFor 		= require('./roleIdsFor');
+var getPermissionsFor 	= require('./permissionsFor');
 
 /**
  * Answers a Promise of Permissions, specific to the given user and resource

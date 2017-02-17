@@ -1,5 +1,3 @@
-
-
 exports.up = function(knex, Promise) {
 
 	knex.schema.dropTableIfExists('users');

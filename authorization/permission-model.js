@@ -1,5 +1,3 @@
-// models/permission.js
-
 var Bookshelf = require('../config/database');
 
 var Permission = Bookshelf.Model.extend({

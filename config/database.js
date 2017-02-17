@@ -1,5 +1,3 @@
-// database.js
-
 require('dotenv').config();  // loads key-values in .env file into process.env
 
 // Select correct database config object for the current environment

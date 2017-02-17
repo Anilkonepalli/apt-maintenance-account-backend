@@ -1,18 +1,16 @@
-//var _ 			= require('lodash');
 var	express 	= require('express');
 var	jwt			= require('jsonwebtoken');
-//var	bcrypt 		= require('bcrypt');
 
 var	Role 		= require('./role-model');
 var	Bookshelf 	= require('../config/database');
 var	constants	= require('../config/constants');
 
-var Roles = Bookshelf.Collection.extend({
+var Roles 		= Bookshelf.Collection.extend({
 	model: Role
 });
 
 // application routing
-var roleRoutes = module.exports = express.Router();
+var roleRoutes 	= module.exports = express.Router();
 
 
 // api routes

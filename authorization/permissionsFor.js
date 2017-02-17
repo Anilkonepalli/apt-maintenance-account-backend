@@ -1,7 +1,7 @@
 var	Role 		= require('./role-model');
 var	Bookshelf 	= require('../config/database');
 
-var Roles = Bookshelf.Collection.extend({
+var Roles 		= Bookshelf.Collection.extend({
 	model: Role
 });
 

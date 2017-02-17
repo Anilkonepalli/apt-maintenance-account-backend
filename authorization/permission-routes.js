@@ -1,7 +1,5 @@
-//var _ 			= require('lodash');
 var	express 	= require('express');
 var	jwt			= require('jsonwebtoken');
-//var	bcrypt 		= require('bcrypt');
 
 var	Permission 	= require('./permission-model');
 var	Bookshelf 	= require('../config/database');

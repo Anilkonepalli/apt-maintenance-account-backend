@@ -1,5 +1,3 @@
-// models/maint-acct.js
-
 var Bookshelf = require('../config/database');
 
 var MaintenanceAccount = Bookshelf.Model.extend({

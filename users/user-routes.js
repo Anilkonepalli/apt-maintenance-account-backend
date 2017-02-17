@@ -1,17 +1,17 @@
-var	express 	= require('express');
-var	jwt			= require('jsonwebtoken');
+var	express 			= require('express');
+var	jwt					= require('jsonwebtoken');
 
-var	constants	= require('../config/constants');
-var	User 		= require('./user-model');
-var	Bookshelf 	= require('../config/database');
-var getUserPermissions = require('../authorization/userPermissionsOnResource');
+var	constants			= require('../config/constants');
+var	User 				= require('./user-model');
+var	Bookshelf 			= require('../config/database');
+var getUserPermissions 	= require('../authorization/userPermissionsOnResource');
 
-var Users = Bookshelf.Collection.extend({
+var Users 				= Bookshelf.Collection.extend({
 	model: User
 });
 
 // application routing
-var userRoutes = module.exports = express.Router();
+var userRoutes 			= module.exports = express.Router();
 
 
 // api routes

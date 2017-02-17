@@ -1,10 +1,6 @@
-// models/user.js
+var Bookshelf 	= require('../config/database');
 
-var Bookshelf = require('../config/database');
-
-//var RoleUser = Bookshelf.Model.extend({tableName: 'roles_users'});
-
-var User = Bookshelf.Model.extend({
+var User 		= Bookshelf.Model.extend({
 	tableName: 'users',
 	hasTimestamps: true,
 	softDelete: true,
