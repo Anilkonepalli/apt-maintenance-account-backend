@@ -1,5 +1,5 @@
 var _ 			= require('lodash');
-var	express 	= require('express');
+//var	express 	= require('express');
 var	jwt			= require('jsonwebtoken');
 var	bcrypt 		= require('bcrypt');
 
@@ -8,10 +8,10 @@ var	Bookshelf 	= require('../config/database');
 var	constants	= require('../config/constants');
 
 // application routing
-var loginRoutes = module.exports = express.Router();
+//var loginRoutes = module.exports = express.Router();
 
-loginRoutes.route('/sessions/create').post(function(request, response){
-
+//loginRoutes.route('/sessions/create').post(function(request, response){
+function createSession(request, response){
 	if( !request.body.email || !request.body.password){
 		return response.status(400).send("Email and Password needed");
 	}
@@ -40,4 +40,9 @@ loginRoutes.route('/sessions/create').post(function(request, response){
 			return response.status(401).send('Email or Password do not match');
 		});
 	
-});
+}
+
+//);
+
+//export all the functions
+module.exports = { createSession };

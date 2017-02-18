@@ -5,11 +5,21 @@ var express 	= require('express'),
 var	app 		= express();
 
 // body-parser middleware for handling request variables
+// parse application/json and look for raw text
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
+app.use(bodyParser.text());
+app.use(bodyParser.json({ type: 'application/json' }));
 app.use(cors());
 
-app.use('/api', require('./authentication/login-routes'));
+
+app.get("/", (req, res) => res.json({ message: "Welcome to Maintenance Accounts Tracking App"}));
+
+let login = require('./authentication/login-routes');
+app.route("/api/login")
+	.post(login.createSession);
+
+//app.use('/api', require('./authentication/login-routes'));
 app.use('/api/users', require('./users/user-routes'));
 app.use('/api/maintenance-accounts', require('./accounts/maint-acct-routes'));
 app.use('/api/roles', require('./authorization/role-routes'));
