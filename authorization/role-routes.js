@@ -43,7 +43,6 @@ roleRoutes.use(function(req, res, next){
 			message: 'No token provided in roleRoutes.'
 		});
 	}
-	//next(); // make sure we go to the next routes and don't stop here
 });
 
 

@@ -5,7 +5,6 @@ var User 		= Bookshelf.Model.extend({
 	hasTimestamps: true,
 	softDelete: true,
 	roles: function() {
-		//return this.belongsToMany(Role).through(RoleUser);
 		return this.belongsToMany(Role);
 	},
 

@@ -15,8 +15,6 @@ var req = http.request(options, function(res){
 		body += chunk;
 	});
 	res.on('end', function(){
-		//console.log('body: ');
-		//console.log(body);
 		var json = JSON.parse(body);
 		console.log('Your location: '+json.city+', '+json.region);
 		console.log('Your country: '+json.country);

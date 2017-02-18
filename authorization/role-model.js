@@ -10,7 +10,6 @@ var Role = Bookshelf.Model.extend({
 		return this.belongsToMany(User);
 	},
 	permissions: function() {
-		//return this.belongsToMany(Permission).through(PermissionRole);
 		return this.belongsToMany(Permission);
 	},
 
