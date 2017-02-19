@@ -16,6 +16,7 @@ var userRoutes 			= module.exports = express.Router();
 
 // api routes
 
+/*
 // middleware to use for all requests
 userRoutes.use(function(req, res, next){
 	// do logging
@@ -44,22 +45,25 @@ userRoutes.use(function(req, res, next){
 	}
 
 });
-
+*/
 
 // on routes that end in /users
 // ---------------------------------------------------------------------
-userRoutes.route('/')
+//userRoutes.route('/')
 	// get all the user models (accessed at GET http://localhost:3002/api/users)
-	.get(function(req, res){
+//	.get(function(req, res){
+function getAll(req, res) {
 		Users.forge().fetch()
 			.then(models => res.json(models))
 			.catch(err => res.send(err));
-	});
+}
+//	});
 
 // on routes that end in /users/:id to get an user
 // ---------------------------------------------------------------------
-userRoutes.route('/:id')
-	.get(function(req, res) {
+//userRoutes.route('/:id')
+//	.get(function(req, res) {
+function get(req, res) {
 		if(req.params.id === '0') { // respond with a new user model
 			res.json(new User());
 		} else { // respond with fetched user model
@@ -67,37 +71,43 @@ userRoutes.route('/:id')
 				.then(model => res.json(model))
 				.catch(err => res.send(err));
 		}
-	});
+}
+//	});
 
 
 // on routes that end in /Users/rolesfor/:id to get an User with associated roles
 // ---------------------------------------------------------------------
-userRoutes.route('/rolesfor/:id')
-	.get(function(req, res) {
+//userRoutes.route('/rolesfor/:id')
+//	.get(function(req, res) {
+function getRoles(req,res) {
 		User.forge( {id: req.params.id} ).fetch({withRelated: ['roles']})
 			.then(model => {
 				let modelJson = model.toJSON();
 				res.json(modelJson.roles); 
 			})
 			.catch(err => res.send(err));
-	});
+}			
+//	});
 
 
 // on routes that end in /Users/mypermissions/:name to get permissions of 'name' module
 // ---------------------------------------------------------------------
-userRoutes.route('/mypermissions/:name')
-	.get(function(req, res) {
+//userRoutes.route('/mypermissions/:name')
+//	.get(function(req, res) {
+function getPermissions(req, res) {
 			let userId = req.decoded.id;
 			let resource = req.params.name;
 			getUserPermissions(userId, resource)
 				.then(perms => res.json(perms))
 				.catch(err => res.send(err));
-	});
+}				
+//	});
 
 // on routes that end in /users/:id to update an existing user
 // ---------------------------------------------------------------------
-userRoutes.route('/:id')
-	.put(function(req, res) {
+//userRoutes.route('/:id')
+//	.put(function(req, res) {
+function put(req, res) {
 		User.forge({id: req.params.id}).fetch({require: true})
 			.then(doUpdate)
 			.catch(notifyError);
@@ -116,14 +126,15 @@ userRoutes.route('/:id')
 		function notifyError(err){
 			res.status(500).json({error: true, data: {message: err.message}});
 		}
-
-	});
+}
+//	});
 
 
 // on routes that end in /roles/myroles/:id to update an existing User with myroles
 // --------------------------------------------------------------------------------------------
-userRoutes.route('/myroles/:id')
-	.put(function(req, res) {
+//userRoutes.route('/myroles/:id')
+//	.put(function(req, res) {
+function putMyRoles(req, res) {
 		User.forge({id: req.params.id}).fetch({require: true, withRelated:['roles']})
 			.then(doUpdate)
 			.catch(notifyError);
@@ -136,31 +147,33 @@ userRoutes.route('/myroles/:id')
 		function notifyError(err){
 			res.status(500).json({error: true, data: {message: err.message}});
 		}
-
-	});
+}
+//	});
 
 
 
 // on routes that end in /users to post (to add) a new user
 // ---------------------------------------------------------------------
 
-userRoutes.route('/')
-	.post(function(req, res) {
-
+//userRoutes.route('/')
+//	.post(function(req, res) {
+function post(req, res) {
 		User.forge({
 			name: req.body.name,
 		})
 		.save()
 		.then( model => res.json({error: false, data:{model}}))
 		.catch( err => res.status(500).json({error: true, data:{message: err.message}}));
-	});
+}
+//	});
 
 
 // on routes that end in /users/:id to delete an user
 // ---------------------------------------------------------------------
 
-userRoutes.route('/:id')
-	.delete(function(req, res){
+//userRoutes.route('/:id')
+//	.delete(function(req, res){
+function delete(req, res) {
 		User.forge({id: req.params.id}).fetch({require: true})
 			.then(doDelete)
 			.catch(notifyError);
@@ -173,4 +186,5 @@ userRoutes.route('/:id')
 		function notifyError(err){
 			res.status(500).json({error: true, data: {message: err.message}});
 		}
-	});
+}
+//	});
