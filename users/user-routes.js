@@ -1,7 +1,7 @@
-var	express 			= require('express');
-var	jwt					= require('jsonwebtoken');
+//var	express 			= require('express');
+//var	jwt					= require('jsonwebtoken');
 
-var	constants			= require('../config/constants');
+//var	constants			= require('../config/constants');
 var	User 				= require('./user-model');
 var	Bookshelf 			= require('../config/database');
 var getUserPermissions 	= require('../authorization/userPermissionsOnResource');
@@ -11,7 +11,7 @@ var Users 				= Bookshelf.Collection.extend({
 });
 
 // application routing
-var userRoutes 			= module.exports = express.Router();
+//var userRoutes 			= module.exports = express.Router();
 
 
 // api routes
@@ -173,7 +173,7 @@ function post(req, res) {
 
 //userRoutes.route('/:id')
 //	.delete(function(req, res){
-function delete(req, res) {
+function del(req, res) {
 		User.forge({id: req.params.id}).fetch({require: true})
 			.then(doDelete)
 			.catch(notifyError);
@@ -188,3 +188,5 @@ function delete(req, res) {
 		}
 }
 //	});
+
+module.exports = { createSession };
