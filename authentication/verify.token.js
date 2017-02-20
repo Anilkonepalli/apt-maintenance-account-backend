@@ -1,4 +1,5 @@
 var	jwt					= require('jsonwebtoken');
+var	constants			= require('../config/constants');
 
 // middleware to use for all requests
 //userRoutes.use(

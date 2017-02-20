@@ -173,7 +173,7 @@ function post(req, res) {
 
 //userRoutes.route('/:id')
 //	.delete(function(req, res){
-function del(req, res) {
+function del(req, res) { // using full form 'delete' causes error, hence short form 'del' is used here - yet to analyze root cause
 		User.forge({id: req.params.id}).fetch({require: true})
 			.then(doDelete)
 			.catch(notifyError);
@@ -189,4 +189,4 @@ function del(req, res) {
 }
 //	});
 
-module.exports = { createSession };
+module.exports = { getAll, post, get, put, del, getRoles, getPermissions, putMyRoles };
