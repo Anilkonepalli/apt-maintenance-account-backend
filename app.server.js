@@ -18,10 +18,6 @@ app.get("/", (req, res) => res.json({ message: "Welcome to Maintenance Accounts 
 let login = require('./authentication/login-routes');
 app.route("/api/login").post(login.createSession);
 
-//app.use('/api/maintenance-accounts', require('./accounts/maint-acct-routes'));
-//app.use('/api/roles', require('./authorization/role-routes'));
-//app.use('/api/permissions', require('./authorization/permission-routes'));
-
 
 let jwt = require('./authentication/verify.token');
 app.use(jwt.verifyToken);	
@@ -29,12 +25,6 @@ app.use(jwt.verifyToken);
 ///////////////////////  USER ROUTES  /////////////////////////////////
 
 let user = require('./users/user-routes');
-/*
-app.route("/api/users/roles/myroles/:id")
-	.put(user.putMyRoles);
-
-app.route("/api/users/rolesfor/:id")
-	.get(user.getRoles); */
 
 app.route("/api/users/myroles/:id")
 	.get(user.getRoles)
@@ -98,15 +88,6 @@ app.route("/api/permissions/:id")
 	.delete(permission.del)
 	.put(permission.put);
 
-
-
-
-
-//app.use('/api', require('./authentication/login-routes'));
-//app.use('/api/users', require('./users/user-routes'));
-//app.use('/api/maintenance-accounts', require('./accounts/maint-acct-routes'));
-//app.use('/api/roles', require('./authorization/role-routes'));
-//app.use('/api/permissions', require('./authorization/permission-routes'));
 
 // Launch NodeJS server with port #3002
 app.listen(3002, function(){
