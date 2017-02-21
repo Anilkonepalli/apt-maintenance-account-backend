@@ -97,6 +97,7 @@ function getRoles(req,res) {
 function getPermissions(req, res) {
 			let userId = req.decoded.id;
 			let resource = req.params.name;
+console.log('get permissions for userId: '+userId+', '+' resource: '+resource);			
 			getUserPermissions(userId, resource)
 				.then(perms => res.json(perms))
 				.catch(err => res.send(err));

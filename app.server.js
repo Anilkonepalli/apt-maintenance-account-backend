@@ -28,19 +28,25 @@ app.use(jwt.verifyToken);
 
 
 let user = require('./users/user-routes');
+
+app.route("/api/users/roles/myroles/:id")
+	.put(user.putMyRoles);
+
+app.route("/api/users/rolesfor/:id")
+	.get(user.getRoles);
+
+app.route("/api/users/mypermissions/:name")
+	.get(user.getPermissions);
+
 app.route("/api/users/")
 	.get(user.getAll)
 	.post(user.post);
+
 app.route("/api/users/:id")
 	.get(user.get)
 	.delete(user.del)
 	.put(user.put);
-app.route("/api/users/rolesfor/:id")
-	.get(user.getRoles);
-app.route("/api/users/roles/myroles/:id")
-	.put(user.putMyRoles);	
-app.route("api/users/mypermissions/:id")
-	.get(user.getPermissions);		
+		
 
 //app.use('/api', require('./authentication/login-routes'));
 //app.use('/api/users', require('./users/user-routes'));
