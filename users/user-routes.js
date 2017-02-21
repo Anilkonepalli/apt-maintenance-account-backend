@@ -135,7 +135,7 @@ function put(req, res) {
 // --------------------------------------------------------------------------------------------
 //userRoutes.route('/myroles/:id')
 //	.put(function(req, res) {
-function putMyRoles(req, res) {
+function putRoles(req, res) {
 		User.forge({id: req.params.id}).fetch({require: true, withRelated:['roles']})
 			.then(doUpdate)
 			.catch(notifyError);
@@ -190,4 +190,4 @@ function del(req, res) { // using full form 'delete' causes error, hence short f
 }
 //	});
 
-module.exports = { getAll, post, get, put, del, getRoles, getPermissions, putMyRoles };
+module.exports = { getAll, post, get, put, del, getRoles, getPermissions, putRoles };

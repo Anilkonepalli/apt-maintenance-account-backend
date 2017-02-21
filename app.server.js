@@ -29,12 +29,16 @@ app.use(jwt.verifyToken);
 ///////////////////////  USER ROUTES  /////////////////////////////////
 
 let user = require('./users/user-routes');
-
+/*
 app.route("/api/users/roles/myroles/:id")
 	.put(user.putMyRoles);
 
 app.route("/api/users/rolesfor/:id")
-	.get(user.getRoles);
+	.get(user.getRoles); */
+
+app.route("/api/users/myroles/:id")
+	.get(user.getRoles)
+	.put(user.putRoles);
 
 app.route("/api/users/mypermissions/:name")
 	.get(user.getPermissions);
@@ -67,9 +71,7 @@ app.route("/api/maintenance-accounts/:id")
 let role = require('./authorization/role-routes');
 
 app.route("/api/roles/myPermissions/:id")
-	.get(role.getPermissions);
-
-app.route("/api/roles/myPermissions/:id")
+	.get(role.getPermissions)
 	.put(role.putPermissions);
 
 app.route("/api/roles")
