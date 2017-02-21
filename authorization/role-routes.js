@@ -1,20 +1,20 @@
-var	express 	= require('express');
-var	jwt			= require('jsonwebtoken');
+//var	express 	= require('express');
+//var	jwt			= require('jsonwebtoken');
 
 var	Role 		= require('./role-model');
 var	Bookshelf 	= require('../config/database');
-var	constants	= require('../config/constants');
+//var	constants	= require('../config/constants');
 
 var Roles 		= Bookshelf.Collection.extend({
 	model: Role
 });
 
 // application routing
-var roleRoutes 	= module.exports = express.Router();
+//var roleRoutes 	= module.exports = express.Router();
 
 
 // api routes
-
+/*
 // middleware to use for all requests
 roleRoutes.use(function(req, res, next){
 	// do logging
@@ -45,21 +45,30 @@ roleRoutes.use(function(req, res, next){
 	}
 });
 
+*/
 
 // on routes that end in /Roles
 // ---------------------------------------------------------------------
+/*
 roleRoutes.route('/')
 	// get all the Role models (accessed at GET http://localhost:3002/api/Roles)
 	.get(function(req, res){
+*/
+function getAll(req, res) {
 		Roles.forge().fetch()
 			.then(models => res.json(models))
 			.catch(err => res.send(err));
-	});
+//	});
+}
+
 
 // on routes that end in /Roles/:id to get an Role
 // ---------------------------------------------------------------------
+/*
 roleRoutes.route('/:id')
 	.get(function(req, res) {
+*/
+function get(req, res) {
 		if(req.params.id === '0') { // respond with a new Role model
 			res.json(new Role());
 		} else { // respond with fetched Role model
@@ -67,24 +76,32 @@ roleRoutes.route('/:id')
 				.then(model => res.json(model))
 				.catch(err => res.send(err));
 		}
-	});
+//	});
+}
 
 // on routes that end in /Roles/myPermissions/:id to get an Role
 // ---------------------------------------------------------------------
+/*
 roleRoutes.route('/mypermissions/:id')
 	.get(function(req, res) {
+*/
+function getPermissions(req, res) {
 		Role.forge( {id: req.params.id} ).fetch({withRelated: ['permissions']})
 			.then(model => {
 				let modelJson = model.toJSON();
 				res.json(modelJson.permissions); 
 			})
 			.catch(err => res.send(err));
-	});
+//	});
+}
 
 // on routes that end in /Roles/:id to update an existing Role
 // ---------------------------------------------------------------------
+/*
 roleRoutes.route('/:id')
 	.put(function(req, res) {
+*/
+function put(req, res) {
 		Role.forge({id: req.params.id}).fetch({require: true})
 			.then(doUpdate)
 			.catch(notifyError);
@@ -104,13 +121,16 @@ roleRoutes.route('/:id')
 			res.status(500).json({error: true, data: {message: err.message}});
 		}
 
-	});
-
+//	});
+}
 
 // on routes that end in /roles/mypermissions/:id to update an existing Role with mypermissions
 // --------------------------------------------------------------------------------------------
+/*
 roleRoutes.route('/mypermissions/:id')
 	.put(function(req, res) {
+*/
+function putPermissions(req, res) {
 		Role.forge({id: req.params.id}).fetch({require: true, withRelated:['permissions']})
 			.then(doUpdate)
 			.catch(notifyError);
@@ -124,29 +144,32 @@ roleRoutes.route('/mypermissions/:id')
 			res.status(500).json({error: true, data: {message: err.message}});
 		}
 
-	});
-
+//	});
+}
 
 // on routes that end in /Roles to post (to add) a new Role
 // ---------------------------------------------------------------------
-
+/*
 roleRoutes.route('/')
 	.post(function(req, res) {
-
+*/
+function post(req, res) {
 		Role.forge({
 			name: req.body.name,
 		})
 		.save()
 		.then( model => res.json({error: false, data:{model}}))
 		.catch( err => res.status(500).json({error: true, data:{message: err.message}}));
-	});
-
+//	});
+}
 
 // on routes that end in /Roles/:id to delete an Role
 // ---------------------------------------------------------------------
-
+/*
 roleRoutes.route('/:id')
 	.delete(function(req, res){
+*/
+function del(req, res) {
 		Role.forge({id: req.params.id}).fetch({require: true})
 			.then(doDelete)
 			.catch(notifyError);
@@ -159,4 +182,8 @@ roleRoutes.route('/:id')
 		function notifyError(err){
 			res.status(500).json({error: true, data: {message: err.message}});
 		}
-	});
+//	});
+}
+
+
+module.exports = { getAll, post, get, put, del, getPermissions, putPermissions };

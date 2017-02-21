@@ -1,8 +1,8 @@
-var _ 					= require('lodash');
-var	express 			= require('express');
-var	jwt					= require('jsonwebtoken');
+//var _ 					= require('lodash');
+//var	express 			= require('express');
+//var	jwt					= require('jsonwebtoken');
 
-var	constants			= require('../config/constants');
+//var	constants			= require('../config/constants');
 var	Bookshelf 			= require('../config/database');
 var	MaintenanceAccount 	= require('./maint-acct-model');
 var auth 				= require('../authorization/authorization');
@@ -12,8 +12,9 @@ var MaintenanceAccounts = Bookshelf.Collection.extend({
 });
 
 // application routing
-var maintAcctRoutes 	= module.exports = express.Router();
+//var maintAcctRoutes 	= module.exports = express.Router();
 
+/*
 // middleware to use for all requests
 maintAcctRoutes.use(function(req, res, next){
 	// do logging
@@ -43,35 +44,43 @@ maintAcctRoutes.use(function(req, res, next){
 
 });
 
+*/
+
 // more routes for the API will happen here
 
 // on routes that end in /maintenance-accounts
 // ---------------------------------------------------------------------
+/*
 maintAcctRoutes.route('/')
 	// get all the maintenance account models 
 	// (accessed at GET http://localhost:3002/api/maintenance-accounts)
 	.get(function(req, res){
-		MaintenanceAccounts
-			.forge()
-			.fetch()
-			.then(doAuth)
-			.then(models => res.json(models))
-			.catch(sendError);
+*/
+function getAll(req, res) {
+	MaintenanceAccounts
+		.forge()
+		.fetch()
+		.then(doAuth)
+		.then(models => res.json(models))
+		.catch(sendError);
 
-		function doAuth(models) {
-			return auth.allowedList(req.decoded.id, 'accounts', models);
-		}
+	function doAuth(models) {
+		return auth.allowedList(req.decoded.id, 'accounts', models);
+	}
 
-		function sendError(err) {
-			return res.status(500).json({error: true, data: {message: err.message}});
-		}
-
-	});
+	function sendError(err) {
+		return res.status(500).json({error: true, data: {message: err.message}});
+	}
+//	});
+}
 
 // on routes that end in /maintenance-accounts/:id to get an account
 // ---------------------------------------------------------------------
+/*
 maintAcctRoutes.route('/:id')
 	.get(function(req, res) {
+*/
+function get(req, res) {
 		if(req.params.id === '0') { // respond with a new account model
 			auth.allowsAdd(req.decoded.id, 'accounts') // is authorized to add ?
 				.then(granted => res.json(new MaintenanceAccount()))
@@ -90,13 +99,15 @@ maintAcctRoutes.route('/:id')
 		function sendError(err) {
 			return res.status(500).json({error: true, data: {message: err.message}});
 		}
-
-	});
+//	});
+}
 // on routes that end in /maintenance-accounts/:id to update an existing account
 // ---------------------------------------------------------------------
+/*
 maintAcctRoutes.route('/:id')
 	.put(function(req, res) {
-
+*/
+function put(req, res) {
 		MaintenanceAccount
 			.forge({id: req.params.id})
 			.fetch({require: true})
@@ -119,14 +130,16 @@ maintAcctRoutes.route('/:id')
 		function sendError(err) {
 			return res.status(500).json({error: true, data: {message: err.message}});
 		}
-
-	});
+//	});
+}
 
 // on routes that end in /maintenance-accounts to post (to add) a new account
 // ---------------------------------------------------------------------
-
+/*
 maintAcctRoutes.route('/')
 	.post(function(req, res) {
+*/
+function post(req, res) {
 		auth.allowsAdd(req.decoded.id, 'accounts')
 			.then(doSave)
 			.then(sendResponse)
@@ -143,15 +156,16 @@ maintAcctRoutes.route('/')
 		function sendError(err) {
 			return res.status(500).json({error: true, data: {message: err.message}});
 		}
-
-	});
-
+//	});
+}
 
 // on routes that end in /maintenance-accounts/:id to delete an account
 // ---------------------------------------------------------------------
-
+/*
 maintAcctRoutes.route('/:id')
 	.delete(function(req, res){
+*/
+function del(req, res) {
 		MaintenanceAccount
 			.forge({id: req.params.id})
 			.fetch({require: true})
@@ -172,6 +186,7 @@ maintAcctRoutes.route('/:id')
 		function sendError(err) {
 			return res.status(500).json({error: true, data: {message: err.message}});
 		}
+//	});
+}
 
-	});
-
+module.exports = { getAll, post, get, put, del };
