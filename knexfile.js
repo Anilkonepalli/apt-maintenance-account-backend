@@ -35,6 +35,22 @@ module.exports = {
     migrations: {
       tableName: 'knex_migrations'
     }
+  },
+
+  testing: {
+    client: 'mysql',
+    connection: {
+      database: process.env.test_database,
+      user: process.env.test_user,
+      password: process.env.test_password
+    },
+    pool: {
+      min: 2,
+      max: 10
+    },
+    migrations: {
+      tableName: 'knex_migrations'
+    }
   }
 
 };

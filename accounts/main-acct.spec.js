@@ -1,8 +1,3 @@
-// Note:
-// 1. Run json-server before running this test
-// 2. To run json-server, open a command prompt, go to 'test' folder where json-server.js file is found.
-// 3. Then run command 'node json-server'.  
-// 4. It should now show 'JSON Server is running'
 
 /*
 var assert = require('assert');
@@ -21,8 +16,7 @@ let Account = require('./maint-acct-model');
 // require the dev dependencies
 let chai = require('chai');
 let chaiHttp = require('chai-http');
-//let server = require('../test/json-server');
-let server = "http://localhost:3000";
+let server = require('../test/app.server');
 let should = chai.should();
 
 chai.use(chaiHttp);
