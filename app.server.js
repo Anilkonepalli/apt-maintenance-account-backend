@@ -91,6 +91,6 @@ app.route("/api/permissions/:id")
 
 // Launch NodeJS server with port #3002
 app.listen(3002, function(){
-	console.log('Express server listening on port %d in %s mode',  3002, 'development');
+	console.log('Express server listening on port %d in %s mode',  3002, process.env.NODE_ENV);
 });
 
