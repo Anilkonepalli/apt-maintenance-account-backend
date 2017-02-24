@@ -1,19 +1,9 @@
-var constants = require('../config/constants');
-
-let server = constants.server;
-let testUser = constants.appTestUser;
-
-
-// require the dev dependencies
-let chai = require('chai');
-let chaiHttp = require('chai-http');
-let should = chai.should();
-
-chai.use(chaiHttp);
+// Test Spec on Login routes
 
 /**
- * Test the login with credentials
+ * Test /api/login route
  */
+
 describe('Testing Routes... /api/login', () => {
 	it('should fail on insufficient user credentials', (done) => {
 		let user = {
@@ -23,7 +13,6 @@ describe('Testing Routes... /api/login', () => {
 			.post('/api/login')
 			.send(user) // send incomplete user credentials
 			.end((err, res) => {
-//console.log('Response is...'); console.log(res);				
 				res.should.have.status(400);
 				res.body.should.be.a('object');
 				//res.body.should.have.property('errors');
@@ -38,12 +27,10 @@ describe('Testing Routes... /api/login', () => {
 			.post('/api/login')
 			.send(testUser) // send a complete user credentials
 			.end((err, res) => {
-//console.log('Response is...'); console.log(res);				
 				res.should.have.status(201);
 				res.body.should.be.a('object');
 				//res.body.should.have.property('errors');
 				res.body.should.have.property('id_token');
-//console.log('Token: '+res.body.id_token);
 				//res.body.errors.should.have.property('password');
 				done();
 			});

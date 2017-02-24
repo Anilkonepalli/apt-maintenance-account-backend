@@ -1,19 +1,7 @@
-// Test Spec on Permission's Routes 
-
-var constants = require('../config/constants');
-
-let server = constants.server;
-let testUser = constants.appTestUser;
-
-// require the dev dependencies
-let chai = require('chai');
-let chaiHttp = require('chai-http');
-let should = chai.should();
-
-chai.use(chaiHttp);
+// Test Spec on Role's Routes 
 
 /**
- * Test the /permissions route 
+ * Test the /roles route 
  */
 describe('Testing Routes... /api/roles', () => {
 

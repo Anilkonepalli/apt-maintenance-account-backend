@@ -1,17 +1,5 @@
 // test spec on maintenance account's routes
 
-var constants = require('../config/constants');
-
-let server = constants.server;
-let testUser = constants.appTestUser;
-
-// require the dev dependencies
-let chai = require('chai');
-let chaiHttp = require('chai-http');
-let should = chai.should();
-
-chai.use(chaiHttp);
-
 /**
  * Test the /GET route
  */
@@ -21,7 +9,6 @@ describe('Testing Routes... /api/maintenance-accounts', () => {
 		chai.request(server)
 		.get('/api/maintenance-accounts')
 		.end((err, res) => {
-//console.log('Response is: ...'); console.log(res);			
 			res.should.have.status(403);
 			//res.body.should.be.a('array');
 			//res.body.length.should.be.eql(2);
