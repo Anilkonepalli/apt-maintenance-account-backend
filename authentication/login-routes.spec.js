@@ -14,8 +14,8 @@ chai.use(chaiHttp);
 /**
  * Test the login with credentials
  */
-describe('/POST login credentials', () => {
-	it('should not post credentials without password field', (done) => {
+describe('Testing Routes... /api/login', () => {
+	it('should fail on insufficient user credentials', (done) => {
 		let user = {
 			email: testUser.email
 		}
@@ -33,7 +33,7 @@ describe('/POST login credentials', () => {
 	});
 
 
-	it('should post credentials with email and password fields', (done) => {
+	it('should pass with sufficient user credentials', (done) => {
 		chai.request(server)
 			.post('/api/login')
 			.send(testUser) // send a complete user credentials
