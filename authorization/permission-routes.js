@@ -19,8 +19,10 @@ function getAll(req, res) {
 // ---------------------------------------------------------------------
 function get(req, res) {
 	if(req.params.id === '0') { // respond with a new permission model
+		logger.log('info', '/api/permissions >> get(new)...');
 		res.json(new Permission());
 	} else { // respond with fetched permission model
+		logger.log('info', '/api/permissions >> get(existing)...');
 		Permission.forge( {id: req.params.id} ).fetch()
 			.then(model => res.json(model))
 			.catch(err => res.send(err));
@@ -40,6 +42,7 @@ function put(req, res) {
 			resource: req.body.resource || model.get('resource')
 		})
 		.then(function(){
+			logger.log('info', '/api/permissions >> put()...');
 			res.json({error: false, data:{message: 'Permission Details Updated'}});
 		})
 		.catch(function(err){

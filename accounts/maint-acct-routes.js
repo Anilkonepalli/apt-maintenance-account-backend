@@ -20,10 +20,12 @@ function getAll(req, res) {
 		.catch(sendError);
 
 	function doAuth(models) {
+		logger.log('info', '/api/maintenance-accounts >> getAll()...');
 		return auth.allowedList(req.decoded.id, 'accounts', models);
 	}
 
 	function sendError(err) {
+		logger.log('error', err.message);
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
@@ -44,6 +46,7 @@ function get(req, res) {
 			.catch(sendError);
 	}
 	function doAuth(model) {
+		logger.log('info', '/api/maintenance-accounts >> get()...');
 		return auth.allowsView(req.decoded.id, 'accounts', model);
 	}
 	function sendError(err) {
@@ -65,6 +68,7 @@ function put(req, res) {
 		return auth.allowsEdit(req.decoded.id, 'accounts', model);
 	}
 	function doUpdate(model){
+		logger.log('info', '/api/maintenance-accounts >> put()...');
 		return model.save({
 			name: req.body.name || model.get('name')
 		});
@@ -86,6 +90,7 @@ function post(req, res) {
 		.catch(sendError);
 
 	function doSave(granted) {
+		logger.log('info', '/api/maintenance-accounts >> post()...');
 		return MaintenanceAccount.forge({
 			name: req.body.name
 		}).save()
@@ -113,6 +118,7 @@ function del(req, res) {
 		return auth.allowsDelete(req.decoded.id, 'accounts', model);
 	}
 	function doDelete(model){
+		logger.log('info', '/api/maintenance-accounts >> del()...');
 		return model.destroy(); 
 	}
 	function sendResponse() {

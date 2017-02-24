@@ -1,4 +1,5 @@
 # Node generated files
 /node_modules/
+/logs/
 *.tar.gz
 npm-debug.log

@@ -1,8 +1,27 @@
-var express 	= require('express'),
-	bodyParser 	= require('body-parser'),
-	cors		= require('cors');
+var express 	= require('express');
+var	bodyParser 	= require('body-parser');
+var	cors		= require('cors');
+var winston 	= require('winston'); // logging module
+				  require('winston-daily-rotate-file');
+var constants 	= require('./config/constants.json');
 
 var	app 		= express();
+
+var transport = new winston.transports.DailyRotateFile({
+	filename: './logs/maint-acct.log',
+	datePattern: 'yyyy-MM-dd-',
+	prepend: true,
+	level: process.env.NODE_ENV === 'development' ? 'debug' : 'info'
+});
+
+global.logger = new winston.Logger({
+	level: constants.logLevel,
+	transports: [
+		new (winston.transports.Console)({colorize: true}),
+		transport
+		//new (winston.transports.File)({ filename: constants.logFileName })
+	]
+});
 
 // body-parser middleware for handling request variables
 // parse application/json and look for raw text
