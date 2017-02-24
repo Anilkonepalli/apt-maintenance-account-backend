@@ -38,6 +38,7 @@ describe('/GET Accounts', () => {
 		});
 	});
 
+/*
 	it('should now GET all the accounts as token is sent', (done) => {
 		// login
 		//var agent = chai.request.agent(server);
@@ -63,4 +64,30 @@ console.log('id_token: ');console.log(res.body.id_token);
 			})
 
 	});
+*/
+
+	it('should now GET all the accounts as token is sent', (done) => {
+
+		chai.request(server)
+			.post('/api/login')
+			.send({ email: 'user1@eastgate.in', password: 'user1secret' })
+			.then( (res) => {
+console.log('id_token: ');console.log(res.body.id_token);
+				return chai.request(server)
+					.get('/api/maintenance-accounts')
+					.set('Content-Type', 'application/x-www-form-urlencoded')
+					.set('x-access-token', res.body.id_token);
+			})
+			.then( (res) => {
+console.log('Response from Accounts...');console.log(res);				
+				expect(res).to.have.status(200);
+			})
+			.catch( (err) => {
+				throw err;
+			})
+
+	});
+
+
+
 });
