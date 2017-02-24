@@ -1,3 +1,5 @@
 {
-	"secret": "hHu4zxai9Opt54bq"
+	"secret": "hHu4zxai9Opt54bq",
+	"server": "http://localhost:3002",
+	"appTestUser": { "email": "user1@eastgate.in",	"password": "user1secret" }
 }
