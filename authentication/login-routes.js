@@ -11,11 +11,15 @@ function createSession(request, response){
 	if( !request.body.email || !request.body.password){
 		return response.status(400).send("Email and Password needed");
 	}
+
+	// Get User details of email
 	User.forge( {email: request.body.email} ).fetch()
 		.then(model => {
+			if(!model) throw new Error('Invalid Email!'); // no user exist for the given email id
 			let user = model.toJSON();
 			if(! bcrypt.compareSync(request.body.password, user.password)) {
-				return response.status(401).send("Email or Password don't match");
+				//return response.status(401).send("Email or Password don't match");
+				throw new Error('Email or Password do not match!!')
 			}
 			let omitList = [
 							 'password',
@@ -32,10 +36,13 @@ function createSession(request, response){
 
 		})
 		.catch(err => {
-			console.log('Error occurred in retrived log in user details');
-			console.log(err);
-			return response.status(401).send('Email or Password do not match');
-		});	
+			//console.log('Error occurred in retrived log in user details');
+			//console.log(err);
+			//return response.status(401).send('Email or Password do not match');
+			response.statusMessage = err;
+			response.status(401).send();
+			//throw new Error('Email or Password do not match!!!');
+		});
 }
 
 //export all the functions
