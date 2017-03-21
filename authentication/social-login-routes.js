@@ -9,7 +9,7 @@ var	Bookshelf 	= require('../config/database');
 var	constants	= require('../config/constants');
 var providers = {
 	facebook: {
-		url: 'https://graph.facebook.com/me'
+		url: 'https://graph.facebook.com/me?fields=id,name,email'
 	}
 };
 
@@ -44,7 +44,7 @@ function validateWithProvider(network, socialToken) {
 		// Send a GET request to Facebook with the token as query string
 		//
 		request
-			.post( providers[network].url )
+			.get( providers[network].url )
 			.set('Accept', 'application/json')
 			.query({ "access_token": socialToken })
 			.end(function(error, response){
