@@ -42,9 +42,10 @@ function createJwt(profile) {
 function validateWithProvider(network, socialToken) {
 	return new Promise(function(resolve, reject) {
 		// Send a GET request to Facebook with the token as query string
-		// 			.set('Accept', 'application/json')
+		//
 		request
 			.post( providers[network].url )
+			.set('Accept', 'application/json')
 			.query({ "access_token": socialToken })
 			.end(function(error, response){
 				if( !error && response.statusCode == 200) {
