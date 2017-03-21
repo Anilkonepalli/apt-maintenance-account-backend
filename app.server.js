@@ -37,9 +37,11 @@ app.get("/", (req, res) => res.json({ message: "Welcome to Maintenance Accounts 
 let login = require('./authentication/login-routes');
 app.route("/api/login").post(login.createSession);
 
+let socialLogin = require('./authentication/social-login-routes');
+app.route("/api/sociallogin").post(socialLogin.createSession);
 
 let jwt = require('./authentication/verify.token');
-app.use(jwt.verifyToken);	
+app.use(jwt.verifyToken);
 
 ///////////////////////  USER ROUTES  /////////////////////////////////
 
@@ -60,14 +62,14 @@ app.route("/api/users/:id")
 	.get(user.get)
 	.delete(user.del)
 	.put(user.put);
-		
-/////////////////////////  ACCOUNT ROUTES  //////////////////////////////		
+
+/////////////////////////  ACCOUNT ROUTES  //////////////////////////////
 
 let account = require('./accounts/maint-acct-routes');
 
 app.route("/api/maintenance-accounts")
 	.get(account.getAll)
-	.post(account.post);		
+	.post(account.post);
 
 app.route("/api/maintenance-accounts/:id")
 	.get(account.get)
@@ -75,7 +77,7 @@ app.route("/api/maintenance-accounts/:id")
 	.put(account.put);
 
 
-/////////////////////////  ROLES ROUTES  //////////////////////////////		
+/////////////////////////  ROLES ROUTES  //////////////////////////////
 
 let role = require('./authorization/role-routes');
 
@@ -85,7 +87,7 @@ app.route("/api/roles/myPermissions/:id")
 
 app.route("/api/roles")
 	.get(role.getAll)
-	.post(role.post);		
+	.post(role.post);
 
 app.route("/api/roles/:id")
 	.get(role.get)
@@ -94,13 +96,13 @@ app.route("/api/roles/:id")
 
 
 
-/////////////////////////  PERMISSIONS ROUTES  //////////////////////////////		
+/////////////////////////  PERMISSIONS ROUTES  //////////////////////////////
 
 let permission = require('./authorization/permission-routes');
 
 app.route("/api/permissions")
 	.get(permission.getAll)
-	.post(permission.post);		
+	.post(permission.post);
 
 app.route("/api/permissions/:id")
 	.get(permission.get)
@@ -112,4 +114,3 @@ app.route("/api/permissions/:id")
 app.listen(3002, function(){
 	console.log('Express server listening on port %d in %s mode',  3002, process.env.NODE_ENV);
 });
-
