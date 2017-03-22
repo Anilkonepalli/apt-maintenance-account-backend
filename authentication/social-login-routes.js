@@ -42,7 +42,6 @@ function createJwt(profile) {
 function validateWithProvider(network, socialToken) {
 	return new Promise(function(resolve, reject) {
 		// Send a GET request to Facebook with the token as query string
-		//
 		request
 			.get( providers[network].url )
 			.set('Accept', 'application/json')
@@ -54,8 +53,13 @@ console.log('validateWithProvider...response..'); console.log(response.body);
 				} else {
 					reject(error);
 				}
-
 			});
+	});
+}
+
+function collectProfile(profile) {
+	return new Promise(function(resolve, reject){
+
 	});
 }
 

@@ -11,10 +11,12 @@ exports.up = function(knex, Promise) {
 		table.string('password', 60).notNull();
 		table.integer('confirmed');
 		table.string('confirmation_code', 50).nullable();
+		table.string('social_network_id', 50).nullable();
+		table.string('social_network_name', 25).nullable();
 		table.timestamp('created_at').nullable().defaultTo(knex.fn.now());
 		table.timestamp('updated_at').nullable();
-		table.timestamp('deleted_at').nullable();	
-	});  
+		table.timestamp('deleted_at').nullable();
+	});
 };
 
 exports.down = function(knex, Promise) {
