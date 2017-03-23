@@ -15,31 +15,57 @@ var providers = {
 
 // application routing - for Social login
 function createSession(request, response){
-	let network = request.body.network;
-	let socialToken = request.body.socialToken;
+	var network = request.body.network;
+	var socialToken = request.body.socialToken;
+	var profile;
+
 	if( !network || !socialToken){
 		return response.status(400).send("Network name and Social token are needed");
 	}
-//console.log('createSession(req,res) @social-login-routes...');
-console.log('Network is '+network+'; social token: '+socialToken);
-	// Validate the social token with network
-	validateWithProvider(network, socialToken).then( (profile) => {
-		// Return the user data received from network
-		//response.send('Authenticated as : ' + profile.id);
-console.log('Profile received is:...'); console.log(profile);
-		return response.status(201).send({
-			id_token: createJwt(profile)
-		});
-	}).catch( (err) => {
-		response.send('Failed!' + err.message);
-	});
-}
-function createJwt(profile) {
-	//id_token: jwt.sign(_.omit(user, omitList), constants.secret, {expiresIn: 60*60*2})
-    return jwt.sign(profile, constants.secret, {expiresIn: '2h', issuer: 'Apt-Maint'});
+	validateWithProvider(network, socialToken) 	// calling inner function1
+		.then(checkUserAlreadyExist)							// calling inner function2
+		.then(getNewOrExistingUser)								// calling inner function3
+		.then(sendJwt)														// calling inner function4
+		.catch(sendError);												// calling inner function5
+
+	function checkUserAlreadyExist(userProfile){ // implementing inner function2
+console.log('checkUserAlreadyExist...');
+		profile = userProfile;
+		return User.where('email', profile.email).count('id');
+	}
+	function getNewOrExistingUser(count) { // implementing inner function3
+		console.log('Count is '+count);
+		if(count){
+			return User.forge({email: profile.email}).fetch();
+		} else {
+			return new User({
+				name: profile.name,
+				social_network_id: profile.id,
+				social_network_name: network,
+				email: profile.email
+			}).save();
+		}
+	}
+	function sendJwt(model) {	// implementing inner function4
+		console.log('doSendJwt...');console.log(model);
+			let user = model.toJSON();
+			let omitList = [
+				'password', 	'confirmed',	 'confirmation_code',
+				'created_at',	'updated_at',	 'deleted_at'
+			];
+			logger.log('info', 'Login through social network...');
+			return response.status(201).send({
+				id_token: jwt.sign(_.omit(user, omitList), constants.secret, {expiresIn: '2h', issuer: 'Apt-Maint'})
+			});
+	}
+	function sendError(err){ // implementing inner function5
+		response.status(500).json({error: true, data: {message: err.message}});
+	}
+
 }
 
-function validateWithProvider(network, socialToken) {
+function validateWithProvider(network, socialToken) { // implementing inner function1
+console.log('validateWithProvider...');
 	return new Promise(function(resolve, reject) {
 		// Send a GET request to Facebook with the token as query string
 		request
@@ -54,12 +80,6 @@ console.log('validateWithProvider...response..'); console.log(response.body);
 					reject(error);
 				}
 			});
-	});
-}
-
-function collectProfile(profile) {
-	return new Promise(function(resolve, reject){
-
 	});
 }
 
