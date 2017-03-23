@@ -21,7 +21,7 @@ var providers = {
 function createSession(request, response){
 	var network = request.body.network;
 	var socialToken = request.body.socialToken;
-	var profile;
+	//var profile;
 	var profile_name;
 	var profile_id;
 	var profile_email;
@@ -37,20 +37,23 @@ function createSession(request, response){
 
 			function checkUserAlreadyExist(userProfile){ // implementing inner function1
 				logger.log('info', 'checkUserAlreadyExist(..)');
-				profile = userProfile;
-				collectProfileInfo();
-console.log('user profile is...'); console.log(userProfile);
-				return User.where('email', profile.email).count('id'); // returns Promise containing count
+				//profile = userProfile;
+				extractDataFrom(userProfile);
+				return User.where('email', profile_email).count('id'); // returns Promise containing count
 			}
 
-			function collectProfileInfo(){
+			/**
+			 * Collect Profile Info as each provider slightly differs in their naming
+			 * @return none
+			 */
+			function extractDataFrom(profile){
 				switch(network){
 					case 'facebook':
 						profile_name = profile.name;
 						profile_id	= profile.id;
 						break;
 					case 'google':
-						at = profile_email.indexOf('@');
+						at = profile.email.indexOf('@');
 						profile_name = profile.email.slice(0, at);
 						profile_id = profile.sub;
 				}
