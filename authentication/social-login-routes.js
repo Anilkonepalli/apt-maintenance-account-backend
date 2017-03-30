@@ -7,21 +7,14 @@ var	User 		= require('../users/user-model');
 var	Bookshelf 	= require('../config/database');
 var	constants	= require('../config/constants');
 var providers = {
-	facebook: {
-		url: 'https://graph.facebook.com/me?fields=id,name,email'
-	},
-	google: {
-		url: 'https://www.googleapis.com/oauth2/v3/tokeninfo'
-		//url: 'https://www.googleapis.com/plus/v1/people/me'
-		//url: 'https://www/googleapis.com/auth/plus.me'
-	}
+	facebook: { url: 'https://graph.facebook.com/me?fields=id,name,email'	},
+	google: {	url: 'https://www.googleapis.com/oauth2/v3/tokeninfo'	}
 };
 
 // application routing - for Social login
 function createSession(request, response){
 	var network = request.body.network;
 	var socialToken = request.body.socialToken;
-	//var profile;
 	var profile_name;
 	var profile_id;
 	var profile_email;
@@ -37,7 +30,6 @@ function createSession(request, response){
 
 			function checkUserAlreadyExist(userProfile){ // implementing inner function1
 				logger.log('info', 'checkUserAlreadyExist(..)');
-				//profile = userProfile;
 				extractDataFrom(userProfile);
 				return User.where('email', profile_email).count('id'); // returns Promise containing count
 			}
@@ -94,20 +86,13 @@ function createSession(request, response){
 
 function validateWithProvider(network, socialToken) {
 	logger.log('info', 'validateWithProvider...');
-/*	let queryObj = {};
-	switch (network) {
-		case 'facebook': queryObj = { "access_token": socialToken }; break;
-		case 'google': queryObj = { "access_token": socialToken }; break;
-		default: break;
-	}
-*/
+
 	return new Promise(function(resolve, reject) {
 		// Send a GET request to Facebook with the token as query string
 		request
 			.get( providers[network].url )
 			.set('Accept', 'application/json')
 			.query({ "access_token": socialToken })
-			//.query(queryObj)
 			.end(function(error, response){
 				if( !error && response.statusCode == 200) {
 					resolve(response.body);

@@ -2,10 +2,7 @@ var	jwt					= require('jsonwebtoken');
 var	constants			= require('../config/constants');
 
 // middleware to use for all requests
-//userRoutes.use(
 function verifyToken(req, res, next){
-	// do logging
-	console.log('User Access is happening...');
 
 	let token = req.body.token || req.query.token || req.headers['x-access-token'];
 
@@ -18,7 +15,6 @@ function verifyToken(req, res, next){
 			} else {
 				// if everything is good, save to request for use in other routes
 				req.decoded = decoded;
-console.log("jwt verified...go to next()...");
 				next();
 			}
 		});
@@ -29,10 +25,7 @@ console.log("jwt verified...go to next()...");
 			message: 'No token provided in UserRoutes.'
 		});
 	}
-
 }
-
-//);
 
 //export all the functions
 module.exports = { verifyToken };
