@@ -64,16 +64,16 @@ function put(req, res) {
 // --------------------------------------------------------------------------------------------
 function putPermissions(req, res) {
 	let roleModel;
-console.log('Inside putPermissions(req,res)...'); console.log('req params id: '+req.params.id);
+console.log('Inside role-routes >> putPermissions(req,res)...'); console.log('req params id: '+req.params.id);
 	Role.forge({id: req.params.id}).fetch({require: true, withRelated:['permissions']})
 		.then(detachExistingPermissions)
 		.then(attachNewPermissions)
 		.then(sendResponse)
-		.catch(notifyError);
+		.catch(errorToNotify);
 
 	function detachExistingPermissions(model){ // remove existing permissions first
 		roleModel = model;
-console.log('Inside detachExistingPermissions(model)...');console.log(model.toJSON());
+console.log('Inside role-routes >> detachExistingPermissions(model)...');console.log(model.toJSON());
 		return model.permissions().detach();
 	}
 /*	function doUpdate(model){
@@ -82,7 +82,7 @@ console.log('Inside detachExistingPermissions(model)...');console.log(model.toJS
 		res.json({error:false, data:{ message: 'My Permissions are attached to Role'}});
 	}  */
 	function attachNewPermissions(){
-console.log('inside doUpdate(model)...'); console.log(roleModel.toJSON());
+console.log('inside role-routes >> attachNewPermissions(model)...'); console.log(roleModel.toJSON());
 		return roleModel.permissions().attach(req.body.mypermissionsIds); // attach new permissions
 		//res.json({error:false, data:{ message: 'My Permissions are attached to Role' }});
 	}
@@ -91,7 +91,7 @@ console.log('inside doUpdate(model)...'); console.log(roleModel.toJSON());
 		res.json({error:false, data:{ message: 'My Permissions are attached to Role' }});
 	}
 
-	function notifyError(err){
+	function errorToNotify(err){
 		res.status(500).json({error: true, data: {message: err.message}});
 	}
 }

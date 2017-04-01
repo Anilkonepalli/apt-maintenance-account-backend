@@ -78,12 +78,18 @@ function put(req, res) {
 // on routes that end in /roles/myroles/:id to update an existing User with myroles
 // --------------------------------------------------------------------------------------------
 function putRoles(req, res) {
+
+	let userModel;
+console.log('Inside user-routes >> putRoles(req,res)...'); console.log('req params id: '+req.params.id);
 	User.forge({id: req.params.id}).fetch({require: true, withRelated:['roles']})
 		.then(detachExistingRoles)
-		.then(doUpdate)
-		.catch(notifyError);
+		.then(attachNewRoles)
+		.then(sendResponse)
+		.catch(errorToNotify);
 
 	function detachExistingRoles(model){
+		userModel = model;
+console.log('Inside user-routes >> detachExistingRoles(model)...');console.log(model.toJSON());
 		return model.roles().detach();
 	}
 /*	function doUpdate(model){
@@ -91,13 +97,20 @@ function putRoles(req, res) {
 			() => model.roles().attach(req.body.myrolesIds)); // attach new roles
 		res.json({error:false, data:{ message: 'My Roles are attached'}});
 	} */
-	function doUpdate(model){
-		model.roles().attach(req.body.myrolesIds); // attach new roles
+	function attachNewRoles(){
+console.log('inside user-routes >> attachNewRoles(model)...'); console.log(userModel.toJSON());
+		return userModel.roles().attach(req.body.myrolesIds); // attach new roles
+	}
+
+	function sendResponse(aColl) {
+console.log('Inside user-routes >> sendResponse(aColl)...');
 		res.json({error:false, data:{ message: 'My Roles are attached'}});
 	}
-	function notifyError(err){
+
+	function errorToNotify(err){
 		res.status(500).json({error: true, data: {message: err.message}});
 	}
+
 }
 
 
