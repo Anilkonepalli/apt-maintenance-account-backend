@@ -35,10 +35,10 @@ function getRoles(req,res) {
 	User.forge( {id: req.params.id} ).fetch({withRelated: ['roles']})
 		.then(model => {
 			let modelJson = model.toJSON();
-			res.json(modelJson.roles); 
+			res.json(modelJson.roles);
 		})
 		.catch(err => res.send(err));
-}			
+}
 
 
 // on routes that end in /Users/mypermissions/:name to get permissions of 'name' module
@@ -49,7 +49,7 @@ function getPermissions(req, res) {
 	getUserPermissions(userId, resource)
 		.then(perms => res.json(perms))
 		.catch(err => res.send(err));
-}				
+}
 
 // on routes that end in /users/:id to update an existing user
 // ---------------------------------------------------------------------
@@ -79,12 +79,20 @@ function put(req, res) {
 // --------------------------------------------------------------------------------------------
 function putRoles(req, res) {
 	User.forge({id: req.params.id}).fetch({require: true, withRelated:['roles']})
+		.then(detachExistingRoles)
 		.then(doUpdate)
 		.catch(notifyError);
 
-	function doUpdate(model){
+	function detachExistingRoles(model){
+		return model.roles().detach();
+	}
+/*	function doUpdate(model){
 		model.roles().detach().then( // remove the existing roles first
 			() => model.roles().attach(req.body.myrolesIds)); // attach new roles
+		res.json({error:false, data:{ message: 'My Roles are attached'}});
+	} */
+	function doUpdate(model){
+		model.roles().attach(req.body.myrolesIds); // attach new roles
 		res.json({error:false, data:{ message: 'My Roles are attached'}});
 	}
 	function notifyError(err){
