@@ -77,6 +77,20 @@ app.route("/api/maintenance-accounts/:id")
 	.put(account.put);
 
 
+/////////////////////////  FLAT ROUTES  //////////////////////////////
+
+let flat = require('./flats/flat-routes');
+
+app.route("/api/flats")
+	.get(flat.getAll)
+	.post(flat.post);
+
+app.route("/api/flats/:id")
+	.get(flat.get)
+	.delete(flat.del)
+	.put(flat.put);
+
+
 /////////////////////////  ROLES ROUTES  //////////////////////////////
 
 let role = require('./authorization/role-routes');
