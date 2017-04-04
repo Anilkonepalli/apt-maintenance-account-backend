@@ -60,51 +60,90 @@ function get(req, res) {
 // on routes that end in /flats/:id to update an existing flat
 // ---------------------------------------------------------------------
 function put(req, res) {
+
+	let blockNumber = req.body.block_number;
+	let flatNumber = req.body.flat_number;
+	let model;
+
 	Flat
 		.forge({id: req.params.id})
 		.fetch({require: true})
 		.then(doAuth)
+		.then(checkForDuplicate)
 		.then(doUpdate)
 		.then(sendResponse)
 		.catch(error);
 
 	function doAuth(model) {
+		this.model = model;
 		return auth.allowsEdit(req.decoded.id, 'flats', model);
 	}
-	function doUpdate(model){
-		logger.log('info', '/api/flats >> put()...');
-		return model.save({
-			block_number: req.body.block_number || model.get('block_number'),
-			flat_number: req.body.flat_number || model.get('flat_number')
+	function checkForDuplicate(granted){ // implementing inner function1
+		logger.log('info', 'checkForDuplicate(...)!');
+		logger.log('info', 'granted...'+granted);
+		return Flat
+			.where({block_number: blockNumber,
+						  flat_number: flatNumber })
+		  .count('id'); // returns Promise containing count
+	}
+	function doUpdate(count){
+		logger.log('info', 'count is: '+count);
+		if(count) {
+		 throw new Error('Duplicate Error!');
+	 	}
+		logger.log('info', '/api/flats >> put()...updating flat details');
+		return this.model.save({
+			block_number: blockNumber || this.model.get('block_number'),
+			flat_number: flatNumber || this.model.get('flat_number')
 		});
 	}
 	function sendResponse() {
 		return res.json({error: false, data:{message: 'Flat Details Updated'}});
 	}
 	function error(err) {
-		return res.status(500).json({error: true, data: {message: err.message}});
+		logger.log('error', err.message);
+		//return res.status(500).json({error: true, data: {message: err.message}});
+		res.statusMessage = err.message;
+		res.status(500).send();
 	}
 }
 
 // on routes that end in /flats to post (to add) a new flat
 // ---------------------------------------------------------------------
 function post(req, res) {
+
+	let blockNumber = req.body.block_number;
+	let flatNumber = req.body.flat_number;
+
 	auth.allowsAdd(req.decoded.id, 'flats')
+		.then(checkForDuplicate)
 		.then(doSave)
 		.then(sendResponse)
 		.catch(error);
 
-	function doSave(granted) {
-		logger.log('info', '/api/flats >> post()...');
+	function checkForDuplicate(granted){ // implementing inner function1
+		logger.log('info', 'checkForDuplicate(...)!!');
+		return Flat
+			.where({block_number: blockNumber,
+						  flat_number: flatNumber })
+		  .count('id'); // returns Promise containing count
+	}
+
+	function doSave(count) {
+		if(count) {
+			throw new Error('Duplicate Error!!');
+		}
+		logger.log('info', '/api/flats >> post()...saving new flat details');
 		return Flat.forge({
-			block_number: req.body.block_number,
-			flat_number: req.body.flat_number
+			block_number: blockNumber,
+			flat_number: flatNumber
 		}).save()
 	}
 	function sendResponse(model) {
 		return res.json({error: false, data:{model}});
 	}
 	function error(err) {
+		logger.log('error', err.message);
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
