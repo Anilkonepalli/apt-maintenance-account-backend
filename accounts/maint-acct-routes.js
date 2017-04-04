@@ -70,7 +70,10 @@ function put(req, res) {
 	function doUpdate(model){
 		logger.log('info', '/api/maintenance-accounts >> put()...');
 		return model.save({
-			name: req.body.name || model.get('name')
+			item: req.body.item || model.get('item'),
+			name: req.body.name || model.get('name'),
+			flat_number: req.body.flat_number || model.get('flat_number'),
+			for_month: req.body.for_month || model.get('for_month')
 		});
 	}
 	function sendResponse() {
@@ -92,7 +95,10 @@ function post(req, res) {
 	function doSave(granted) {
 		logger.log('info', '/api/maintenance-accounts >> post()...');
 		return MaintenanceAccount.forge({
-			name: req.body.name
+			item: req.body.item,
+			name: req.body.name,
+			flat_number: req.body.flat_number,
+			for_month: req.body.for_month
 		}).save()
 	}
 	function sendResponse(model) {
@@ -119,7 +125,7 @@ function del(req, res) {
 	}
 	function doDelete(model){
 		logger.log('info', '/api/maintenance-accounts >> del()...');
-		return model.destroy(); 
+		return model.destroy();
 	}
 	function sendResponse() {
 		return res.json({error: false, data:{message: 'Account Details Successfully Deleted'}});
