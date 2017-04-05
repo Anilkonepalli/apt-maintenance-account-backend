@@ -73,7 +73,11 @@ function put(req, res) {
 			item: req.body.item || model.get('item'),
 			name: req.body.name || model.get('name'),
 			flat_number: req.body.flat_number || model.get('flat_number'),
-			for_month: req.body.for_month || model.get('for_month')
+			for_month: req.body.for_month || model.get('for_month'),
+			for_year: req.body.for_year || model.get('for_year'),
+			crdr: req.body.crdr || model.get('crdr'),
+			amount: req.body.amount || model.get('amount'),
+			recorded_at: req.body.recorded_at || model.get('recorded_at')
 		});
 	}
 	function sendResponse() {
@@ -98,7 +102,11 @@ function post(req, res) {
 			item: req.body.item,
 			name: req.body.name,
 			flat_number: req.body.flat_number,
-			for_month: req.body.for_month
+			for_month: req.body.for_month,
+			for_year: req.body.for_year,
+			crdr: req.body.crdr,
+			amount: req.body.amount,
+			recorded_at: req.body.recorded_at
 		}).save()
 	}
 	function sendResponse(model) {
