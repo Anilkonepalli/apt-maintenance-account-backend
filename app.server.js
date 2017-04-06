@@ -91,6 +91,22 @@ app.route("/api/flats/:id")
 	.put(flat.put);
 
 
+
+	/////////////////////////  RESIDENT ROUTES  //////////////////////////////
+
+	let resident = require('./residents/routes');
+
+	app.route("/api/residents")
+		.get(resident.getAll)
+		.post(resident.post);
+
+	app.route("/api/residents/:id")
+		.get(resident.get)
+		.delete(resident.del)
+		.put(resident.put);
+
+
+
 /////////////////////////  ROLES ROUTES  //////////////////////////////
 
 let role = require('./authorization/role-routes');
