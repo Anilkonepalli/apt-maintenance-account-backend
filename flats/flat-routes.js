@@ -1,5 +1,5 @@
-var	Bookshelf 			= require('../config/database');
-var	Flat 	= require('./flat-model');
+var	Bookshelf 	= require('../config/database');
+var	Flat 				= require('./flat-model');
 var auth 				= require('../authorization/authorization');
 
 var Flats = Bookshelf.Collection.extend({
@@ -57,6 +57,20 @@ function get(req, res) {
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
+
+
+// on routes that end in /flats/myresidents/:id to get residents for flat id
+// ---------------------------------------------------------------------
+function getResidents(req, res) {
+	Flat.forge( {id: req.params.id} ).fetch({withRelated: ['residents']})
+		.then(model => {
+			let modelJson = model.toJSON();
+			res.json(modelJson.residents);
+		})
+		.catch(err => res.send(err));
+}
+
+
 // on routes that end in /flats/:id to update an existing flat
 // ---------------------------------------------------------------------
 function put(req, res) {
@@ -107,6 +121,37 @@ function put(req, res) {
 		res.status(500).send();
 	}
 }
+
+// on routes that end in /flats/myresidents/:id to update an existing Flat with myresidents
+// --------------------------------------------------------------------------------------------
+function putResidents(req, res) {
+	let flatModel;
+console.log('Inside flat-routes >> putResidents(req,res)...'); console.log('req params id: '+req.params.id);
+	Flat.forge({id: req.params.id}).fetch({require: true, withRelated:['residents']})
+		.then(detachExistingResidents)
+		.then(attachNewResidents)
+		.then(sendResponse)
+		.catch(errorToNotify);
+
+	function detachExistingResidents(model){ // remove existing residents first
+		flatModel = model;
+console.log('Inside flat-routes >> detachExistingResidents(model)...');console.log(model.toJSON());
+		return model.residents().detach();
+	}
+	function attachNewResidents(){
+console.log('inside flat-routes >> attachNewResidents(model)...'); console.log(flatModel.toJSON());
+		return flatModel.residents().attach(req.body.myresidentsIds); // attach new residents
+	}
+
+	function sendResponse(aColl) {
+		res.json({error:false, data:{ message: 'My Residents are attached to Flat' }});
+	}
+
+	function errorToNotify(err){
+		res.status(500).json({error: true, data: {message: err.message}});
+	}
+}
+
 
 // on routes that end in /flats to post (to add) a new flat
 // ---------------------------------------------------------------------
@@ -174,4 +219,4 @@ function del(req, res) {
 	}
 }
 
-module.exports = { getAll, post, get, put, del };
+module.exports = { getAll, post, get, put, del, getResidents, putResidents };

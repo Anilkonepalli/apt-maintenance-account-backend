@@ -15,6 +15,6 @@ var User 		= Bookshelf.Model.extend({
 
 var Role = Bookshelf.Model.extend({
 	tableName: 'roles'
-})
+});
 
 module.exports = Bookshelf.model('User', User);

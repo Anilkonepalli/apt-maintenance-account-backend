@@ -56,6 +56,20 @@ function get(req, res) {
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
+
+
+// on routes that end in /residents/myflats/:id to get flats for resident id
+// ---------------------------------------------------------------------
+function getFlats(req, res) {
+	Resident.forge( {id: req.params.id} ).fetch({withRelated: ['flats']})
+		.then(model => {
+			let modelJson = model.toJSON();
+			res.json(modelJson.flats);
+		})
+		.catch(err => res.send(err));
+}
+
+
 // on routes that end in /residents/:id to update an existing resident
 // ---------------------------------------------------------------------
 function put(req, res) {
@@ -172,4 +186,4 @@ function del(req, res) {
 	}
 }
 
-module.exports = { getAll, post, get, put, del };
+module.exports = { getAll, post, get, put, del, getFlats };

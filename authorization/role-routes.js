@@ -26,7 +26,7 @@ function get(req, res) {
 	}
 }
 
-// on routes that end in /Roles/myPermissions/:id to get an Role
+// on routes that end in /Roles/myPermissions/:id to get permissions role id
 // ---------------------------------------------------------------------
 function getPermissions(req, res) {
 	Role.forge( {id: req.params.id} ).fetch({withRelated: ['permissions']})
