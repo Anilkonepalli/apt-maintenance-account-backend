@@ -62,10 +62,10 @@ function get(req, res) {
 // on routes that end in /flats/myresidents/:id to get residents for flat id
 // ---------------------------------------------------------------------
 function getResidents(req, res) {
-console.log('Inside flat-routes >> getResidents() for flat id: '+req.params.id);
+//console.log('Inside flat-routes >> getResidents() for flat id: '+req.params.id);
 	Flat.forge( {id: req.params.id} ).fetch({withRelated: ['residents']})
 		.then(model => {
-			console.log('Flat model is retrieved...'); console.log(model);
+			//console.log('Flat model is retrieved...'); console.log(model);
 			let modelJson = model.toJSON();
 			res.json(modelJson.residents);
 		})
@@ -128,7 +128,7 @@ function put(req, res) {
 // --------------------------------------------------------------------------------------------
 function putResidents(req, res) {
 	let flatModel;
-console.log('Inside flat-routes >> putResidents(req,res)...'); console.log('req params id: '+req.params.id);
+//console.log('Inside flat-routes >> putResidents(req,res)...'); console.log('req params id: '+req.params.id);
 	Flat.forge({id: req.params.id}).fetch({require: true, withRelated:['residents']})
 		.then(detachExistingResidents)
 		.then(attachNewResidents)
@@ -137,11 +137,11 @@ console.log('Inside flat-routes >> putResidents(req,res)...'); console.log('req 
 
 	function detachExistingResidents(model){ // remove existing residents first
 		flatModel = model;
-console.log('Inside flat-routes >> detachExistingResidents(model)...');console.log(model.toJSON());
+//console.log('Inside flat-routes >> detachExistingResidents(model)...');console.log(model.toJSON());
 		return model.residents().detach();
 	}
 	function attachNewResidents(){
-console.log('inside flat-routes >> attachNewResidents(model)...'); console.log(flatModel.toJSON());
+//console.log('inside flat-routes >> attachNewResidents(model)...'); console.log(flatModel.toJSON());
 		return flatModel.residents().attach(req.body.myresidentsIds); // attach new residents
 	}
 
