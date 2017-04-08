@@ -81,6 +81,10 @@ app.route("/api/maintenance-accounts/:id")
 
 let flat = require('./flats/flat-routes');
 
+app.route("/api/flats/myresidents/:id")
+	.get(flat.getResidents)
+	.put(flat.putResidents);
+
 app.route("/api/flats")
 	.get(flat.getAll)
 	.post(flat.post);

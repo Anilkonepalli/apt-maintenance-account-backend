@@ -62,8 +62,10 @@ function get(req, res) {
 // on routes that end in /flats/myresidents/:id to get residents for flat id
 // ---------------------------------------------------------------------
 function getResidents(req, res) {
+console.log('Inside flat-routes >> getResidents() for flat id: '+req.params.id);
 	Flat.forge( {id: req.params.id} ).fetch({withRelated: ['residents']})
 		.then(model => {
+			console.log('Flat model is retrieved...'); console.log(model);
 			let modelJson = model.toJSON();
 			res.json(modelJson.residents);
 		})
