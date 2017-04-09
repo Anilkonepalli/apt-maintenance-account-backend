@@ -6,7 +6,7 @@ exports.up = function(knex, Promise) {
   	return knex.schema.createTable('flats', function(table){
   		table.increments().primary();
   		table.string('block_number', 20).notNull().defaultTo('0'); // empty string means no block number exists
-  		table.string('flat_number', 20).notNull();
+  		table.string('flat_number', 20).nullable();
   		table.string('remarks', 254).nullable();
       table.integer('owner_id').defaultTo(0); // owner id as 0 indicates admin only access
 		  table.timestamp('created_at').nullable().defaultTo(knex.fn.now());
