@@ -1,6 +1,7 @@
 var	Bookshelf 			= require('../config/database');
 var	MaintenanceAccount 	= require('./maint-acct-model');
 var auth 				= require('../authorization/authorization');
+var _ 					= require('lodash');
 
 var MaintenanceAccounts = Bookshelf.Collection.extend({
 	model: MaintenanceAccount
@@ -16,12 +17,29 @@ function getAll(req, res) {
 		.forge()
 		.fetch()
 		.then(doAuth)
-		.then(models => res.json(models))
+//		.then(models => res.json(models))
+		.then(sendResponse)
 		.catch(sendError);
 
 	function doAuth(models) {
 		logger.log('info', '/api/maintenance-accounts >> getAll()...');
 		return auth.allowedList(req.decoded.id, 'accounts', models);
+	}
+
+	function sendResponse(models) {
+console.log('Sending Response from maintenance-accounts >> sendResponse(models)');
+console.log(models.toJSON());
+		let sortedModels = _.sortBy(models.toJSON(), [
+				function(model){
+console.log('Model is: '); console.log(model);
+					return model.recorded_at;
+				}, // sort criteria 1
+				function(model){
+					return model.id;
+				}							// sort criteria 2
+			]);
+		//res.json(models);
+		res.json(sortedModels);
 	}
 
 	function sendError(err) {
