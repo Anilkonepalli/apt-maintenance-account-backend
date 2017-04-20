@@ -26,19 +26,12 @@ function getAll(req, res) {
 		return auth.allowedList(req.decoded.id, 'accounts', models);
 	}
 
+	// sends Account models after sorting; sorting is based on its recorded_at field and then id field
 	function sendResponse(models) {
-console.log('Sending Response from maintenance-accounts >> sendResponse(models)');
-console.log(models.toJSON());
 		let sortedModels = _.sortBy(models.toJSON(), [
-				function(model){
-console.log('Model is: '); console.log(model);
-					return model.recorded_at;
-				}, // sort criteria 1
-				function(model){
-					return model.id;
-				}							// sort criteria 2
+				function(model){ return model.recorded_at; }, // sort criteria 1
+				function(model){ return model.id;	}						// sort criteria 2
 			]);
-		//res.json(models);
 		res.json(sortedModels);
 	}
 
@@ -111,6 +104,7 @@ function put(req, res) {
 function post(req, res) {
 	auth.allowsAdd(req.decoded.id, 'accounts')
 		.then(doSave)
+		.then(updateBalance)
 		.then(sendResponse)
 		.catch(sendError);
 
@@ -125,7 +119,45 @@ function post(req, res) {
 			crdr: req.body.crdr,
 			amount: req.body.amount,
 			recorded_at: req.body.recorded_at
-		}).save()
+		}).save();
+	}
+	function updateBalance(model){
+		console.log('Saved posted account...'); console.log(model);
+
+		MaintenanceAccounts
+			.forge()
+			.fetch()
+			.then(sortIterateApplyBalance)
+			.catch(sendError);
+
+			// sort on fetched models
+			// find index of the model in the sorted models
+			// get balance from index - 1 model, use it to calculate balance for remaining
+			// models in the sorted list
+			function sortIterateApplyBalance(models) {
+				let sortedModels = _.sortBy(models.toJSON(), [
+						function(model){ return model.recorded_at; }, // sort criteria 1
+						function(model){ return model.id;	}						// sort criteria 2
+					]);
+				let indx = _.findIndex(sortedModels, function(o){ return o.recorded_at === model.recorded_at; });
+				let currentBalance = sortedModels[indx-1].balance; // previous account record's balance
+				for(i=indx; i < sortedModels.length; i++){
+					let acct = sortedModels[i];
+					currentBalance = currentBalance + acct.amount;
+console.log('Current Balance: '+currentBalance);
+					acct.balance = currentBalance;
+					acct.save();
+				}
+				return new Promise(function(resolve, reject){
+					1 > 0 ? resolve(model) : reject(new Error('Cannot calc balance'));
+				});
+			}
+
+			function sendError(err) {
+				logger.log('error', err.message);
+				return res.status(500).json({error: true, data: {message: err.message}});
+			}
+
 	}
 	function sendResponse(model) {
 		return res.json({error: false, data:{model}});
@@ -160,5 +192,39 @@ function del(req, res) {
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
+
+/*
+// get latest balance
+function getLatestBalance(granted) {
+	logger.log('info', 'maint-acct-routes >> getLatest()...');
+
+	MaintenanceAccounts
+		.forge()
+		.fetch()
+		.then(sendLatestBalance)
+		.catch(sendError);
+
+	// sends balance of last record in the sorted models
+	function sendLatestBalance(models) {
+		let sortedModels = _.sortBy(models.toJSON(), [
+				function(model){ return model.recorded_at; }, // sort criteria 1
+				function(model){ return model.id;	}						// sort criteria 2
+			]);
+console.log('get latest balance from sorted models...'); console.log(sortedModels);
+			return new Promise(function(resolve, reject) {
+				let total = sortedModels.length;
+				total > 0
+					? resolve(sortedModels[total-1].balance)
+					: reject(0); // no latest account, so no balance or Zero balance
+			});
+	}
+
+	function sendError(err) {
+		logger.log('error', err.message);
+		return res.status(500).json({error: true, data: {message: err.message}});
+	}
+
+}
+*/
 
 module.exports = { getAll, post, get, put, del };
