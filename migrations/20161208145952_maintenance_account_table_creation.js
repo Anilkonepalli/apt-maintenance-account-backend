@@ -13,7 +13,7 @@ exports.up = function(knex, Promise) {
   		table.decimal('amount').nullable();
   		table.decimal('balance').nullable();
   		table.string('category', 25).nullable();
-  		table.timestamp('date').nullable();
+  		table.string('recorded_at', 10).nullable();
   		table.string('remarks', 254).nullable();
       table.integer('owner_id').defaultTo(0); // owner id as 0 indicates admin only access
 		  table.timestamp('created_at').nullable().defaultTo(knex.fn.now());

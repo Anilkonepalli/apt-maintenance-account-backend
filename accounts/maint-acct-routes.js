@@ -32,6 +32,7 @@ function getAll(req, res) {
 				function(model){ return model.recorded_at; }, // sort criteria 1
 				function(model){ return model.id;	}						// sort criteria 2
 			]);
+console.log('Sorted Models: '); console.log(sortedModels);
 		res.json(sortedModels);
 	}
 
@@ -110,6 +111,7 @@ function post(req, res) {
 
 	function doSave(granted) {
 		logger.log('info', '/api/maintenance-accounts >> post()...');
+console.log('model to be saved...')		; console.log(req.body);
 		return MaintenanceAccount.forge({
 			item: req.body.item,
 			name: req.body.name,
@@ -118,12 +120,16 @@ function post(req, res) {
 			for_year: req.body.for_year,
 			crdr: req.body.crdr,
 			amount: req.body.amount,
-			recorded_at: req.body.recorded_at
+			category: req.body.category,
+			recorded_at: req.body.recorded_at,
+			remarks: req.body.remarks
 		}).save();
 	}
 	function updateBalance(model){
-		console.log('Saved posted account...'); console.log(model);
 
+		//console.log('Saved posted account...'); console.log(model);
+		jmodel = model.toJSON();
+		console.log('jmodel is...'); console.log(jmodel);
 		MaintenanceAccounts
 			.forge()
 			.fetch()
@@ -135,18 +141,35 @@ function post(req, res) {
 			// get balance from index - 1 model, use it to calculate balance for remaining
 			// models in the sorted list
 			function sortIterateApplyBalance(models) {
+
 				let sortedModels = _.sortBy(models.toJSON(), [
 						function(model){ return model.recorded_at; }, // sort criteria 1
 						function(model){ return model.id;	}						// sort criteria 2
 					]);
-				let indx = _.findIndex(sortedModels, function(o){ return o.recorded_at === model.recorded_at; });
+console.log('update balance: sorted models...'); console.log(sortedModels);
+				let indx = _.findIndex(sortedModels, function(o){
+console.log('o.recorded_at: '+o.recorded_at+', jmodel: '+jmodel.recorded_at);
+					return o.id == jmodel.id ;
+				});
+
+console.log('Index: '+indx);
 				let currentBalance = sortedModels[indx-1].balance; // previous account record's balance
+				currentBalance = currentBalance?currentBalance:0; // if null, set it to 0
 				for(i=indx; i < sortedModels.length; i++){
 					let acct = sortedModels[i];
 					currentBalance = currentBalance + acct.amount;
 console.log('Current Balance: '+currentBalance);
 					acct.balance = currentBalance;
-					acct.save();
+					//acct.save();
+					new MaintenanceAccount({id: jmodel.id})
+						.save({balance: currentBalance}, {patch: true})
+						.then( (model) => {
+							let obj = model.toJSON();
+							console.log('Model id '+obj.id+' is updated with balance: '+obj.balance);
+						})
+						.catch( (err) => {
+							console.error('Error while updating account with balance: '+err.message);
+						});
 				}
 				return new Promise(function(resolve, reject){
 					1 > 0 ? resolve(model) : reject(new Error('Cannot calc balance'));
