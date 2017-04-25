@@ -79,13 +79,28 @@ function put(req, res) {
 	}
 	function doUpdate(model){
 
+		let attributesChanged = '';
 		model.on('saving', (obj) => {
-				console.log('model is about to be updated...'); console.log(obj);
-			//obj.hasChanged(['recorded_at', 'crdr', 'amount'])
-			let attributes = ['recorded_at', 'crdr', 'amount'];
-			obj.hasChanged('crdr')
-				? console.log('model has changed')
-				: console.log('no change in model found');
+
+			if ( obj.hasChanged('crdr') ) {
+				attributesChanged += 'crdr';
+			}
+			if( obj.hasChanged('amount') ) {
+				attributesChanged += attributesChanged ? ', ' : '' ;
+				attributesChanged += 'amount';
+			}
+			if ( obj.hasChanged('recorded_at') ) {
+				attributesChanged += attributesChanged ? ', ' : '' ;
+				attributesChanged += 'recorded_at';
+			}
+
+		});
+
+		model.on('saved', (obj) => {
+			if(attributesChanged){
+				logger.log('info', "model's attribute(s) "+attributesChanged+' is/are changed');
+				updateBalance(model, 'updated');
+			}
 		});
 
 		logger.log('info', '/api/maintenance-accounts >> put()...');
@@ -102,7 +117,6 @@ function put(req, res) {
 	}
 	function sendResponse(model) {
 console.log('updated model...'); console.log(model);
-
 		return res.json({error: false, data:{message: 'Account Details Updated'}});
 	}
 	function sendError(err) {
@@ -135,7 +149,7 @@ function post(req, res) {
 		}).save();
 	}
 	function setBalance(model) {
-		return updateBalance(model); // a private functions shared between post and put calls
+		return updateBalance(model, 'added'); // a private functions shared between post and put calls
 	}
 	function sendResponse(model) {
 		return res.json({error: false, data:{model}});
@@ -161,6 +175,11 @@ function del(req, res) {
 	}
 	function doDelete(model){
 		logger.log('info', '/api/maintenance-accounts >> del()...');
+		let modelCopy = model.clone();  // after model deletion, it cannot be accesses, so clone it
+		model.on('destroying', (obj) => {
+			logger.log('info', "Triggered balance re-calculation on removel of this model");
+			updateBalance(modelCopy, 'deleted');
+		});
 		return model.destroy();
 	}
 	function sendResponse() {
@@ -190,7 +209,7 @@ function del(req, res) {
  * @param  {[type]} model
  * @return {[type]} Promise
  */
-function updateBalance(model){
+function updateBalance(model, action){
 
 	jmodel = model.toJSON();
 	jmodels=[];
@@ -230,7 +249,7 @@ function updateBalance(model){
 		function processAll(models) {
 			jmodels = jmodels.concat( models.toJSON() );
 			logger.log('info', 'After Record Date has '+models.toJSON().length+' records' );
-			return calculateBalanceAndApply(jmodels, model);
+			return calculateBalanceAndApply(jmodels, model, action);
 		}
 		function sendResponse(models) {
 			return new Promise(function(resolve, reject){
@@ -250,7 +269,7 @@ function updateBalance(model){
 // remaining models in the sorted list
 // Note: If jmodel is null, then balance
 // will start from first element in the sortedModels;
-function calculateBalanceAndApply(jmodels, jmodel=NULL) {
+function calculateBalanceAndApply(jmodels, jmodel=NULL, action) {
 	console.log('No. of models fetched...'); console.log(jmodels.length);
 	console.log('fetched models are: '); console.log(jmodels);
 
@@ -272,7 +291,7 @@ function calculateBalanceAndApply(jmodels, jmodel=NULL) {
 		bal = smodels[indx-1].balance; // previous account record's balance
 		currBal = bal?bal:0; // if bal is null, then set it to 0
 	}
-
+	if(action == 'deleted') indx++; // as indx model is about to be deleted, do not include it for balance calc
 	for(i=indx; i < smodels.length; i++){ // calculate new balance and apply
 		let acct = smodels[i];
 		currBal += (acct.crdr === 'cr') ? acct.amount : 0;
