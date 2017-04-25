@@ -80,18 +80,29 @@ function put(req, res) {
 	function doUpdate(model){
 
 		let attributesChanged = '';
+		let modelCopy = model.clone();
 		model.on('saving', (obj) => {
-
+console.log('Updating model...'); console.log(model);
 			if ( obj.hasChanged('crdr') ) {
 				attributesChanged += 'crdr';
 			}
-			if( obj.hasChanged('amount') ) {
+			if ( obj.hasChanged('amount') ) {
 				attributesChanged += attributesChanged ? ', ' : '' ;
 				attributesChanged += 'amount';
 			}
 			if ( obj.hasChanged('recorded_at') ) {
 				attributesChanged += attributesChanged ? ', ' : '' ;
 				attributesChanged += 'recorded_at';
+				oldRecordDate = model._previousAttributes.recorded_at;
+				newRecordDate = model.attributes.recorded_at;
+				logger.log('info', 'Old Record Date is: '+oldRecordDate+'; New Record date is: '+newRecordDate);
+				if(oldRecordDate < newRecordDate) {
+					logger.log('info', 'Old Record Date is earlier; hence start balance calc from this old record date');
+					modelCopy.attributes.recorded_at = oldRecordDate;
+					logger.log('info', 'model used for update is: '); logger.log('info', modelCopy);
+				} else {
+					modelCopy.attributes.recorded_at = newRecordDate;
+				}
 			}
 
 		});
@@ -99,7 +110,8 @@ function put(req, res) {
 		model.on('saved', (obj) => {
 			if(attributesChanged){
 				logger.log('info', "model's attribute(s) "+attributesChanged+' is/are changed');
-				updateBalance(model, 'updated');
+				logger.log('info', 'model copy is: '); logger.log('info', modelCopy);
+				updateBalance(modelCopy);
 			}
 		});
 
@@ -116,7 +128,6 @@ function put(req, res) {
 		});
 	}
 	function sendResponse(model) {
-console.log('updated model...'); console.log(model);
 		return res.json({error: false, data:{message: 'Account Details Updated'}});
 	}
 	function sendError(err) {
@@ -149,7 +160,7 @@ function post(req, res) {
 		}).save();
 	}
 	function setBalance(model) {
-		return updateBalance(model, 'added'); // a private functions shared between post and put calls
+		return updateBalance(model); // a private functions shared between post and put calls
 	}
 	function sendResponse(model) {
 		return res.json({error: false, data:{model}});
@@ -178,7 +189,7 @@ function del(req, res) {
 		let modelCopy = model.clone();  // after model deletion, it cannot be accesses, so clone it
 		model.on('destroying', (obj) => {
 			logger.log('info', "Triggered balance re-calculation on removel of this model");
-			updateBalance(modelCopy, 'deleted');
+			updateBalance(modelCopy);
 		});
 		return model.destroy();
 	}
@@ -192,64 +203,56 @@ function del(req, res) {
 
 
 /**   Private Function
- * Balance is calculated after sorting the records;
- * sorting is based on two fields: recorded_at, id.
- * In the sorted list, this posted new record can be a first record,
- * between existing records, or in the end of the list.
- * To minimize performance hit, only necessary records are retrieved first,
- * then sorted out.  Three set of records are retrieved based on recorded_at date
- * of the posted new record:
- * 	a) records with same 'recorded_at' date  ** it can retrieve 0 to n records
- * 	b) only one record previous to 'recorded_at' date  ** it is to get its Balance
- * 	c) records with date after 'recorded_at' date ** it can be 0 to 'all' records
- * Join all the retrieved records; sort them as per two criteria mentioned above.
- * Determine index of the posted new record within the sorted list.
- * Fetch (index - 1) record to get its balance.  Use it to calculate balance of
- * the posted new record.  Use this balance, in turn, to other following records.
+ * First retrieve record for balance; record previous to added/updated/deleted record
+ * is retrieved to know balance and apply it to subsequent records.
+ * If no previous record is found, balance is taken as 0 (zero); that means entire records
+ * need a balance recalcuation.
+ * Now, retrieve records dated later to record retrieved for balance.
+ * Order the records based on two criteria: a) recorded_at b) id fields
  * @param  {[type]} model
  * @return {[type]} Promise
  */
-function updateBalance(model, action){
 
+function updateBalance(model) {
 	jmodel = model.toJSON();
-	jmodels=[];
-
+	jmodels = [];
+	currentBalance = 0;
+	logger.log('info', 'update balance in progress....jmodel recorded_at: '+jmodel.recorded_at);
 	return MaintenanceAccounts
-		.query('where', 'recorded_at', '=', jmodel.recorded_at)
-		.orderBy('id', 'ASC')
-		.fetch()
-		.then(getModelsBeforeRecordDate)
-		.then(getModelsAfterRecordDate)
+		.query('where', 'recorded_at', '<', jmodel.recorded_at)
+		.orderBy('recorded_at', 'DESC')
+		.orderBy('id', 'DESC')
+		.fetchOne()
+		.then(getModelsAddedOnLaterDate)
 		.then(processAll)
 		.then(sendResponse)
 		.catch(sendError);
 
-		function getModelsBeforeRecordDate(models) {
-			jmodels = jmodels.concat( models.toJSON() );
-			logger.log('info', 'Record Date has already '+jmodels.length+' records');
-			return MaintenanceAccounts
-				.query('where', 'recorded_at', '<', jmodel.recorded_at)
-				.orderBy('recorded_at', 'DESC')
-				.orderBy('id', 'DESC')
-				.fetchOne();
-		}
-		function getModelsAfterRecordDate(models) {
-			if(models){  // if models is not null
-				jmodels = jmodels.concat( models.toJSON() );
-				logger.log('info', 'One record before Record Date is retrieved');
+		function getModelsAddedOnLaterDate(prevModel){
+			let modelForBalance = null;
+			logger.log('info','Previous model is: '); logger.log('info', prevModel);
+			if(prevModel) {
+				recordDate = prevModel.attributes.recorded_at;
+				currentBalance = prevModel.attributes.balance;
+				logger.log('info','Retrieval based on Record Date: '+recordDate);
+				logger.log('info','Current Balance as: '+currentBalance);
+				return MaintenanceAccounts
+					.query('where', 'recorded_at', '>', recordDate)
+					.fetch();
 			} else {
-				logger.log('info', 'No models before record date');
+				logger.log('info', 'No prevous model; hence, retrieving all records...');
+				return MaintenanceAccount.fetchAll();
 			}
-			return MaintenanceAccounts
-				.query('where', 'recorded_at', '>', jmodel.recorded_at)
-				.orderBy('recorded_at', 'ASC')
-				.orderBy('id', 'ASC')
-				.fetch();
 		}
 		function processAll(models) {
-			jmodels = jmodels.concat( models.toJSON() );
-			logger.log('info', 'After Record Date has '+models.toJSON().length+' records' );
-			return calculateBalanceAndApply(jmodels, model, action);
+			let jmodels = models.toJSON();
+			let smodels = _.sortBy(jmodels, [
+					(model) => model.recorded_at, // sort criteria 1
+					(model) => model.id						// sort criteria 2
+				]);
+			logger.log('info', smodels.length+' records undergo balance update' );
+			logger.log('info', 'using current balance as: '+currentBalance);
+			return calculateBalanceAndApply(smodels, currentBalance);
 		}
 		function sendResponse(models) {
 			return new Promise(function(resolve, reject){
@@ -262,45 +265,28 @@ function updateBalance(model, action){
 		}
 }
 
+
 // private function
-// Sorts the models first, to start applying balance
-// find index of the jmodel if supplied;
-// get balance from index - 1 model, use it to calculate balance for
-// remaining models in the sorted list
-// Note: If jmodel is null, then balance
-// will start from first element in the sortedModels;
-function calculateBalanceAndApply(jmodels, jmodel=NULL, action) {
-	console.log('No. of models fetched...'); console.log(jmodels.length);
-	console.log('fetched models are: '); console.log(jmodels);
+/**
+ * Iterate each elements in the jmodels; for the initial balance, use currentBalance
+ * @param  {[MaintenanceAccounts]} jmodels
+ * @param  {Number} currentBalance
+ * @return {[Promises]}
+ */
+function calculateBalanceAndApply(jmodels, currentBalance) {
 
-	let smodels = _.sortBy(jmodels, [
-			(model) => model.recorded_at, // sort criteria 1
-			(model) => model.id						// sort criteria 2
-		]);
-
-	let indx = jmodel
-		? _.findIndex(smodels, (o) => o.id === jmodel.id)
-		: 0; // if null, set indx to 0
-
-	console.log('indx for assessing current balance = '+indx);
-	let currBal = 0;
+	let currBal = currentBalance;
 	let promises = [];
 	let aPromise;
 
-	if(indx > 0) { // if jmodel is not the first element in the smodels
-		bal = smodels[indx-1].balance; // previous account record's balance
-		currBal = bal?bal:0; // if bal is null, then set it to 0
-	}
-	if(action == 'deleted') indx++; // as indx model is about to be deleted, do not include it for balance calc
-	for(i=indx; i < smodels.length; i++){ // calculate new balance and apply
-		let acct = smodels[i];
+	for(i=0; i < jmodels.length; i++){ // calculate new balance and apply
+		let acct = jmodels[i];
 		currBal += (acct.crdr === 'cr') ? acct.amount : 0;
 		currBal -= (acct.crdr === 'dr') ? acct.amount : 0;
 		aPromise = new MaintenanceAccount({id: acct.id})
-				.save({balance: currBal}, {patch: true}); // save the balance into database
+			.save({balance: currBal}, {patch: true}); // save the balance into database
 		promises.push(aPromise);
 	}
-
 	return Promise.all(promises);
 }
 
