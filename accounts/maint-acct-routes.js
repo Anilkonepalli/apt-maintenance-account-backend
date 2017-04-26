@@ -82,7 +82,7 @@ function put(req, res) {
 		let attributesChanged = '';
 		let modelCopy = model.clone();
 		model.on('saving', (obj) => {
-console.log('Updating model...'); console.log(model);
+
 			if ( obj.hasChanged('crdr') ) {
 				attributesChanged += 'crdr';
 			}
