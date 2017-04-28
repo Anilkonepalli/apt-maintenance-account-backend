@@ -14,15 +14,18 @@ var MaintenanceAccounts = Bookshelf.Collection.extend({
 // on routes that end in /maintenance-accounts-periodic/
 // ---------------------------------------------------------------------
 function getAll(req, res) {
+// console.log('Request param is: '); console.log(req);
 	MaintenanceAccounts
-		.forge()
+		.query('where', 'for_month', '=', +req.query.month)
+		.query('where', 'for_year', '=', +req.query.year)
+		//.forge()
 		.fetch()
 		.then(doAuth)
 		.then(sendResponse)
 		.catch(sendError);
 
 	function doAuth(models) {
-		logger.log('info', '/api/maintenance-accounts-periodic >> getPeriodicList(...)');
+		logger.log('info', '/api/maintenance-accounts-periodic >> getPeriodicList('+req.query.month+', '+req.query.year+')' );
 		return auth.allowedList(req.decoded.id, 'accounts', models);
 	}
 

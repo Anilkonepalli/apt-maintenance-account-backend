@@ -201,7 +201,7 @@ function del(req, res) {
 	}
 }
 
-
+/*
 // on routes that end in /maintenance-accounts-periodic/
 // ---------------------------------------------------------------------
 function getPeriodicList(req, res) {
@@ -232,7 +232,7 @@ function getPeriodicList(req, res) {
 	}
 
 }
-
+*/
 
 
 
