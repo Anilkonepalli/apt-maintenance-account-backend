@@ -77,6 +77,14 @@ app.route("/api/maintenance-accounts/:id")
 	.put(account.put);
 
 
+/////////////////////////  ACCOUNT PERIODIC ROUTES  //////////////////////////////
+
+let accountp = require('./accounts/maint-acct-periodic-routes');
+
+app.route("/api/maintenance-accounts-periodic")
+	.get(accountp.getAll);
+
+
 /////////////////////////  FLAT ROUTES  //////////////////////////////
 
 let flat = require('./flats/flat-routes');
