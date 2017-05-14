@@ -13,8 +13,14 @@ var MaintenanceAccounts = Bookshelf.Collection.extend({
 // on routes that end in /maintenance-accounts
 // ---------------------------------------------------------------------
 function getAll(req, res) {
+	let fromDate = new Date(req.query.fromDate).toISOString().split('T')[0];
+	let toDate = new Date(req.query.toDate).toISOString().split('T')[0];
+	console.log('from date string format: '); console.log(fromDate);
+	console.log('to date string format: '); console.log(toDate);
+
 	MaintenanceAccounts
-		.forge()
+		.query('where', 'recorded_at', '>=', fromDate)
+		.query('where', 'recorded_at', '<=', toDate)
 		.fetch()
 		.then(doAuth)
 		.then(sendResponse)
@@ -39,6 +45,7 @@ function getAll(req, res) {
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
+
 
 // on routes that end in /maintenance-accounts/:id to get an account
 // ---------------------------------------------------------------------
