@@ -30,7 +30,8 @@ function getAll(req, res) {
 	}
 	function error(err) {
 		logger.log('error', err.message);
-		return res.status(500).json({error: true, data: {message: err.message}});
+		//res.status(500).send(err.message);
+		res.send({status: 500, data: null, message: err.message});
 	}
 }
 
@@ -174,6 +175,7 @@ function post(req, res) {
 			.where({block_number: blockNumber,
 						  flat_number: flatNumber })
 		  .count('id'); // returns Promise containing count
+
 	}
 
 	function doSave(count) {
@@ -191,7 +193,9 @@ function post(req, res) {
 	}
 	function error(err) {
 		logger.log('error', err.message);
-		return res.status(500).json({error: true, data: {message: err.message}});
+		//return res.status(500).json({error: true, data: {message: err.message}});
+		res.status(500);
+		return res.json({error: true, data: {message: err.message}});
 	}
 }
 

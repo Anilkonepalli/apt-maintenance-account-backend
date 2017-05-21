@@ -1,16 +1,16 @@
-var	Bookshelf 			= require('../config/database');
+var	Bookshelf 					= require('../config/database');
 var	MaintenanceAccount 	= require('./maint-acct-model');
-var auth 				= require('../authorization/authorization');
-var _ 					= require('lodash');
+var auth 								= require('../authorization/authorization');
+var _ 									= require('lodash');
 
 var MaintenanceAccounts = Bookshelf.Collection.extend({
 	model: MaintenanceAccount
 });
 
-var	Flat 				= require('../flats/flat-model');
-var Flats 			= Bookshelf.Collection.extend({
-										model: Flat
-									});
+var	Flat 								= require('../flats/flat-model');
+var Flats 							= Bookshelf.Collection.extend({
+														model: Flat
+													});
 
 // on routes that end in /maintenance-accounts-periodic/
 // ---------------------------------------------------------------------
