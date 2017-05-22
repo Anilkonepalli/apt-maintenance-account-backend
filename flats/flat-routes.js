@@ -193,9 +193,9 @@ function post(req, res) {
 	}
 	function error(err) {
 		logger.log('error', err.message);
-		//return res.status(500).json({error: true, data: {message: err.message}});
-		res.status(500);
-		return res.json({error: true, data: {message: err.message}});
+		return res.status(500).json({error: true, data: {message: err.message}});
+		//res.status(500);
+		//return res.json({error: true, data: {message: err.message}});
 	}
 }
 
