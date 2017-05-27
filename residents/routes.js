@@ -76,6 +76,7 @@ function put(req, res) {
 
 	let firstName = req.body.first_name;
 	let lastName = req.body.last_name;
+	let isA = req.body.is_a;
 	let model;
 
 	Resident
@@ -96,7 +97,8 @@ function put(req, res) {
 		logger.log('info', 'granted...'+granted);
 		return Resident
 			.where({first_name: firstName,
-						  last_name: lastName })
+						  last_name: lastName,
+						 	is_a: isA })
 		  .count('id'); // returns Promise containing count
 	}
 	function doUpdate(count){
@@ -107,7 +109,8 @@ function put(req, res) {
 		logger.log('info', '/api/residents >> put()...updating resident details');
 		return this.model.save({
 			first_name: firstName || this.model.get('first_name'),
-			last_name: lastName || this.model.get('last_name')
+			last_name: lastName || this.model.get('last_name'),
+			is_a: isA || this.model.get('is_a')
 		});
 	}
 	function sendResponse() {
@@ -115,8 +118,9 @@ function put(req, res) {
 	}
 	function error(err) {
 		logger.log('error', err.message);
-		res.statusMessage = err.message;
-		res.status(500).send();
+		//res.statusMessage = err.message;
+		//res.status(500).send();
+		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
 
@@ -126,6 +130,7 @@ function post(req, res) {
 
 	let firstName = req.body.first_name;
 	let lastName = req.body.last_name;
+	let isA = req.body.is_a;
 
 	auth.allowsAdd(req.decoded.id, 'residents')
 		.then(checkForDuplicate)
@@ -137,7 +142,8 @@ function post(req, res) {
 		logger.log('info', 'checkForDuplicate(...)!!');
 		return Resident
 			.where({first_name: firstName,
-						  last_name: lastName })
+						  last_name: lastName,
+						 	is_a: isA })
 		  .count('id'); // returns Promise containing count
 	}
 
@@ -148,7 +154,8 @@ function post(req, res) {
 		logger.log('info', '/api/residents >> post()...saving new resident details');
 		return Resident.forge({
 			first_name: firstName,
-			last_name: lastName
+			last_name: lastName,
+			is_a: isA
 		}).save()
 	}
 	function sendResponse(model) {

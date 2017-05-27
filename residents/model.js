@@ -3,7 +3,7 @@ var Bookshelf = require('../config/database');
 var Resident = Bookshelf.Model.extend({
 	tableName: 'residents',
 	hasTimestamps: true,
-	softDelete: true,
+	softDelete: false, // soft delet is not required on this table
 	flats: function() {
 		return this.belongsToMany(Flat);
 	},

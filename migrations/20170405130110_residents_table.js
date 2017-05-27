@@ -13,7 +13,7 @@ exports.up = function(knex, Promise) {
 		  table.timestamp('created_at').nullable().defaultTo(knex.fn.now());
 		  table.timestamp('updated_at').nullable();
 		  table.timestamp('deleted_at').nullable();
-      table.unique(['first_name', 'last_name']);
+      table.unique(['first_name', 'last_name', 'is_a']);
   	});
 
 };
