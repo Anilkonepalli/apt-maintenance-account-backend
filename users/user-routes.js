@@ -1,8 +1,10 @@
-var	User 				= require('./user-model');
-var	Bookshelf 			= require('../config/database');
+var	User 								= require('./user-model');
+var	Bookshelf 					= require('../config/database');
 var getUserPermissions 	= require('../authorization/userPermissionsOnResource');
+var bcrypt 							= require('bcrypt');
+var auth 								= require('../authorization/authorization');
 
-var Users 				= Bookshelf.Collection.extend({
+var Users 	= Bookshelf.Collection.extend({
 	model: User
 });
 
@@ -54,7 +56,58 @@ function getPermissions(req, res) {
 // on routes that end in /users/:id to update an existing user
 // ---------------------------------------------------------------------
 function put(req, res) {
-	User.forge({id: req.params.id}).fetch({require: true})
+
+	let userName = req.body.name;
+	let firstName = req.body.first_name;
+	let lastName = req.body.last_name;
+	let email = req.body.email;
+	let password = req.body.password;
+	let model;
+
+	User
+		.forge({id: req.params.id})
+		.fetch({require: true})
+		.then(doAuth)
+		.then(checkForDuplicate)
+		.then(doUpdate)
+		.then(sendResponse)
+		.catch(error);
+
+	function doAuth(model) {
+		this.model = model;
+		return auth.allowsEdit(req.decoded.id, 'users', model);
+	}
+	function checkForDuplicate(granted){ // implementing inner function1
+		logger.log('info', 'checkForDuplicate(...)!');
+		logger.log('info', 'granted...'+granted);
+		return User
+			.where({ email: email })
+		  .count('id'); // returns Promise containing count
+	}
+	function doUpdate(count){
+		logger.log('info', 'count is: '+count);
+		if(count) {
+		 throw new Error('Duplicate Error!! email-id already exists!!');
+	 	}
+		logger.log('info', '/api/users >> put()...updating user details');
+		return this.model.save({
+			name: userName || this.model.get('name'),
+			first_name: firstName || this.model.get('first_name'),
+			last_name: lastName || this.model.get('last_name'),
+			email: email || this.model.get('email'),
+			password: bcrypt.hashSync(password, 10) || this.model.get('password')
+		});
+	}
+	function sendResponse() {
+		return res.json({error: false, data:{message: 'User profile updated'}});
+	}
+	function error(err) {
+		logger.log('error', err.message);
+		return res.status(500).json({error: true, data: {message: err.message}});
+	}
+
+
+/*	User.forge({id: req.params.id}).fetch({require: true})
 		.then(doUpdate)
 		.catch(notifyError);
 
@@ -71,7 +124,7 @@ function put(req, res) {
 	}
 	function notifyError(err){
 		res.status(500).json({error: true, data: {message: err.message}});
-	}
+	} */
 }
 
 
@@ -117,12 +170,51 @@ console.log('Inside user-routes >> sendResponse(aColl)...');
 // on routes that end in /users to post (to add) a new user
 // ---------------------------------------------------------------------
 function post(req, res) {
+	logger.log('info', 'adding new user...name: '+req.body.name+', first name: '+req.body.first_name);
+
+/*
 	User.forge({
 		name: req.body.name,
+		first_name: req.body.first_name,
+		last_name: req.body.last_name,
+		email: req.body.email,
+		password: req.body.password
 	})
 	.save()
 	.then( model => res.json({error: false, data:{model}}))
 	.catch( err => res.status(500).json({error: true, data:{message: err.message}}));
+*/
+	checkForDuplicate()
+	.then(doSave)
+	.then(sendResponse)
+	.catch(error);
+
+	function checkForDuplicate() {
+		return User
+		.where({
+			email: req.body.email })
+		.count('id'); // returns Promise containing count
+	}
+	function doSave(count) {
+		if(count) {
+			throw new Error('Duplicate Error! email-id already exists!');
+		}
+		logger.log('info', '/api/users >> post()...saving new user profile');
+		return User.forge({
+			name: req.body.name,
+			first_name: req.body.first_name,
+			last_name: req.body.last_name,
+			email: req.body.email,
+			password: bcrypt.hashSync(req.body.password, 10)
+		}).save();
+	}
+	function sendResponse(model) {
+		return res.json({error: false, data:{model}});
+	}
+	function error(err) {
+		logger.log('error', err.message);
+		return res.status(500).json({error: true, data: {message: err.message}});
+	}
 }
 
 

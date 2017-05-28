@@ -37,6 +37,10 @@ app.get("/", (req, res) => res.json({ message: "Welcome to Maintenance Accounts 
 let login = require('./authentication/login-routes');
 app.route("/api/login").post(login.createSession);
 
+let user = require('./users/user-routes');
+app.route("/api/users/")
+	.post(user.post);
+
 let socialLogin = require('./authentication/social-login-routes');
 app.route("/api/sociallogin").post(socialLogin.createSession);
 
@@ -45,7 +49,7 @@ app.use(jwt.verifyToken);
 
 ///////////////////////  USER ROUTES  /////////////////////////////////
 
-let user = require('./users/user-routes');
+//let user = require('./users/user-routes');
 
 app.route("/api/users/myroles/:id")
 	.get(user.getRoles)
@@ -54,9 +58,14 @@ app.route("/api/users/myroles/:id")
 app.route("/api/users/mypermissions/:name")
 	.get(user.getPermissions);
 
+/*
 app.route("/api/users/")
 	.get(user.getAll)
 	.post(user.post);
+*/
+
+app.route("/api/users/")
+	.get(user.getAll);
 
 app.route("/api/users/:id")
 	.get(user.get)
