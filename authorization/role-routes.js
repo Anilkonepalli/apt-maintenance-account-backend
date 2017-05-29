@@ -48,17 +48,17 @@ function put(req, res) {
 		model.save({
 			name: req.body.name || model.get('name'),
 			description: req.body.description || model.get('description'),
-			inherits: req.body.inherits || model.get('inherits')
+			inherits: req.body.inherits
 		})
 		.then(function(){
-			res.json({error: false, data:{message: 'Role Details Updated'}});
+			return res.json({error: false, data:{message: 'Role Details Updated'}});
 		})
 		.catch(function(err){
-			res.status(500).json({error: true, data: {message: err.message}});
+			return res.status(500).json({error: true, data: {message: err.message}});
 		});
 	}
 	function notifyError(err){
-		res.status(500).json({error: true, data: {message: err.message}});
+		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
 
