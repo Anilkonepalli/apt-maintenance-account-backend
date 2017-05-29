@@ -5,7 +5,7 @@ var PermissionRole 	= Bookshelf.Model.extend({tableName: 'permissions_roles'});
 var Role = Bookshelf.Model.extend({
 	tableName: 'roles',
 	hasTimestamps: true,
-	softDelete: true,
+	softDelete: false, // soft delete is not required on Roles table
 	users: function() {
 		return this.belongsToMany(User);
 	},

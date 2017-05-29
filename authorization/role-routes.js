@@ -46,7 +46,9 @@ function put(req, res) {
 
 	function doUpdate(model){
 		model.save({
-			name: req.body.name || model.get('name')
+			name: req.body.name || model.get('name'),
+			description: req.body.description || model.get('description'),
+			inherits: req.body.inherits || model.get('inherits')
 		})
 		.then(function(){
 			res.json({error: false, data:{message: 'Role Details Updated'}});
@@ -101,6 +103,8 @@ console.log('inside role-routes >> attachNewPermissions(model)...'); console.log
 function post(req, res) {
 	Role.forge({
 		name: req.body.name,
+		description: req.body.description,
+		inherits: req.body.inherits
 	})
 	.save()
 	.then( model => res.json({error: false, data:{model}}))
