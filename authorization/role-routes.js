@@ -48,7 +48,7 @@ function put(req, res) {
 		model.save({
 			name: req.body.name || model.get('name'),
 			description: req.body.description || model.get('description'),
-			inherits: req.body.inherits
+			inherits: req.body.inherits // optional field; it can be empty;
 		})
 		.then(function(){
 			return res.json({error: false, data:{message: 'Role Details Updated'}});

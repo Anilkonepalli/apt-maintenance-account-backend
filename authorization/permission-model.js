@@ -3,7 +3,7 @@ var Bookshelf = require('../config/database');
 var Permission = Bookshelf.Model.extend({
 	tableName: 'permissions',
 	hasTimestamps: true,
-	softDelete: true,
+	softDelete: false,  // soft delete is not required on permissions table
 	roles: function() {
 		return this.belongsToMany(Role);
 	},

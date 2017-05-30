@@ -37,28 +37,17 @@ function put(req, res) {
 console.log('Inside permission-routes >> put(req,res)...'); console.log('req params id: '+req.params.id);
 
 	Permission.forge({id: req.params.id}).fetch({require: true})
-		//.then(doUpdate)
 		.then(savePermission)
 		.then(sendResponse)
 		.catch(errorToNotify);
 
-/*	function doUpdate(model){
-		model.save({
-			resource: req.body.resource || model.get('resource')
-		})
-		.then(function(){
-			logger.log('info', '/api/permissions >> put()...');
-			res.json({error: false, data:{message: 'Permission Details Updated'}});
-		})
-		.catch(function(err){
-			res.status(500).json({error: true, data: {message: err.message}});
-		});
-	}  */
-
 		function savePermission(model) {
 console.log('Inside permission-routes >> savePermission(model)...');console.log(model.toJSON());
 			return model.save({
-				resource: req.body.resource || model.get('resource')
+				operations: req.body.operations || model.get('operations'),
+				resource: req.body.resource || model.get('resource'),
+				condition: req.body.condition, // optional field, it can be empty
+				description: req.body.description || model.get('description')
 			});
 		}
 
@@ -77,7 +66,10 @@ console.log('Inside permission-routes >> sendResponse()...');
 // ---------------------------------------------------------------------
 function post(req, res) {
 	Permission.forge({
+		operations: req.body.operations,
 		resource: req.body.resource,
+		condition: req.body.condition,
+		description: req.body.description
 	})
 	.save()
 	.then( model => res.json({error: false, data:{model}}))
