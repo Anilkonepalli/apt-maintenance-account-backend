@@ -21,6 +21,8 @@ module.exports = function(userId) {
 			.then(model => {
 				let user = model.toJSON();
 				let roleIds = [];
+logger.log('info', 'User is: ....'); console.log(user);
+logger.log('info', 'User role: ...'); console.log(user.roles);
 				user.roles.forEach(eachRole => {
 					roleIds.push(eachRole.id);
 					let inhIds = getInheritedIds(eachRole);
@@ -28,6 +30,6 @@ module.exports = function(userId) {
 				});
 				resolve(roleIds);
 			})
-			.catch(err => reject(err));	
+			.catch(err => reject(err));
 	});
 }
