@@ -43,6 +43,18 @@ function getRoles(req,res) {
 }
 
 
+// on routes that end in /Users/allpermissions to get all permissions of user
+// ---------------------------------------------------------------------
+function getAllPermissions(req, res) {
+	let userId = req.decoded.id;
+	//let resource = req.params.name;
+	getUserPermissions(userId)
+		.then(perms => res.json(perms))
+		.catch(err => res.send(err));
+}
+
+
+
 // on routes that end in /Users/mypermissions/:name to get permissions of 'name' module
 // ---------------------------------------------------------------------
 function getPermissions(req, res) {
@@ -235,4 +247,4 @@ function del(req, res) { // using full form 'delete' causes error, hence short f
 	}
 }
 
-module.exports = { getAll, post, get, put, del, getRoles, getPermissions, putRoles };
+module.exports = { getAll, post, get, put, del, getRoles, getPermissions, putRoles, getAllPermissions };

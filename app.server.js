@@ -47,6 +47,7 @@ app.route("/api/sociallogin").post(socialLogin.createSession);
 let jwt = require('./authentication/verify.token');
 app.use(jwt.verifyToken);
 
+
 ///////////////////////  USER ROUTES  /////////////////////////////////
 
 //let user = require('./users/user-routes');
@@ -57,6 +58,9 @@ app.route("/api/users/myroles/:id")
 
 app.route("/api/users/mypermissions/:name")
 	.get(user.getPermissions);
+
+app.route("/api/users/allpermissions/")
+	.get(user.getAllPermissions);
 
 /*
 app.route("/api/users/")
