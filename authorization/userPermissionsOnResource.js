@@ -14,13 +14,17 @@ module.exports = function(userId, resource = null){
 
 		getRoleIdsFor(userId)
 			.then(roleIds => {
+console.log('getRoleIdsFor('+roleIds+')');
 				return getPermissionsFor(roleIds);
 			})
 			.then(perms => {
 				if(resource){
+console.log('filter permissions for resource: '+resource);
 					let permsForResource = perms.filter(each => each.resource === resource);
+console.log(permsForResource);
 					resolve(permsForResource);
 				} else {
+console.log('resource is null; so send all permissions...'); console.log(perms);
 					resolve(perms);
 				}
 			})

@@ -17,11 +17,13 @@ module.exports = function(roleIds){
 			.fetch({withRelated: ['permissions']})
 			.then(models => {
 				let roles = models.toJSON();
+console.log('Role models are: '); console.log(roles);
 				let permissions = [];
 				roles.forEach(eachModel => {
 					perms = eachModel.permissions;
-					permissions = permissions.concat(perms); 
+					permissions = permissions.concat(perms);
 				});
+console.log('Related permissions are: '); console.log(permissions);				
 				resolve(permissions);
 			})
 			.catch(err => reject(err));

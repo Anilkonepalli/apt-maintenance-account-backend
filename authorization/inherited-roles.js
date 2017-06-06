@@ -7,9 +7,9 @@ var Roles 		= Bookshelf.Collection.extend({
 
 
 // api routes
- 
+
 // private functions
-var retrieved_roles = null; // yet to retrieve all roles 
+var retrieved_roles = null; // yet to retrieve all roles
 
 (function retrieve_roles() {
 	Roles.forge().fetch()
@@ -52,11 +52,15 @@ function getInheritedIds(role) {
 }
 
 function getIds(inherits){
+// console.log('getIds of inherits: '); console.log(inherits);
 	if(inherits == null || inherits == ''){
 		return [];
 	}
 	let separator = ',';
-	let arr = inherits.split(separator); // example: inherits column value '1,5,11' becomes '1', '5', '11'
-	arr = arr.map(each => +each); // converts into number; example above becomes: 1, 5, 11
-	return arr;
+	let arr = inherits.split(separator); // example: inherits column value 'guest,manager,supervisor' becomes 'guest', 'manager', 'si[ervisor'
+	let result = retrieved_roles.data
+		.filter(each => arr.includes(each.name))
+		.map(each => each.id);
+	// console.log('inherits ids: '); console.log(result);
+	return result;
 }
