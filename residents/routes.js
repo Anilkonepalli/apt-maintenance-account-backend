@@ -77,6 +77,7 @@ function put(req, res) {
 	let firstName = req.body.first_name;
 	let lastName = req.body.last_name;
 	let isA = req.body.is_a;
+	let ownerId = req.body.owner_id;
 	let model;
 
 	Resident
@@ -98,7 +99,8 @@ function put(req, res) {
 		return Resident
 			.where({first_name: firstName,
 						  last_name: lastName,
-						 	is_a: isA })
+						 	is_a: isA,
+						 	owner_id: ownerId})
 		  .count('id'); // returns Promise containing count
 	}
 	function doUpdate(count){
@@ -110,7 +112,8 @@ function put(req, res) {
 		return this.model.save({
 			first_name: firstName || this.model.get('first_name'),
 			last_name: lastName || this.model.get('last_name'),
-			is_a: isA || this.model.get('is_a')
+			is_a: isA || this.model.get('is_a'),
+			owner_id: ownerId || this.model.get('owner_id')
 		});
 	}
 	function sendResponse() {
@@ -131,6 +134,7 @@ function post(req, res) {
 	let firstName = req.body.first_name;
 	let lastName = req.body.last_name;
 	let isA = req.body.is_a;
+	let ownerId = req.body.owner_id;
 
 	auth.allowsAdd(req.decoded.id, 'residents')
 		.then(checkForDuplicate)
@@ -143,7 +147,8 @@ function post(req, res) {
 		return Resident
 			.where({first_name: firstName,
 						  last_name: lastName,
-						 	is_a: isA })
+						 	is_a: isA,
+						 	owner_id: ownerId})
 		  .count('id'); // returns Promise containing count
 	}
 
@@ -152,11 +157,13 @@ function post(req, res) {
 			throw new Error('Duplicate Error!!');
 		}
 		logger.log('info', '/api/residents >> post()...saving new resident details');
+		
 		return Resident.forge({
 			first_name: firstName,
 			last_name: lastName,
-			is_a: isA
-		}).save()
+			is_a: isA,
+			owner_id: ownerId
+		}).save();
 	}
 	function sendResponse(model) {
 		return res.json({error: false, data:{model}});

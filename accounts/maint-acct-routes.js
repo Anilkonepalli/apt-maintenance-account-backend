@@ -131,7 +131,8 @@ function put(req, res) {
 			for_year: req.body.for_year || model.get('for_year'),
 			crdr: req.body.crdr || model.get('crdr'),
 			amount: req.body.amount || model.get('amount'),
-			recorded_at: req.body.recorded_at || model.get('recorded_at')
+			recorded_at: req.body.recorded_at || model.get('recorded_at'),
+			owner_id: req.body.owner_id || model.get('owner_id')
 		});
 	}
 	function sendResponse(model) {
@@ -163,7 +164,8 @@ function post(req, res) {
 			amount: req.body.amount,
 			category: req.body.category,
 			recorded_at: req.body.recorded_at,
-			remarks: req.body.remarks
+			remarks: req.body.remarks,
+			owner_id: req.body.owner_id
 		}).save();
 	}
 	function setBalance(model) {
