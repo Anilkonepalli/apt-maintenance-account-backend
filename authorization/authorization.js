@@ -11,8 +11,8 @@ var getUserPermissions = require('./userPermissionsOnResource');
  */
 module.exports = {
 
-	allowedList: function(userId, resource, models) { // answers list containing authorized models only
-		return viewables(userId, resource, models);
+	allowedList: function(userId, resource, modelsJson) { // answers list containing authorized models only
+		return viewables(userId, resource, modelsJson);
 	},
 	allowsAdd: function(userId, resource) {
 		return new Promise( function(resolve, reject) {
@@ -74,6 +74,7 @@ function allows(userId, resource, model, action) {
 
 				// evaluate condition in each of the permissionsWithCondition
 				let modelJson = model.toJSON();
+console.log('Authorization >> allows....Model is: '); console.log(modelJson);
 				hasEvaluatedPerms(permissionsWithCondition, modelJson, userId)
 					? resolve(model)
 					: reject(new Error('Unauthorized Access!!!')); // three !!! here; all conditions evaluated to false, return error with message
@@ -85,13 +86,13 @@ function allows(userId, resource, model, action) {
 }
 
 /**
- * Answers filtered out models that are view authorized
+ * Answers filter out models that are view authorized
  * @param  {number} userId
  * @param  {string} resource
- * @param  {[Any]} models
+ * @param  {[Any]} modelsJson
  * @return {Promise<[Any]>}
  */
-function viewables(userId, resource, models) {
+function viewables(userId, resource, modelsJson) {
 
 	return new Promise( function(resolve, reject) {
 
@@ -105,17 +106,21 @@ function viewables(userId, resource, models) {
 				let pwcCount = permissionsWithCondition.length;
 
 				// if permission(s) exist but has no condition, pass the model for futher processing
-				if(pwcCount < 1) resolve(models);
+				if(pwcCount < 1) resolve(modelsJson);
 
 				let pCount = perms.length;
 				// permissions with no condition take precedence, hence pass the model for futher processing
-				if(pCount > pwcCount) resolve(models);
-
+				if(pCount > pwcCount) resolve(modelsJson);
 				// evaluate condition in each of the permissionsWithCondition
-				let viewables = models.filter(eachModel => {
-					let modelJson = eachModel.toJSON();
-					return hasEvaluatedPerms(permissionsWithCondition, modelJson, userId);
-				})
+				let viewables = modelsJson.filter(eachModel => {
+					return hasEvaluatedPerms(permissionsWithCondition, eachModel, userId);
+				});
+
+/*				viewables = _.filter(modelsJson, function(eachModel) {
+					return hasEvaluatedPerms(permissionsWithCondition, eachModel, userId);
+				}); */
+
+				console.log('Viewables models are: ....'); console.log(viewables);
 				resolve(viewables);
 			})
 			.catch(err => reject(err));
@@ -144,8 +149,12 @@ function pwc(perms) {
 function hasEvaluatedPerms(permissionsWithCondition, modelJson, userId) {
 	let evaluatedPerms = permissionsWithCondition.filter(perm => { 	// filter for permission that
 		let fn = new Function("data", perm.condition);					// evaluates its condition to true
-		let data = { userId: userId, ownerId: modelJson.owner_id };
-		return fn(data);
+		let data = {
+			user_id: userId,
+			model: modelJson
+		}
+		let result = fn(data);
+		return result;
 	});
 	return evaluatedPerms.length > 0;
 }

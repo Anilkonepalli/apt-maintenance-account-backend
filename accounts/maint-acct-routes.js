@@ -28,12 +28,13 @@ function getAll(req, res) {
 
 	function doAuth(models) {
 		logger.log('info', '/api/maintenance-accounts >> getAll()...');
-		return auth.allowedList(req.decoded.id, 'accounts', models);
+		return auth.allowedList(req.decoded.id, 'accounts', models.toJSON());
 	}
 
 	// sends Account models after sorting; sorting is based on its recorded_at field and then id field
 	function sendResponse(models) {
-		let sortedModels = _.sortBy(models.toJSON(), [
+		console.log('maint-acct-routes >>getAll()...sendResponse(models)... '); console.log(models);
+		let sortedModels = _.sortBy(models, [
 				function(model){ return model.recorded_at; }, // sort criteria 1
 				function(model){ return model.id;	}						// sort criteria 2
 			]);
