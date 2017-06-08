@@ -41,6 +41,8 @@ let user = require('./users/user-routes');
 app.route("/api/users/")
 	.post(user.post);
 
+let userprofile = require('./userprofile/routes');
+
 let socialLogin = require('./authentication/social-login-routes');
 app.route("/api/sociallogin").post(socialLogin.createSession);
 
@@ -75,6 +77,14 @@ app.route("/api/users/:id")
 	.get(user.get)
 	.delete(user.del)
 	.put(user.put);
+
+/////////////////////////  USERPROFILE ROUTES  //////////////////////////////
+
+app.route("/api/userprofile/:id")
+	.get(userprofile.get)
+	.put(userprofile.put);
+
+
 
 /////////////////////////  ACCOUNT ROUTES  //////////////////////////////
 
