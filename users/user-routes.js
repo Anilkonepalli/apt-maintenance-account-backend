@@ -3,26 +3,10 @@ var	Bookshelf 					= require('../config/database');
 var getUserPermissions 	= require('../authorization/userPermissionsOnResource');
 var bcrypt 							= require('bcrypt');
 var auth 								= require('../authorization/authorization');
-var nodemailer 					= require('nodemailer');
 
 var Users 	= Bookshelf.Collection.extend({
 	model: User
 });
-
-var transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'armk100@gmail.com',
-    pass: '@Mohan12345@'
-  }
-});
-
-var mailOptions = {
-  from: 'armk100@gmail.com',
-  to: 'mohankumar.anna@gmail.com',
-  subject: 'Test mail using nodeJs',
-  text: 'Exploring mail sending...!'
-};
 
 // on routes that end in /users
 // get all the user models (accessed at GET http://localhost:3002/api/users)
@@ -236,16 +220,7 @@ function post(req, res) {
 			password: bcrypt.hashSync(req.body.password, 10)
 		}).save();
 	}
-	function sendResponse(model) {
-		console.log('Send an email for confirmation of new registraion...');
-		transporter.sendMail(mailOptions, function(error, info){
-		  if(error) {
-		    console.log(error);
-		  } else {
-		    console.log('Email sent: '+info.response);
-		  }
-		});
-				
+	function sendResponse(model) {				
 		return res.json({error: false, data:{model}});
 	}
 	function error(err) {
