@@ -3,6 +3,7 @@ var	Bookshelf 					= require('../config/database');
 var getUserPermissions 	= require('../authorization/userPermissionsOnResource');
 var bcrypt 							= require('bcrypt');
 var auth 								= require('../authorization/authorization');
+var oauth2 							= require('../authentication/oauth2');
 
 var Users 	= Bookshelf.Collection.extend({
 	model: User
@@ -220,7 +221,8 @@ function post(req, res) {
 			password: bcrypt.hashSync(req.body.password, 10)
 		}).save();
 	}
-	function sendResponse(model) {				
+	function sendResponse(model) {
+		oauth2.getAccessToken();
 		return res.json({error: false, data:{model}});
 	}
 	function error(err) {
