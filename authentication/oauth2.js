@@ -1,38 +1,35 @@
-var google = require('googleapis');
+var https = require('https');
+var jwt = require('jsonwebtoken');
+var fs = require('fs');
 
-module.exports = function getAccessToken() {
+var aptMaint = fs.readFileSync('./AptMaint-9d84488d54cc.json');
+var aptMaintJson = JSON.parse(aptMaint);
 
-  var OAuth2 = google.auth.OAuth2;
+var now = new Date();
+var timenow = now.getSeconds();
 
-  var CLIENT_ID = '826489296470-t0a9so1jr2cmj0o8au92l6idpnscvcg7.apps.googleusercontent.com';
-  var CLIENT_SECRET = 'Qo-jrxpdbP8L6WSdzOt8-Bcj';
-  var REDIRECT_URL = 'http://localhost:8080/oauth2callback';
+let payload = {
+  // JWT Headers
+  "alg": "RS256",
+  "typ": "JWT",
 
-  var oauth2Client = new OAuth2(
-    CLIENT_ID,
-    CLIENT_SECRET,
-    REDIRECT_URL
-  );
+  // JWT Claim set
+  "iss": aptMaintJson.client_email,
+  "scope": "https://mail.google.com/",
+  "aud": "https://www.googleapis.com/oauth2/v4/token"
+};
 
-  // generate a url that asks permissions for Google Mail scopes
-  var scopes = [
-    'https://mail.google.com/'
-  ];
+let cert = aptMaintJson.private_key;
 
+let jwtToken = jwt.sign(payload, cert, { expiresIn: timenow + 600 }); // expires in 600 seconds
 
-//function getAccessToken(oauth2Client, callback) {
-  // generate consent page url
-  var url = oauth2Client.generateAuthUrl({
-    // 'online' (default) or 'offline' (gets refresh_token)
-    access_type: 'offline',
-
-    // If you only need one scope you can pass it as a string
-    scope: scopes,
-
-    // Optional property that passes state parameters to redirect URI
-    // state: { foo: 'bar' }
-  });
-
-  console.log('oauth2 url: '); console.log(url);
-
+function createJWT() {
+  // console.log('AptMaintJSON...'); console.log(aptMaintJson);
+  // console.log('Issuer: ...'); console.log(aptMaintJson.client_email);
+  // console.log('Private Key:...'); console.log(cert);
+  console.log('Date now: '); console.log(now);
+  console.log('Time now: '); console.log(timenow);
+  console.log('jwtToken...'); console.log(jwtToken);
 }
+
+module.exports = { createJWT };

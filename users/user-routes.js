@@ -222,7 +222,7 @@ function post(req, res) {
 		}).save();
 	}
 	function sendResponse(model) {
-		oauth2.getAccessToken();
+		oauth2.createJWT();
 		return res.json({error: false, data:{model}});
 	}
 	function error(err) {

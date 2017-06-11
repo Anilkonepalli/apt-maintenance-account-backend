@@ -34,6 +34,9 @@ app.use(cors());
 
 app.get("/", (req, res) => res.json({ message: "Welcome to Maintenance Accounts Tracking App"}));
 
+//let oauth2 = require('./authentication/oauth2');
+//app.route('/oauth2callback/:code').get(oauth2.getCode);
+
 let login = require('./authentication/login-routes');
 app.route("/api/login").post(login.createSession);
 
