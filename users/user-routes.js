@@ -3,7 +3,8 @@ var	Bookshelf 					= require('../config/database');
 var getUserPermissions 	= require('../authorization/userPermissionsOnResource');
 var bcrypt 							= require('bcrypt');
 var auth 								= require('../authorization/authorization');
-var oauth2 							= require('../authentication/oauth2');
+var accessToken 				= require('../authentication/access-token');
+var nodemailer 					= require('nodemailer');
 
 var Users 	= Bookshelf.Collection.extend({
 	model: User
@@ -200,6 +201,7 @@ function post(req, res) {
 	checkForDuplicate()
 	.then(doSave)
 	.then(sendResponse)
+	.then(sendEmail)
 	.catch(error);
 
 	function checkForDuplicate() {
@@ -222,8 +224,13 @@ function post(req, res) {
 		}).save();
 	}
 	function sendResponse(model) {
-		oauth2.createJWT();
-		return res.json({error: false, data:{model}});
+		res.json({error: false, data:{model}});
+		return accessToken.get();
+	}
+	function sendEmail(access_token) {
+		console.log('Send email to: '+req.body.email);
+		console.log('Access Token in user-route: '); console.log(access_token);
+		nodemailer.sendMailTo(req.body.email, access_token);
 	}
 	function error(err) {
 		logger.log('error', err.message);
