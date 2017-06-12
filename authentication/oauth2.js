@@ -18,14 +18,24 @@ let payload = {
   // JWT Claim set
   "iss": aptMaintJson.client_email,
   "scope": "https://mail.google.com/",
-  "aud": "https://www.googleapis.com/oauth2/v4/token",
-  "iat": todaySeconds
+  "aud": "https://www.googleapis.com/oauth2/v4/token"
+};
+
+let payload2 = {
+  "scope": "https://mail.google.com/"
 };
 
 let cert = aptMaintJson.private_key;
 
-let jwtToken = jwt.sign(payload, cert, { expiresIn: expiry }); // expires in 600 seconds
-//let jwtToken = jwt.sign(payload, cert); // expires in 600 seconds
+let options = {
+  algorithm: 'RS256',
+  issuer: aptMaintJson.client_email,
+  audience: "https://www.googleapis.com/oauth2/v4/token",
+  expiresIn: '1h',
+}
+
+//let jwtToken = jwt.sign(payload, cert, { expiresIn: expiry }); // expires in 600 seconds
+let jwtToken = jwt.sign(payload2, cert, options); // expires in 600 seconds
 
 function createJWT() {
   console.log('Today: '+today);
