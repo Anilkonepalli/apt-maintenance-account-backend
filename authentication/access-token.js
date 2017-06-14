@@ -3,7 +3,7 @@ var querystring = require('querystring');
 var jwt = require('jsonwebtoken');
 var fs = require('fs');
 
-var aptMaint = fs.readFileSync('./AptMaint-9d84488d54cc.json');
+var aptMaint = fs.readFileSync('./AptMaint-service-account.json');
 var aptMaintJson = JSON.parse(aptMaint);
 
 let payload = {
