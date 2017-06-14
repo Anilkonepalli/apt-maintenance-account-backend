@@ -53,7 +53,7 @@ function get() {
         let resultInJson = JSON.parse(result);
         console.log('Result in JSON: '); console.log(resultInJson);
         console.log('Access Token: '); console.log(resultInJson.access_token);
-        resolve(resultInJson.access_token);
+        resolve(resultInJson);
       });
       res.on('error', (err) => {
         console.error(err);

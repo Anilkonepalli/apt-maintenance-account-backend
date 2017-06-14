@@ -4,7 +4,7 @@ var getUserPermissions 	= require('../authorization/userPermissionsOnResource');
 var bcrypt 							= require('bcrypt');
 var auth 								= require('../authorization/authorization');
 var accessToken 				= require('../authentication/access-token');
-var nodemailer 					= require('nodemailer');
+var emailer 						= require('../authentication/emailer');
 
 var Users 	= Bookshelf.Collection.extend({
 	model: User
@@ -185,7 +185,7 @@ console.log('Inside user-routes >> sendResponse(aColl)...');
 // ---------------------------------------------------------------------
 function post(req, res) {
 	logger.log('info', 'adding new user...name: '+req.body.name+', first name: '+req.body.first_name);
-
+	let tempModel = null;
 /*
 	User.forge({
 		name: req.body.name,
@@ -201,7 +201,7 @@ function post(req, res) {
 	checkForDuplicate()
 	.then(doSave)
 	.then(sendResponse)
-	.then(sendEmail)
+	// .then(sendEmail)
 	.catch(error);
 
 	function checkForDuplicate() {
@@ -224,14 +224,20 @@ function post(req, res) {
 		}).save();
 	}
 	function sendResponse(model) {
+		//emailer.sendMailTo(req.body.email);
 		res.json({error: false, data:{model}});
-		return accessToken.get();
+		//tempModel = model;
+		//return accessToken.get();
+		accessToken.get().then((tokenObj) => {
+			emailer.sendMailTo(req.body.email, tokenObj.access_token, tokenObj.expires_in);
+		});
 	}
-	function sendEmail(access_token) {
+/*	function sendEmail(access_token) {
 		console.log('Send email to: '+req.body.email);
 		console.log('Access Token in user-route: '); console.log(access_token);
-		nodemailer.sendMailTo(req.body.email, access_token);
-	}
+		emailer.sendMailTo(req.body.email, access_token);
+		res.json({error: false, data:{tempModel}});
+	} */
 	function error(err) {
 		logger.log('error', err.message);
 		return res.status(500).json({error: true, data: {message: err.message}});
