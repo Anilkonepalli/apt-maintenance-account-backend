@@ -3,6 +3,7 @@ var	Bookshelf 					= require('../config/database');
 var getUserPermissions 	= require('../authorization/userPermissionsOnResource');
 var bcrypt 							= require('bcrypt');
 var auth 								= require('../authorization/authorization');
+var emailer							= require('../authentication/emailer');
 
 var Users 	= Bookshelf.Collection.extend({
 	model: User
@@ -222,6 +223,12 @@ function post(req, res) {
 	}
 	function sendResponse(model) {
 		res.json({error: false, data:{model}});
+		let template = {
+			subject: 'Registration: test mail on registration',
+			body: 'Registration: test message body',
+			html: '<b>Registration: test message body'
+		};
+		emailer.sendMailTo(req.body.email, template)
 	}
 	function error(err) {
 		logger.log('error', err.message);
