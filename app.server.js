@@ -43,6 +43,7 @@ app.route("/api/login").post(login.createSession);
 let user = require('./users/user-routes');
 app.route("/api/users/")
 	.post(user.post);
+app.route("/api/signup/:code").put(user.confirmSignup);
 
 let userprofile = require('./userprofile/routes');
 

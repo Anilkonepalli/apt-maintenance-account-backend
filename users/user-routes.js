@@ -4,6 +4,7 @@ var getUserPermissions 	= require('../authorization/userPermissionsOnResource');
 var bcrypt 							= require('bcrypt');
 var auth 								= require('../authorization/authorization');
 var emailer							= require('../authentication/emailer');
+var randomstring				= require('randomstring');
 
 var Users 	= Bookshelf.Collection.extend({
 	model: User
@@ -218,17 +219,25 @@ function post(req, res) {
 			first_name: req.body.first_name,
 			last_name: req.body.last_name,
 			email: req.body.email,
-			password: bcrypt.hashSync(req.body.password, 10)
+			password: bcrypt.hashSync(req.body.password, 10),
+			confirmation_code: randomstring.generate(50)
 		}).save();
 	}
 	function sendResponse(model) {
 		res.json({error: false, data:{model}});
+		let modelJson = model.toJSON();
 		let template = {
-			subject: 'Registration: test mail on registration',
-			body: 'Registration: test message body',
-			html: '<b>Registration: test message body'
+			subject: 'Thanks for Signing up with us!',
+			body: '',
+			html: 'To complete signup, please click on following link: <br><br>'
+							+process.env.ip_address
+							+'signup/'
+							+modelJson.confirmation_code
+							+'.<br><br><i>If the link does not work, copy and paste it into browser url.</i>'
 		};
-		emailer.sendMailTo(req.body.email, template)
+		console.log('Template is: '); console.log(template);
+		//console.log('confirmation_code: '+modelJson.confirmation_code);console.log(modelJson);
+		// emailer.sendMailTo(req.body.email, template)
 	}
 	function error(err) {
 		logger.log('error', err.message);
@@ -254,4 +263,38 @@ function del(req, res) { // using full form 'delete' causes error, hence short f
 	}
 }
 
-module.exports = { getAll, post, get, put, del, getRoles, getPermissions, putRoles, getAllPermissions };
+
+// on routes that end in /api/signup/:code to confirm newly registered User
+// --------------------------------------------------------------------------------------------
+function confirmSignup(req, res) {
+
+	let model;
+
+	User
+		.forge({confirmation_code: req.params.code})
+		.fetch({require: true})
+		.then(updateConfirmationStatus)
+		.then(sendResponse)
+		.catch(error);
+
+	function updateConfirmationStatus(model) {
+		console.log('inside user-routes >> updateConfirmationStatus for model: '); console.log(model);
+		this.model = model;
+		return this.model.save({
+			confirmed: 1,
+			confirmation_code: null
+		});
+	}
+	function sendResponse() {
+		return res.json({error: false, data:{message: 'User Signup confirmed'}});
+	}
+	function error(err) {
+		logger.log('error', err.message);
+		return res.status(500).json({error: true, data: {message: err.message}});
+	}
+
+}
+
+
+
+module.exports = { getAll, post, get, put, del, getRoles, getPermissions, putRoles, getAllPermissions, confirmSignup };
