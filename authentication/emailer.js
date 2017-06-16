@@ -1,13 +1,12 @@
 var nodemailer = require('nodemailer');
-//var senderEmailId = 'aptmaint@eastgate.in';
-//var senderPass = '@100@rng';
-var tempEmailId = 'mohankumar.anna@outlook.com';
-//var host = 'smtp.zoho.com';
-//var port = 465;
-//var secure = true;
+// var tempEmailId = 'mohankumar.anna@outlook.com';
 
 function sendMailTo(emailId, template){
-  if(! process.env.host) {
+  if( !process.env.can_send_email ) {
+    console.log('Sending Email is not Enabled!');
+    return null;
+  }
+  if( !process.env.host ) {
     console.log('No email-host available!');
     return null;
   }
@@ -24,8 +23,8 @@ function sendMailTo(emailId, template){
 
   let mailOptions = {
     from: process.env.senderEmailId,
-    // to: emailId
-    to: tempEmailId,
+    to: emailId
+    //to: tempEmailId,
     subject: template.subject,
     text: template.body,
     html: template.html
@@ -34,7 +33,7 @@ function sendMailTo(emailId, template){
   transporter.sendMail(mailOptions, (error, info) => {
     (error)
     ? console.log(error)
-    : console.log('Message %s ; Send stauts: %s', info.messageId, info.response);
+    : console.log('Message %s; Send status: %s.', info.messageId, info.response);
   });
 
 }

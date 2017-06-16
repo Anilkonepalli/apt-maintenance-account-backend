@@ -270,15 +270,27 @@ function confirmSignup(req, res) {
 
 	let model;
 
-	User
-		.forge({confirmation_code: req.params.code})
-		.fetch({require: true})
-		.then(updateConfirmationStatus)
+	checkForRecord()
+		.then(fetchRecord)
+		.then(updateStatus)
 		.then(sendResponse)
 		.catch(error);
 
-	function updateConfirmationStatus(model) {
-		console.log('inside user-routes >> updateConfirmationStatus for model: '); console.log(model);
+	function checkForRecord() {
+		return User
+			.where({confirmation_code: req.params.code})
+			.count('id'); // returns Promise containing count
+	}
+	function fetchRecord(count) {
+		if(!count) {
+			throw new Error('Invalid code!');
+		}
+		return User
+			.forge({confirmation_code: req.params.code})
+			.fetch({require: true});
+	}
+	function updateStatus(model) {
+		console.log('inside user-routes >> updateStatus for model: '); console.log(model);
 		this.model = model;
 		return this.model.save({
 			confirmed: 1,
@@ -286,7 +298,7 @@ function confirmSignup(req, res) {
 		});
 	}
 	function sendResponse() {
-		return res.json({error: false, data:{message: 'User Signup confirmed'}});
+		return res.json({error: false, data:{message: 'Signup now confirmed!'}});
 	}
 	function error(err) {
 		logger.log('error', err.message);
