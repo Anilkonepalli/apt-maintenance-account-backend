@@ -11,12 +11,17 @@ function createSession(request, response){
 	if( !request.body.email || !request.body.password){
 		return response.status(400).send("Email and Password needed");
 	}
-
 	// Get User details of email
 	User.forge( {email: request.body.email} ).fetch()
 		.then(model => {
 			if(!model) throw new Error('Invalid Email!'); // no user exist for the given email id
 			let user = model.toJSON();
+			if ( !user.confirmed ) {
+				throw new Error('Email confirmation pending!');
+			}
+			if( user.confirmed && user.confirmation_code ) {
+				throw new Error('Incomplete Password Reset Request!!');
+			}
 			if(! bcrypt.compareSync(request.body.password, user.password)) {
 				throw new Error('Email or Password do not match!!')
 			}

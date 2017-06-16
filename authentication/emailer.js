@@ -2,7 +2,7 @@ var nodemailer = require('nodemailer');
 // var tempEmailId = 'mohankumar.anna@outlook.com';
 
 function sendMailTo(emailId, template){
-  if( !process.env.can_send_email ) {
+  if( process.env.can_send_email !== 'true' ) {
     console.log('Sending Email is not Enabled!');
     return null;
   }
@@ -23,7 +23,7 @@ function sendMailTo(emailId, template){
 
   let mailOptions = {
     from: process.env.senderEmailId,
-    to: emailId
+    to: emailId,
     //to: tempEmailId,
     subject: template.subject,
     text: template.body,

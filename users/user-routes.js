@@ -224,20 +224,20 @@ function post(req, res) {
 		}).save();
 	}
 	function sendResponse(model) {
-		res.json({error: false, data:{model}});
+		let can_send_email = process.env.can_send_email === 'true';
+		res.json({error: false, data:{model: model, emailed: can_send_email}});
 		let modelJson = model.toJSON();
+		let confirmUrl = process.env.ip_address+'signup/'+modelJson.confirmation_code;
 		let template = {
-			subject: 'Thanks for Signing up with us!',
+			subject: 'Thanks for Signing up!',
 			body: '',
-			html: 'To complete signup, please click on following link: <br><br>'
-							+process.env.ip_address
-							+'signup/'
-							+modelJson.confirmation_code
+			html: 'To complete signup process, please click on the below link: <br><br>'
+							+ '<a href="' + confirmUrl + '">' + confirmUrl + '</a>'
 							+'.<br><br><i>If the link does not work, copy and paste it into browser url.</i>'
 		};
 		console.log('Template is: '); console.log(template);
 		//console.log('confirmation_code: '+modelJson.confirmation_code);console.log(modelJson);
-		// emailer.sendMailTo(req.body.email, template)
+		emailer.sendMailTo(req.body.email, template)
 	}
 	function error(err) {
 		logger.log('error', err.message);
@@ -298,7 +298,7 @@ function confirmSignup(req, res) {
 		});
 	}
 	function sendResponse() {
-		return res.json({error: false, data:{message: 'Signup now confirmed!'}});
+		return res.json({error: false, data:{message: 'Signup process is now completed!'}});
 	}
 	function error(err) {
 		logger.log('error', err.message);
