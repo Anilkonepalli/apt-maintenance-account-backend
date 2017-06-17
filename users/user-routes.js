@@ -225,7 +225,7 @@ function post(req, res) {
 	}
 	function sendResponse(model) {
 		let can_send_email = process.env.can_send_email === 'true';
-		res.json({error: false, data:{model: model, emailed: can_send_email}});
+		res.json({error: false, data:{emailed: can_send_email}});
 		let modelJson = model.toJSON();
 		let confirmUrl = process.env.ip_address+'signup/'+modelJson.confirmation_code;
 		let template = {

@@ -23,7 +23,7 @@ function createSession(request, response){
 				throw new Error('Email confirmation pending!');
 			}
 			if( user.confirmed && user.confirmation_code ) {
-				throw new Error('Incomplete Password Reset Request!!');
+				throw new Error('Incomplete Password Reset Request!');
 			}
 			if(! bcrypt.compareSync(request.body.password, user.password)) {
 				throw new Error('Email or Password do not match!!')
@@ -45,25 +45,37 @@ function createSession(request, response){
 }
 
 // forgot password
-function forgotPassword(request, response){
-	if( !request.body.email ){
-		return response.status(400).send("Email Id is needed by forgot-password request");
+function forgotPassword(req, res){
+	//console.log('req object: '); console.log(req);
+	if( !req.body.email ){
+		return res.status(400).send("Email Id is required to proceed with forgot-password");
 	}
 	// Get User details of email
 	User
-		.forge( {email: request.body.email} )
+		.forge( {email: req.body.email} )
 		.fetch()
-		.then(updateWithResetToken)
+		.then(assignResetToken)
 		.then(sendResponse)
 		.catch(error);
 
-	function updateWithResetToken(model) {
+	function assignResetToken(model) {
+		let msg = '';
 		if (!model) { // no user exist for the given email id
-			throw new Error('Invalid Email!');
+			msg = 'Invalid Email!';
+			console.log(msg);
+			throw new Error(msg);
 		}
 		let user = model.toJSON();
+		console.log('User object: '); console.log(user);
 		if ( !user.confirmed ) { // User is registered but is not confirmed
-			throw new Error('Email confirmation pending!');
+			msg = 'Email confirmation pending!';
+			console.log(msg);
+			throw new Error(msg);
+		}
+		if (user.confirmed && user.confirmation_code) {
+			msg = 'Password Reset Request Already Exists!!';
+			console.log(msg);
+			throw new Error(msg);
 		}
 		return model.save({ // field 'confirmation_code' is used for reset token too
 			confirmation_code: randomstring.generate(50)
@@ -77,13 +89,13 @@ function forgotPassword(request, response){
 		let template = {
 			subject: 'Password Reset!',
 			body: '',
-			html: 'Please click on the link below to reset your password: <br><br>'
+			html: 'Please click on the link below to proceed with password reset: <br><br>'
 							+ '<a href="' + confirmUrl + '">' + confirmUrl + '</a>'
 							+'.<br><br><i>If the link does not work, copy and paste it into browser url.</i>'
 		};
 		console.log('Template is: '); console.log(template);
 		emailer.sendMailTo(req.body.email, template);
-		res.json({error: false, data:{model: user, emailed: can_send_email}});
+		res.json({error: false, data:{emailed: can_send_email}});
 	}
 	function error(err) {
 			logger.log('error', err.message);
