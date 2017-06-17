@@ -23,7 +23,8 @@ function createSession(request, response){
 				throw new Error('Email confirmation pending!');
 			}
 			if( user.confirmed && user.confirmation_code ) {
-				throw new Error('Incomplete Password Reset Request!');
+				 //throw new Error('Incomplete Password Reset Request!');
+				clearPasswordReset(model);
 			}
 			if(! bcrypt.compareSync(request.body.password, user.password)) {
 				throw new Error('Email or Password do not match!!')
@@ -42,6 +43,15 @@ function createSession(request, response){
 			response.statusMessage = err;
 			response.status(401).send();
 		});
+
+		// clear the existing password reset request, as user is able to login with known password
+		function clearPasswordReset(model) {
+			console.log('Clearing out password-reset request!');
+			model.save({
+				confirmation_code: null
+			});
+		}
+
 }
 
 // forgot password
@@ -105,5 +115,55 @@ function forgotPassword(req, res){
 }
 
 
+// reset password
+function resetPassword(req, res){
+	//console.log('req object: '); console.log(req);
+	if( !req.body.token ){
+		return res.status(400).send("Missing token with reset-password");
+	}
+	if ( !req.body.resetpassword ){
+		return res.status(400).send("Missing password with reset-password");
+	}
+	// Get User details of email
+	User
+		.forge( {confirmation_code: req.body.token} )
+		.fetch()
+		.then(updatePassword)
+		.then(sendResponse)
+		.catch(error);
+
+	function updatePassword(model) {
+		let msg = '';
+		if (!model) { // no user exist for the given email id
+			msg = 'Invalid Token!';
+			console.log(msg);
+			throw new Error(msg);
+		}
+		let user = model.toJSON();
+		console.log('User object: '); console.log(user);
+		if ( !user.confirmed ) { // User is registered but is not confirmed
+			msg = 'Registration confirmation pending!';
+			console.log(msg);
+			throw new Error(msg);
+		}
+		return model.save({ // field 'confirmation_code' is used for reset token too
+			confirmation_code: null,
+			password: bcrypt.hashSync(req.body.resetpassword, 10)
+		});
+	}
+
+	function sendResponse(model){
+		let user = model.toJSON();
+		res.json({error: false, data:{message: 'Password reset is done!'}});
+	}
+	function error(err) {
+			logger.log('error', err.message);
+			return res.status(500).json({error: true, data: {message: err.message}});
+	}
+
+}
+
+
+
 //export all the functions
-module.exports = { createSession, forgotPassword };
+module.exports = { createSession, forgotPassword, resetPassword };
