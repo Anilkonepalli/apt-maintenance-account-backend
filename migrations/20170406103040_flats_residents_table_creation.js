@@ -6,8 +6,8 @@ exports.up = function(knex, Promise) {
   		table.increments().primary();
   		table.integer('flat_id').unsigned().references('flats.id').onDelete('CASCADE');
   		table.integer('resident_id').unsigned().references('residents.id').onDelete('CASCADE');
-		table.timestamp('created_at').nullable().defaultTo(knex.fn.now());
-		table.timestamp('updated_at').nullable();
+			table.timestamp('created_at').nullable().defaultTo(knex.fn.now());
+			table.timestamp('updated_at').nullable();
   	});
 
 };

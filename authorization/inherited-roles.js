@@ -52,7 +52,8 @@ function getInheritedIds(role) {
 }
 
 function getIds(inherits){
-// console.log('getIds of inherits: '); console.log(inherits);
+	logger.log('debug', 'getIds of inherits: ');
+	logger.log('debug', inherits);
 	if(inherits == null || inherits == ''){
 		return [];
 	}
@@ -61,6 +62,6 @@ function getIds(inherits){
 	let result = retrieved_roles.data
 		.filter(each => arr.includes(each.name))
 		.map(each => each.id);
-	// console.log('inherits ids: '); console.log(result);
+	logger.log('debug', 'inherits ids: '); logger.log('debug', result);
 	return result;
 }

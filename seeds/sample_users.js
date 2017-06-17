@@ -1,8 +1,5 @@
 exports.seed = function(knex, Promise) {
   var bcrypt = require('bcrypt');
-  //var saltRounds = 10;
-  //var plainTextPassword = 'secret';
-  //var bcrypted_password = bcrypt.hashSync(plainTextPassword, saltRounds);
 
   // Deletes ALL existing entries
   return knex('users').del()

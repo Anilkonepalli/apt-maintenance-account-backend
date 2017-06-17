@@ -34,7 +34,8 @@ function get(req, res) {
 // ---------------------------------------------------------------------
 function put(req, res) {
 
-console.log('Inside permission-routes >> put(req,res)...'); console.log('req params id: '+req.params.id);
+	logger.log('debug', 'Inside permission-routes >> put(req,res)...');
+	logger.log('debug', 'req params id: '+req.params.id);
 
 	Permission.forge({id: req.params.id}).fetch({require: true})
 		.then(savePermission)
@@ -42,7 +43,9 @@ console.log('Inside permission-routes >> put(req,res)...'); console.log('req par
 		.catch(errorToNotify);
 
 		function savePermission(model) {
-console.log('Inside permission-routes >> savePermission(model)...');console.log(model.toJSON());
+			logger.log('debug', 'Inside permission-routes >> savePermission(model)...');
+			logger.log('debug', model.toJSON());
+
 			return model.save({
 				operations: req.body.operations || model.get('operations'),
 				resource: req.body.resource || model.get('resource'),
@@ -52,7 +55,7 @@ console.log('Inside permission-routes >> savePermission(model)...');console.log(
 		}
 
 		function sendResponse() {
-console.log('Inside permission-routes >> sendResponse()...');
+			logger.log('info', 'Inside permission-routes >> sendResponse()...');
 			res.json({error: false, data:{message: 'Permission Details Updated'}});
 		}
 

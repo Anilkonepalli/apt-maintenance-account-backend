@@ -14,17 +14,18 @@ module.exports = function(userId, resource = null){
 
 		getRoleIdsFor(userId)
 			.then(roleIds => {
-console.log('getRoleIdsFor('+roleIds+')');
+				logger.log('info', 'getRoleIdsFor('+roleIds+')');
 				return getPermissionsFor(roleIds);
 			})
 			.then(perms => {
 				if(resource){
-console.log('filter permissions for resource: '+resource);
+					logger.log('info', 'filter permissions for resource: '+resource);
 					let permsForResource = perms.filter(each => each.resource === resource);
-console.log(permsForResource);
+					logger.log('info', permsForResource);
 					resolve(permsForResource);
 				} else {
-console.log('resource is null; so send all permissions...'); console.log(perms);
+					logger.log('debug', 'resource is null; so send all permissions...');
+					logger.log('debug', perms);
 					resolve(perms);
 				}
 			})
@@ -33,23 +34,3 @@ console.log('resource is null; so send all permissions...'); console.log(perms);
 	});
 
 }
-
-/*
-module.exports = function(userId, resource){
-
-	return new Promise( function(resolve, reject) {
-
-		getRoleIdsFor(userId)
-			.then(roleIds => {
-				return getPermissionsFor(roleIds);
-			})
-			.then(perms => {
-				let permsForResource = perms.filter(each => each.resource === resource);
-				resolve(permsForResource);
-			})
-			.catch(err => reject(err));
-
-	});
-
-}
- */

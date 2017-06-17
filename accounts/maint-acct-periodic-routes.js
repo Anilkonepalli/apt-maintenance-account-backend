@@ -34,7 +34,13 @@ function getAll(req, res) {
 	function doAuth(models) {
 		availableModels = models;
 		jmodels = models.toJSON();
-		logger.log('info', '/api/maintenance-accounts-periodic >> getPeriodicList('+req.query.month+', '+req.query.year+')' );
+		logger.log('info',
+							 '/api/maintenance-accounts-periodic >> getPeriodicList('
+							 +req.query.month
+							 +', '
+							 +req.query.year
+							 +')'
+		);
 		return auth.allowedList(req.decoded.id, 'accounts', models);
 	}
 	function getFlats(models) {

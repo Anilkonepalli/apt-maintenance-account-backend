@@ -48,13 +48,11 @@ function getRoles(req,res) {
 // ---------------------------------------------------------------------
 function getAllPermissions(req, res) {
 	let userId = req.decoded.id;
-	//let resource = req.params.name;
-console.log('getAllPermissions(..)..userId is: '+userId);
+	logger.log('debug', 'getAllPermissions(..)..userId is: '+userId);
 	getUserPermissions(userId)
 		.then(perms => res.json(perms))
 		.catch(err => res.send(err));
 }
-
 
 
 // on routes that end in /Users/mypermissions/:name to get permissions of 'name' module
@@ -120,25 +118,6 @@ function put(req, res) {
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 
-
-/*	User.forge({id: req.params.id}).fetch({require: true})
-		.then(doUpdate)
-		.catch(notifyError);
-
-	function doUpdate(model){
-		model.save({
-			name: req.body.name || model.get('name')
-		})
-		.then(function(){
-			res.json({error: false, data:{message: 'user Details Updated'}});
-		})
-		.catch(function(err){
-			res.status(500).json({error: true, data: {message: err.message}});
-		});
-	}
-	function notifyError(err){
-		res.status(500).json({error: true, data: {message: err.message}});
-	} */
 }
 
 
@@ -147,7 +126,8 @@ function put(req, res) {
 function putRoles(req, res) {
 
 	let userModel;
-console.log('Inside user-routes >> putRoles(req,res)...'); console.log('req params id: '+req.params.id);
+	logger.log('debug', 'Inside user-routes >> putRoles(req,res)...');
+	logger.log('debug', 'req params id: '+req.params.id);
 	User.forge({id: req.params.id}).fetch({require: true, withRelated:['roles']})
 		.then(detachExistingRoles)
 		.then(attachNewRoles)
@@ -156,21 +136,19 @@ console.log('Inside user-routes >> putRoles(req,res)...'); console.log('req para
 
 	function detachExistingRoles(model){
 		userModel = model;
-console.log('Inside user-routes >> detachExistingRoles(model)...');console.log(model.toJSON());
+		logger.log('debug', 'Inside user-routes >> detachExistingRoles(model)...');
+		logger.log('debug', model.toJSON());
 		return model.roles().detach();
 	}
-/*	function doUpdate(model){
-		model.roles().detach().then( // remove the existing roles first
-			() => model.roles().attach(req.body.myrolesIds)); // attach new roles
-		res.json({error:false, data:{ message: 'My Roles are attached'}});
-	} */
+
 	function attachNewRoles(){
-console.log('inside user-routes >> attachNewRoles(model)...'); console.log(userModel.toJSON());
+		logger.log('debug', 'inside user-routes >> attachNewRoles(model)...');
+		logger.log('debug', userModel.toJSON());
 		return userModel.roles().attach(req.body.myrolesIds); // attach new roles
 	}
 
 	function sendResponse(aColl) {
-console.log('Inside user-routes >> sendResponse(aColl)...');
+		logger.log('debug', 'Inside user-routes >> sendResponse(aColl)...');
 		res.json({error:false, data:{ message: 'My Roles are attached'}});
 	}
 
@@ -186,18 +164,7 @@ console.log('Inside user-routes >> sendResponse(aColl)...');
 function post(req, res) {
 	logger.log('info', 'adding new user...name: '+req.body.name+', first name: '+req.body.first_name);
 	let tempModel = null;
-/*
-	User.forge({
-		name: req.body.name,
-		first_name: req.body.first_name,
-		last_name: req.body.last_name,
-		email: req.body.email,
-		password: req.body.password
-	})
-	.save()
-	.then( model => res.json({error: false, data:{model}}))
-	.catch( err => res.status(500).json({error: true, data:{message: err.message}}));
-*/
+
 	checkForDuplicate()
 	.then(doSave)
 	.then(sendResponse)
@@ -205,13 +172,14 @@ function post(req, res) {
 
 	function checkForDuplicate() {
 		return User
-		.where({
-			email: req.body.email })
+		.where({ email: req.body.email })
 		.count('id'); // returns Promise containing count
 	}
 	function doSave(count) {
 		if(count) {
-			throw new Error('Duplicate Error! email-id already exists!');
+			let msg = 'Duplicate Error! email-id already exists!';
+			logger.log('debug', msg);
+			throw new Error(msg);
 		}
 		logger.log('info', '/api/users >> post()...saving new user profile');
 		return User.forge({
@@ -235,8 +203,10 @@ function post(req, res) {
 							+ '<a href="' + confirmUrl + '">' + confirmUrl + '</a>'
 							+'.<br><br><i>If the link does not work, copy and paste it into browser url.</i>'
 		};
-		console.log('Template is: '); console.log(template);
-		//console.log('confirmation_code: '+modelJson.confirmation_code);console.log(modelJson);
+		logger.log('debug', 'Template is: ');
+		logger.log('debug', template);
+		logger.log('debug', 'confirmation_code: '+modelJson.confirmation_code);
+		logger.log('debug', modelJson);
 		emailer.sendMailTo(req.body.email, template);
 	}
 	function error(err) {
@@ -290,7 +260,8 @@ function confirmSignup(req, res) {
 			.fetch({require: true});
 	}
 	function updateStatus(model) {
-		console.log('inside user-routes >> updateStatus for model: '); console.log(model);
+		logger.log('debug', 'inside user-routes >> updateStatus for model: ');
+		logger.log('debug', model);
 		this.model = model;
 		return this.model.save({
 			confirmed: 1,

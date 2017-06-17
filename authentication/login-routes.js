@@ -1,13 +1,13 @@
-var _ 			= require('lodash');
-var	jwt			= require('jsonwebtoken');
-var	bcrypt 		= require('bcrypt');
+var _ 					 = require('lodash');
+var	jwt					 = require('jsonwebtoken');
+var	bcrypt 			 = require('bcrypt');
 
-var	User 		= require('../users/user-model');
-var	Bookshelf 	= require('../config/database');
-var	constants	= require('../config/constants');
+var	User 				 = require('../users/user-model');
+var	Bookshelf 	 = require('../config/database');
+var	constants		 = require('../config/constants');
 
-var emailer							= require('../authentication/emailer');
-var randomstring				= require('randomstring');
+var emailer			 = require('../authentication/emailer');
+var randomstring = require('randomstring');
 
 // application routing
 function createSession(request, response){
@@ -20,14 +20,17 @@ function createSession(request, response){
 			if(!model) throw new Error('Invalid Email!'); // no user exist for the given email id
 			let user = model.toJSON();
 			if ( !user.confirmed ) {
-				throw new Error('Email confirmation pending!');
+				let msg = 'Email confirmation pending!';
+				logger.log('error', msg)
+				throw new Error(msg);
 			}
 			if( user.confirmed && user.confirmation_code ) {
-				 //throw new Error('Incomplete Password Reset Request!');
 				clearPasswordReset(model);
 			}
 			if(! bcrypt.compareSync(request.body.password, user.password)) {
-				throw new Error('Email or Password do not match!!')
+				let msg = 'Email or Password do not match!!';
+				logger.log('error', msg)
+				throw new Error(msg);
 			}
 			let omitList = [
 				'password',		 'confirmed',		 'confirmation_code',
@@ -46,7 +49,7 @@ function createSession(request, response){
 
 		// clear the existing password reset request, as user is able to login with known password
 		function clearPasswordReset(model) {
-			console.log('Clearing out password-reset request!');
+			logger.log('info', 'Clearing out password-reset request!');
 			model.save({
 				confirmation_code: null
 			});
@@ -56,7 +59,7 @@ function createSession(request, response){
 
 // forgot password
 function forgotPassword(req, res){
-	//console.log('req object: '); console.log(req);
+
 	if( !req.body.email ){
 		return res.status(400).send("Email Id is required to proceed with forgot-password");
 	}
@@ -72,19 +75,20 @@ function forgotPassword(req, res){
 		let msg = '';
 		if (!model) { // no user exist for the given email id
 			msg = 'Invalid Email!';
-			console.log(msg);
+			logger.log('error', msg);
 			throw new Error(msg);
 		}
 		let user = model.toJSON();
-		console.log('User object: '); console.log(user);
+		logger.log('info', 'User object: ');
+		logger.log('info', user);
 		if ( !user.confirmed ) { // User is registered but is not confirmed
 			msg = 'Email confirmation pending!';
-			console.log(msg);
+			logger.log('error', msg);
 			throw new Error(msg);
 		}
 		if (user.confirmed && user.confirmation_code) {
 			msg = 'Password Reset Request Already Exists!!';
-			console.log(msg);
+			logger.log('error', msg);
 			throw new Error(msg);
 		}
 		return model.save({ // field 'confirmation_code' is used for reset token too
@@ -103,7 +107,8 @@ function forgotPassword(req, res){
 							+ '<a href="' + confirmUrl + '">' + confirmUrl + '</a>'
 							+'.<br><br><i>If the link does not work, copy and paste it into browser url.</i>'
 		};
-		console.log('Template is: '); console.log(template);
+		logger.log('info', 'Template is: ');
+		logger.log('info', template);
 		emailer.sendMailTo(req.body.email, template);
 		res.json({error: false, data:{emailed: can_send_email}});
 	}
@@ -136,14 +141,15 @@ function resetPassword(req, res){
 		let msg = '';
 		if (!model) { // no user exist for the given email id
 			msg = 'Invalid Token!';
-			console.log(msg);
+			logger.log('error', msg);
 			throw new Error(msg);
 		}
 		let user = model.toJSON();
-		console.log('User object: '); console.log(user);
+		logger.log('debug', 'User object: ');
+		logger.log('debug', user);
 		if ( !user.confirmed ) { // User is registered but is not confirmed
 			msg = 'Registration confirmation pending!';
-			console.log(msg);
+			logger.log('error', msg);
 			throw new Error(msg);
 		}
 		return model.save({ // field 'confirmation_code' is used for reset token too
@@ -162,8 +168,6 @@ function resetPassword(req, res){
 	}
 
 }
-
-
 
 //export all the functions
 module.exports = { createSession, forgotPassword, resetPassword };

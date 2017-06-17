@@ -1,13 +1,12 @@
 var nodemailer = require('nodemailer');
-// var tempEmailId = 'mohankumar.anna@outlook.com';
 
 function sendMailTo(emailId, template){
   if( process.env.can_send_email !== 'true' ) {
-    console.log('Sending Email is not Enabled!');
+    logger.log('info', 'Sending Email is not Enabled!');
     return null;
   }
   if( !process.env.host ) {
-    console.log('No email-host available!');
+    logger.log('info', 'No email-host available!');
     return null;
   }
 
@@ -32,8 +31,8 @@ function sendMailTo(emailId, template){
 
   transporter.sendMail(mailOptions, (error, info) => {
     (error)
-    ? console.log(error)
-    : console.log('Message %s; Send status: %s.', info.messageId, info.response);
+    ? logger.log('error', error)
+    : logger.log('info', 'Message %s; Send status: %s.', info.messageId, info.response);
   });
 
 }

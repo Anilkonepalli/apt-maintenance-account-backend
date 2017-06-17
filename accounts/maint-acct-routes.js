@@ -1,7 +1,7 @@
-var	Bookshelf 			= require('../config/database');
+var	Bookshelf 					= require('../config/database');
 var	MaintenanceAccount 	= require('./maint-acct-model');
-var auth 				= require('../authorization/authorization');
-var _ 					= require('lodash');
+var auth 								= require('../authorization/authorization');
+var _ 									= require('lodash');
 
 var MaintenanceAccounts = Bookshelf.Collection.extend({
 	model: MaintenanceAccount
@@ -15,8 +15,8 @@ var MaintenanceAccounts = Bookshelf.Collection.extend({
 function getAll(req, res) {
 	let fromDate = new Date(req.query.fromDate).toISOString().split('T')[0];
 	let toDate = new Date(req.query.toDate).toISOString().split('T')[0];
-	console.log('from date string format: '); console.log(fromDate);
-	console.log('to date string format: '); console.log(toDate);
+	logger.log('info', 'from date string format: '); logger.log('info', fromDate);
+	logger.log('info', 'to date string format: '); logger.log('info', toDate);
 
 	MaintenanceAccounts
 		.query('where', 'recorded_at', '>=', fromDate)
@@ -33,7 +33,8 @@ function getAll(req, res) {
 
 	// sends Account models after sorting; sorting is based on its recorded_at field and then id field
 	function sendResponse(models) {
-		console.log('maint-acct-routes >>getAll()...sendResponse(models)... '); console.log(models);
+		logger.log('info', 'maint-acct-routes >>getAll()...sendResponse(models)... ');
+		logger.log('info', models);
 		let sortedModels = _.sortBy(models, [
 				function(model){ return model.recorded_at; }, // sort criteria 1
 				function(model){ return model.id;	}						// sort criteria 2
@@ -46,7 +47,6 @@ function getAll(req, res) {
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
-
 
 // on routes that end in /maintenance-accounts/:id to get an account
 // ---------------------------------------------------------------------
@@ -210,40 +210,6 @@ function del(req, res) {
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
-
-/*
-// on routes that end in /maintenance-accounts-periodic/
-// ---------------------------------------------------------------------
-function getPeriodicList(req, res) {
-	MaintenanceAccounts
-		.forge()
-		.fetch()
-		.then(doAuth)
-		.then(sendResponse)
-		.catch(sendError);
-
-	function doAuth(models) {
-		logger.log('info', '/api/maintenance-accounts-periodic >> getPeriodicList(...)');
-		return auth.allowedList(req.decoded.id, 'accounts', models);
-	}
-
-	// sends Account models after sorting; sorting is based on its recorded_at field and then id field
-	function sendResponse(models) {
-		let sortedModels = _.sortBy(models.toJSON(), [
-				function(model){ return model.recorded_at; }, // sort criteria 1
-				function(model){ return model.id;	}						// sort criteria 2
-			]);
-		res.json(sortedModels);
-	}
-
-	function sendError(err) {
-		logger.log('error', err.message);
-		return res.status(500).json({error: true, data: {message: err.message}});
-	}
-
-}
-*/
-
 
 
 /**   Private Function

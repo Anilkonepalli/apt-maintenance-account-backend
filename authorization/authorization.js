@@ -74,7 +74,8 @@ function allows(userId, resource, model, action) {
 
 				// evaluate condition in each of the permissionsWithCondition
 				let modelJson = model.toJSON();
-console.log('Authorization >> allows....Model is: '); console.log(modelJson);
+				logger.log('debug', 'Authorization >> allows....Model is: ');
+				logger.log('debug', modelJson);
 				hasEvaluatedPerms(permissionsWithCondition, modelJson, userId)
 					? resolve(model)
 					: reject(new Error('Unauthorized Access!!!')); // three !!! here; all conditions evaluated to false, return error with message
@@ -116,11 +117,8 @@ function viewables(userId, resource, modelsJson) {
 					return hasEvaluatedPerms(permissionsWithCondition, eachModel, userId);
 				});
 
-/*				viewables = _.filter(modelsJson, function(eachModel) {
-					return hasEvaluatedPerms(permissionsWithCondition, eachModel, userId);
-				}); */
-
-				console.log('Viewables models are: ....'); console.log(viewables);
+				logger.log('debug', 'Viewables models are: ....');
+				logger.log('debug', viewables);
 				resolve(viewables);
 			})
 			.catch(err => reject(err));

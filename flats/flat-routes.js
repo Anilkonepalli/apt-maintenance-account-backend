@@ -16,7 +16,6 @@ function getAll(req, res) {
 		.forge()
 		.fetch()
 		.then(doAuth)
-		//.then(models => res.json(models))
 		.then(sendResponse)
 		.catch(error);
 
@@ -30,7 +29,6 @@ function getAll(req, res) {
 	}
 	function error(err) {
 		logger.log('error', err.message);
-		//res.status(500).send(err.message);
 		res.send({status: 500, data: null, message: err.message});
 	}
 }
@@ -63,11 +61,12 @@ function get(req, res) {
 // on routes that end in /flats/myresidents/:id to get residents for flat id
 // ---------------------------------------------------------------------
 function getResidents(req, res) {
-console.log('Inside flat-routes >> getResidents() for flat id: '+req.params.id);
+	logger.log('debug', 'Inside flat-routes >> getResidents() for flat id: '+req.params.id);
 	Flat.forge( {id: req.params.id} ).fetch({withRelated: ['residents']})
 		.then(model => {
-			console.log('Flat model is retrieved...'); console.log
+			logger.log('debug', 'Flat model is retrieved...');
 			let modelJson = model.toJSON();
+			logger.log('debug', modelJson);
 			res.json(modelJson.residents);
 		})
 		.catch(err => res.send(err));
@@ -119,7 +118,6 @@ function put(req, res) {
 	}
 	function error(err) {
 		logger.log('error', err.message);
-		//return res.status(500).json({error: true, data: {message: err.message}});
 		res.statusMessage = err.message;
 		res.status(500).send();
 	}
@@ -129,7 +127,8 @@ function put(req, res) {
 // --------------------------------------------------------------------------------------------
 function putResidents(req, res) {
 	let flatModel;
-console.log('Inside flat-routes >> putResidents(req,res)...'); console.log('req params id: '+req.params.id);
+	logger.log('debug', 'Inside flat-routes >> putResidents(req,res)...');
+	logger.log('debug', 'req params id: '+req.params.id);
 	Flat.forge({id: req.params.id}).fetch({require: true, withRelated:['residents']})
 		.then(detachExistingResidents)
 		.then(attachNewResidents)
@@ -138,11 +137,13 @@ console.log('Inside flat-routes >> putResidents(req,res)...'); console.log('req 
 
 	function detachExistingResidents(model){ // remove existing residents first
 		flatModel = model;
-console.log('Inside flat-routes >> detachExistingResidents(model)...');console.log(model.toJSON());
+		logger.log('debug', 'Inside flat-routes >> detachExistingResidents(model)...');
+		logger.log('debug', model.toJSON());
 		return model.residents().detach();
 	}
 	function attachNewResidents(){
-console.log('inside flat-routes >> attachNewResidents(model)...'); console.log(flatModel.toJSON());
+		logger.log('debug', 'inside flat-routes >> attachNewResidents(model)...');
+		logger.log('debug', flatModel.toJSON());
 		return flatModel.residents().attach(req.body.myresidentsIds); // attach new residents
 	}
 
@@ -175,7 +176,6 @@ function post(req, res) {
 			.where({block_number: blockNumber,
 						  flat_number: flatNumber })
 		  .count('id'); // returns Promise containing count
-
 	}
 
 	function doSave(count) {
@@ -194,8 +194,6 @@ function post(req, res) {
 	function error(err) {
 		logger.log('error', err.message);
 		return res.status(500).json({error: true, data: {message: err.message}});
-		//res.status(500);
-		//return res.json({error: true, data: {message: err.message}});
 	}
 }
 

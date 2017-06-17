@@ -9,7 +9,7 @@ var Resident = Bookshelf.Model.extend({
 	},
 
 	hello: function(){
-		console.log('Hello, this is Resident Model');
+		logger.log('info', 'Hello, this is Resident Model');
 	}
 });
 

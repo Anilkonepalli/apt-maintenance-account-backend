@@ -9,7 +9,7 @@ var User 		= Bookshelf.Model.extend({
 	},
 
 	hello: function(){
-		console.log('Hello, this is User Model');
+		logger.log('info', 'Hello, this is User Model');
 	}
 });
 

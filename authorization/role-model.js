@@ -14,7 +14,7 @@ var Role = Bookshelf.Model.extend({
 	},
 
 	hello: function(){
-		console.log('Hello, this is Role Model');
+		logger.log('info', 'Hello, this is Role Model');
 	}
 });
 

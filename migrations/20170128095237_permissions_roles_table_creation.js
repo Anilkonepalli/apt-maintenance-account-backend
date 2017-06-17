@@ -6,10 +6,10 @@ exports.up = function(knex, Promise) {
   		table.increments().primary();
   		table.integer('permission_id').unsigned().references('permissions.id').onDelete('CASCADE');
   		table.integer('role_id').unsigned().references('roles.id').onDelete('CASCADE');
-		table.timestamp('created_at').nullable().defaultTo(knex.fn.now());
-		table.timestamp('updated_at').nullable();
+			table.timestamp('created_at').nullable().defaultTo(knex.fn.now());
+			table.timestamp('updated_at').nullable();
   	});
-  
+
 };
 
 exports.down = function(knex, Promise) {
