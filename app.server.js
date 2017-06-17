@@ -38,6 +38,7 @@ app.get("/", (req, res) => res.json({ message: "Welcome to Maintenance Accounts 
 //app.route('/oauth2callback/:code').get(oauth2.getCode);
 
 let login = require('./authentication/login-routes');
+app.route("/api/login/forgot-password").put(login.forgotPassword);
 app.route("/api/login").post(login.createSession);
 
 let user = require('./users/user-routes');

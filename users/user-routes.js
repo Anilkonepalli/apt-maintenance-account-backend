@@ -237,7 +237,7 @@ function post(req, res) {
 		};
 		console.log('Template is: '); console.log(template);
 		//console.log('confirmation_code: '+modelJson.confirmation_code);console.log(modelJson);
-		emailer.sendMailTo(req.body.email, template)
+		emailer.sendMailTo(req.body.email, template);
 	}
 	function error(err) {
 		logger.log('error', err.message);
