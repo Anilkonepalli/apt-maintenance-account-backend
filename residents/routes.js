@@ -111,7 +111,7 @@ function put(req, res) {
 		logger.log('info', '/api/residents >> put()...updating resident details');
 		return this.model.save({
 			first_name: firstName || this.model.get('first_name'),
-			last_name: lastName || this.model.get('last_name'),
+			last_name: lastName, // empty string is allowed here
 			is_a: isA || this.model.get('is_a'),
 			owner_id: ownerId || this.model.get('owner_id')
 		});
@@ -157,7 +157,7 @@ function post(req, res) {
 			throw new Error('Duplicate Error!!');
 		}
 		logger.log('info', '/api/residents >> post()...saving new resident details');
-		
+
 		return Resident.forge({
 			first_name: firstName,
 			last_name: lastName,
