@@ -9,7 +9,7 @@
 		"accounts": "10",
 		"users": "10",
 		"flats": "16",
-		"residents": "100",
+		"residents": "32",
 		"roles": "100",
 		"permissions": "100"
 	}

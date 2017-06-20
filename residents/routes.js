@@ -1,6 +1,7 @@
 var	Bookshelf = require('../config/database');
 var	Resident  = require('./model');
 var auth 			= require('../authorization/authorization');
+var constants	= require('../config/constants.json');
 
 var Residents = Bookshelf.Collection.extend({
 	model: Resident
@@ -137,13 +138,29 @@ function post(req, res) {
 	let ownerId = req.body.owner_id;
 
 	auth.allowsAdd(req.decoded.id, 'residents')
-		.then(checkForDuplicate)
+		.then(getTotalForMaxCheck)
+		.then(getCountForDupCheck)
 		.then(doSave)
 		.then(sendResponse)
 		.catch(error);
 
-	function checkForDuplicate(granted){ // implementing inner function1
-		logger.log('info', 'checkForDuplicate(...)!!');
+	function getTotalForMaxCheck(granted) {
+		let tableName = Resident.prototype.tableName;
+		if(constants.maxRecordsDisabled) {
+			logger.log('debug', 'Max Records DISABLED!');
+			return new Promise((resolve) => resolve(''));
+		}
+		logger.log('debug', 'Max Records ENABLED');
+		return Bookshelf.knex(tableName).count('id as CNT');
+	}
+
+	function getCountForDupCheck(total){ // implementing inner function1
+		logger.log('info', 'getCountForDupCheck(...)!!');
+		if(total && total[0].CNT >= constants.maxRecords.flats) {
+			let msg = 'Maximum Limit Reached! Cannot Save Resident details!';
+			logger.log('error', msg);
+			throw new Error(msg);
+		}
 		return Resident
 			.where({first_name: firstName,
 						  last_name: lastName,
