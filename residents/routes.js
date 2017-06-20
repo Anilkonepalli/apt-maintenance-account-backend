@@ -156,7 +156,7 @@ function post(req, res) {
 
 	function getCountForDupCheck(total){ // implementing inner function1
 		logger.log('info', 'getCountForDupCheck(...)!!');
-		if(total && total[0].CNT >= constants.maxRecords.flats) {
+		if(total && total[0].CNT >= constants.maxRecords.residents) {
 			let msg = 'Maximum Limit Reached! Cannot Save Resident details!';
 			logger.log('error', msg);
 			throw new Error(msg);
@@ -186,7 +186,6 @@ function post(req, res) {
 		return res.json({error: false, data:{model}});
 	}
 	function error(err) {
-		logger.log('error', err.message);
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }

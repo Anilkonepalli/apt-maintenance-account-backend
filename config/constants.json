@@ -10,7 +10,7 @@
 		"users": "10",
 		"flats": "16",
 		"residents": "32",
-		"roles": "100",
-		"permissions": "100"
+		"roles": "6",
+		"permissions": "24"
 	}
 }

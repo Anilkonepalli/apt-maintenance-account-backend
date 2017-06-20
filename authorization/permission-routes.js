@@ -1,10 +1,10 @@
 var	Permission 	= require('./permission-model');
 var	Bookshelf 	= require('../config/database');
+var constants 	= require('../config/constants.json');
 
 var Permissions = Bookshelf.Collection.extend({
 	model: Permission
 });
-
 
 // on routes that end in /Permissions
 // ---------------------------------------------------------------------
@@ -13,7 +13,6 @@ function getAll(req, res) {
 		.then(models => res.json(models))
 		.catch(err => res.send(err));
 }
-
 
 // on routes that end in /Permissions/:id to get an permission
 // ---------------------------------------------------------------------
@@ -28,7 +27,6 @@ function get(req, res) {
 			.catch(err => res.send(err));
 	}
 }
-
 
 // on routes that end in /Permissions/:id to update an existing permission
 // ---------------------------------------------------------------------
@@ -68,15 +66,40 @@ function put(req, res) {
 // on routes that end in /Permissions to post (to add) a new permission
 // ---------------------------------------------------------------------
 function post(req, res) {
-	Permission.forge({
-		operations: req.body.operations,
-		resource: req.body.resource,
-		condition: req.body.condition,
-		description: req.body.description
-	})
-	.save()
-	.then( model => res.json({error: false, data:{model}}))
-	.catch( err => res.status(500).json({error: true, data:{message: err.message}}));
+	getTotalForMaxCheck()
+		.then(doSave)
+		.then(sendResponse)
+		.catch(error);
+
+	function getTotalForMaxCheck() {
+		let tableName = Permission.prototype.tableName;
+		if(constants.maxRecordsDisabled) {
+			logger.log('debug', 'Max Records DISABLED!');
+			return new Promise((resolve) => resolve(''));
+		}
+		logger.log('debug', 'Max Records ENABLED');
+		return Bookshelf.knex(tableName).count('id as CNT');
+	}
+	function doSave(total){
+		logger.log('info', 'doSave(...)!!');
+		if(total && total[0].CNT >= constants.maxRecords.permissions) {
+			let msg = 'Maximum Limit Reached! Cannot Save Permission details!';
+			logger.log('error', msg);
+			throw new Error(msg);
+		}
+		return Permission.forge({
+			operations: req.body.operations,
+			resource: req.body.resource,
+			condition: req.body.condition,
+			description: req.body.description
+		}).save()
+	}
+	function sendResponse(model){
+		return res.json({error: false, data:{model}});
+	}
+	function error(err){
+		return res.status(500).json({error: true, data:{message: err.message}});
+	}
 }
 
 // on routes that end in /Permissions/:id to delete an permission
