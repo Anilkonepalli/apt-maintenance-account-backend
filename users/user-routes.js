@@ -5,6 +5,7 @@ var bcrypt 							= require('bcrypt');
 var auth 								= require('../authorization/authorization');
 var emailer							= require('../authentication/emailer');
 var randomstring				= require('randomstring');
+var constants 					= require('../config/constants.json');
 
 var Users 	= Bookshelf.Collection.extend({
 	model: User
@@ -165,16 +166,33 @@ function post(req, res) {
 	logger.log('info', 'adding new user...name: '+req.body.name+', first name: '+req.body.first_name);
 	let tempModel = null;
 
-	checkForDuplicate()
+	totalRecords()
+	.then(checkForDuplicate)
 	.then(doSave)
 	.then(sendResponse)
 	.catch(error);
 
-	function checkForDuplicate() {
+	function totalRecords() {
+		let tableName = User.prototype.tableName;
+		if(constants.maxRecordsDisabled) {
+			logger.log('debug', 'Max Records in DISABLED state!');
+			return new Promise((resolve) => resolve(''));
+		}
+		logger.log('debug', 'Max Records in ENABLED state');
+		return Bookshelf.knex(tableName).count('id as CNT');
+	}
+
+	function checkForDuplicate(total) {
+		if(total && total[0].CNT >= constants.maxRecords.users) {
+			let msg = 'Maximum Limit Reached! User registration is closed';
+			logger.log('error', msg);
+			throw new Error(msg);
+		}
 		return User
 		.where({ email: req.body.email })
 		.count('id'); // returns Promise containing count
 	}
+
 	function doSave(count) {
 		if(count) {
 			let msg = 'Duplicate Error! email-id already exists!';
@@ -191,6 +209,7 @@ function post(req, res) {
 			confirmation_code: randomstring.generate(50)
 		}).save();
 	}
+
 	function sendResponse(model) {
 		let can_send_email = process.env.can_send_email === 'true';
 		res.json({error: false, data:{emailed: can_send_email}});
@@ -209,10 +228,12 @@ function post(req, res) {
 		logger.log('debug', modelJson);
 		emailer.sendMailTo(req.body.email, template);
 	}
+
 	function error(err) {
 		logger.log('error', err.message);
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
+
 }
 
 
