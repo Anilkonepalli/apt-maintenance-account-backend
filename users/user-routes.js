@@ -166,23 +166,23 @@ function post(req, res) {
 	logger.log('info', 'adding new user...name: '+req.body.name+', first name: '+req.body.first_name);
 	let tempModel = null;
 
-	totalRecords()
-	.then(checkForDuplicate)
+	getTotalForMaxCheck()
+	.then(getCountForDupCheck)
 	.then(doSave)
 	.then(sendResponse)
 	.catch(error);
 
-	function totalRecords() {
+	function getTotalForMaxCheck() {
 		let tableName = User.prototype.tableName;
 		if(constants.maxRecordsDisabled) {
-			logger.log('debug', 'Max Records in DISABLED state!');
+			logger.log('debug', 'Max Records DISABLED!');
 			return new Promise((resolve) => resolve(''));
 		}
-		logger.log('debug', 'Max Records in ENABLED state');
+		logger.log('debug', 'Max Records ENABLED');
 		return Bookshelf.knex(tableName).count('id as CNT');
 	}
 
-	function checkForDuplicate(total) {
+	function getCountForDupCheck(total) {
 		if(total && total[0].CNT >= constants.maxRecords.users) {
 			let msg = 'Maximum Limit Reached! User registration is closed';
 			logger.log('error', msg);

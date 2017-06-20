@@ -2,6 +2,7 @@ var	Bookshelf 					= require('../config/database');
 var	MaintenanceAccount 	= require('./maint-acct-model');
 var auth 								= require('../authorization/authorization');
 var _ 									= require('lodash');
+var constants 					= require('../config/constants.json');
 
 var MaintenanceAccounts = Bookshelf.Collection.extend({
 	model: MaintenanceAccount
@@ -148,12 +149,28 @@ function put(req, res) {
 // ---------------------------------------------------------------------
 function post(req, res) {
 	auth.allowsAdd(req.decoded.id, 'accounts')
+		.then(getTotalForMaxCheck)
 		.then(doSave)
 		.then(setBalance)
 		.then(sendResponse)
 		.catch(sendError);
 
-	function doSave(granted) {
+	function getTotalForMaxCheck(granted) {
+		let tableName = MaintenanceAccount.prototype.tableName;
+		if(constants.maxRecordsDisabled) {
+			logger.log('debug', 'Max Records DISABLED!');
+			return new Promise((resolve) => resolve(''));
+		}
+		logger.log('debug', 'Max Records ENABLED');
+		return Bookshelf.knex(tableName).count('id as CNT');
+	}
+
+	function doSave(total) {
+		if(total && total[0].CNT >= constants.maxRecords.accounts) {
+			let msg = 'Maximum Limit Reached! Cannot Save Account details!';
+			logger.log('error', msg);
+			throw new Error(msg);
+		}
 		logger.log('info', '/api/maintenance-accounts >> post()->doSave(..)');
 		return MaintenanceAccount.forge({
 			item: req.body.item,

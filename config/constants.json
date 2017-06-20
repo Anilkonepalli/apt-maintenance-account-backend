@@ -4,11 +4,11 @@
 	"appTestUser": { "email": "user1@eastgate.in",	"password": "user1secret" },
 	"logFileName": "./logs/maint-acct.log",
 	"logLevel": "debug",
-	"maxRecordsDisabled": true,
+	"maxRecordsDisabled": false,
 	"maxRecords": {
-		"accounts": "100",
-		"users": "100",
-		"flats": "100",
+		"accounts": "10",
+		"users": "10",
+		"flats": "16",
 		"residents": "100",
 		"roles": "100",
 		"permissions": "100"

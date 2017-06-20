@@ -1,6 +1,7 @@
 var	Bookshelf 	= require('../config/database');
 var	Flat 				= require('./flat-model');
 var auth 				= require('../authorization/authorization');
+var constants 	= require('../config/constants.json');
 
 var Flats = Bookshelf.Collection.extend({
 	model: Flat
@@ -165,13 +166,29 @@ function post(req, res) {
 	let flatNumber = req.body.flat_number;
 
 	auth.allowsAdd(req.decoded.id, 'flats')
-		.then(checkForDuplicate)
+		.then(getTotalForMaxCheck)
+		.then(getCountForDupCheck)
 		.then(doSave)
 		.then(sendResponse)
 		.catch(error);
 
-	function checkForDuplicate(granted){ // implementing inner function1
-		logger.log('info', 'checkForDuplicate(...)!!');
+	function getTotalForMaxCheck(granted) {
+		let tableName = Flat.prototype.tableName;
+		if(constants.maxRecordsDisabled) {
+			logger.log('debug', 'Max Records DISABLED!');
+			return new Promise((resolve) => resolve(''));
+		}
+		logger.log('debug', 'Max Records ENABLED');
+		return Bookshelf.knex(tableName).count('id as CNT');
+	}
+
+	function getCountForDupCheck(total){ // implementing inner function1
+		logger.log('info', 'getCountForDupCheck(...)!!');
+		if(total && total[0].CNT >= constants.maxRecords.flats) {
+			let msg = 'Maximum Limit Reached! Cannot Save Flat details!';
+			logger.log('error', msg);
+			throw new Error(msg);
+		}
 		return Flat
 			.where({block_number: blockNumber,
 						  flat_number: flatNumber })
