@@ -1,36 +1,35 @@
+// [`name`, `description`, `inherits`]
+
+let sampleData =[
+  ['guest', 'A role to view records such as accounts', null],
+  ['member-t', 'Role can update own record, such as USER PROFILE', null],
+  ['supervisor', 'A role to add/edit records such as accounts', null],
+  ['manager', 'A role to delete records such as accounts', 'supervisor'],
+  ['admin', 'A role to add/edit/delete records such as Roles, Permissions, Users', null],
+  ['member-o', 'Inherits member-t role; plus it has few read-only permissions on few modules', 'member-t']
+];
+let tableName = 'roles';
 
 exports.seed = function(knex, Promise) {
-  var bcrypt = require('bcrypt');
 
-  // Deletes ALL existing entries
-  return knex('roles')
-    .del()
-    .then(function () {
-      return Promise.all([
-        // Inserts seed entries
-        knex('roles').insert({
-                        name: 'guest',
-                        description: 'A role to view records such as accounts, user profiles'
-                      }),
-        knex('roles').insert({
-                        name: 'member',
-                        description: 'A role to update records such as user profiles',
-                        inherits: 'guest'
-                      }),
-        knex('roles').insert({
-                        name: 'supervisor',
-                        description: 'A role to add/edit records such as accounts'
-                      }),
-        knex('roles').insert({
-                        name: 'manager',
-                        description: 'A role to delete records such as accounts',
-                        inherits: 'member,supervisor'
-                      }),
-        knex('roles').insert({
-                        name: 'admin',
-                        description: 'A role to add/edit/delete records such as Roles, Permissions, Users',
-                        inherits: 'manager'
-                      }),
-      ]);
-    });
+  return knex(tableName)
+    .del() // Deletes ALL existing entries
+    .then(addSamples);
+
+  function addSamples() {
+      let sampleRecords = [];
+      sampleData.forEach((each) => {
+        sampleRecords.push( knex(tableName).insert( recordOn(each) ) );
+      });
+      return Promise.all(sampleRecords);
+  }
+
+  function recordOn(data) {
+    return {
+      name: data[0],
+      description: data[1],
+      inherits: data[2]
+    };
+  }
+
 };

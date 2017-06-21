@@ -1,26 +1,27 @@
+//  [ flat_number1, flat_number2, ...]
+let sampleData = [
+  'G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8'
+];
+let tableName = 'flats';
 
 exports.seed = function(knex, Promise) {
-  // Deletes ALL existing entries
-  return knex('flats').del()
-    .then(function () {
-      return Promise.all([
-        // Inserts seed entries
-        knex('flats').insert({flat_number: 'G1'}),
-        knex('flats').insert({flat_number: 'G2'}),
-        knex('flats').insert({flat_number: 'G3'}),
-        knex('flats').insert({flat_number: 'G4'}),
-        knex('flats').insert({flat_number: 'G5'}),
-        knex('flats').insert({flat_number: 'G6'}),
-        knex('flats').insert({flat_number: 'G7'}),
-        knex('flats').insert({flat_number: 'G8'}),
-        knex('flats').insert({flat_number: 'F1'}),
-        knex('flats').insert({flat_number: 'F2'}),
-        knex('flats').insert({flat_number: 'F3'}),
-        knex('flats').insert({flat_number: 'F4'}),
-        knex('flats').insert({flat_number: 'F5'}),
-        knex('flats').insert({flat_number: 'F6'}),
-        knex('flats').insert({flat_number: 'F7'}),
-        knex('flats').insert({flat_number: 'F8'})
-      ]);
-    });
+
+  return knex(tableName)
+    .del() // Deletes ALL existing entries
+    .then(addSamples);
+
+  function addSamples() {
+      let sampleRecords = [];
+      sampleData.forEach((each) => {
+        sampleRecords.push( knex(tableName).insert( recordOn(each) ) );
+      });
+      return Promise.all(sampleRecords);
+  }
+
+  function recordOn(data) {
+    return {
+      flat_number: data
+    };
+  }
+
 };
