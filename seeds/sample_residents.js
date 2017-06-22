@@ -16,7 +16,7 @@ let sampleData = [
   ['of6', '', 'owner'],
   ['of7', '', 'owner'],
   ['of8', '', 'owner'],
-  ['tg1', '', 'tenant'], // Tenant, if any, of flat# tg1 is shorted written as tg1
+  ['tg1', '', 'tenant'], // Tenant, if any, of flat# tg1 is shortly written as tg1
   ['tg2', '', 'tenant'],
   ['tg3', '', 'tenant'],
   ['tg4', '', 'tenant'],
