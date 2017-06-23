@@ -73,7 +73,7 @@ exports.seed = function(knex, Promise) {
   }
   function getPermissions(rows) {
     roles = rows;
-    console.log('Roles: '); console.log(rows);
+    // console.log('Roles: '); console.log(rows);
     return knex.select('id', 'operations', 'resource', 'condition').from(sourceTable2);
   }
   function addSamples(rows){
@@ -85,10 +85,10 @@ exports.seed = function(knex, Promise) {
     let pid;
     sampleData.forEach(obj => {
       rid = getRoleIdFor(obj.roleName);
-      console.log('Role id: '); console.log(rid);
+      // console.log('Role id: '); console.log(rid);
       obj.permissions.forEach(eachPerm => {
         pid = getPermIdFor(eachPerm);
-        console.log('permission id: '); console.log(pid);
+        // console.log('permission id: '); console.log(pid);
         link = knex(tableName).insert({role_id: rid, permission_id: pid});
         links.push( link );
       });
