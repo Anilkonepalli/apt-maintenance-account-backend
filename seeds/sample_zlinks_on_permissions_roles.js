@@ -3,7 +3,7 @@ let sampleData = [
   {
     roleName: 'guest',
     permissions: [
-      ['R', 'accounts', null],
+      ['R', 'accounts', null], // read-only permission on 'accounts' module
       ['R', 'users', null],
       ['R', 'flats', null],
       ['R', 'residents', null],
@@ -20,6 +20,34 @@ let sampleData = [
       ['R', 'accounts', 'hasCondition'],
       ['R', 'flats', null],
       ['R', 'residents', null],
+      ['RU', 'user-profile', 'hasCondition'] // Read and Update permissions on 'user-profile' module
+    ]
+  },
+  {
+    roleName: 'supervisor',
+    permissions: [
+      ['CRU', 'accounts', null], // Create, Read, Update permissions on 'accounts' module
+      ['RU', 'user-profile', 'hasCondition']
+    ]
+  },
+  {
+    roleName: 'manager',
+    permissions: [
+      ['D', 'accounts', null] // Delete permission on 'accounts' module
+    ]
+  },
+  {
+    roleName: 'admin',
+    permissions: [ // 3, 5, 6, 7, 9, 20, 22, 24, 26, 31
+      ['CRUD', 'accounts', null],
+      ['CRUD', 'roles', null],
+      ['CRUD', 'flats', null],
+      ['CRUD', 'residents', null],
+      ['CRUD', 'users', null],
+      ['CRUD', 'permissions', null],
+      ['RU', 'flats-residents', null],
+      ['RU', 'users-roles', null],
+      ['RU', 'roles-permissions', null],
       ['RU', 'user-profile', 'hasCondition']
     ]
   }
@@ -69,9 +97,9 @@ exports.seed = function(knex, Promise) {
   }
 
   function getRoleIdFor(roleName){
-    let role = roles.filter(each => each.name == roleName);
-    // console.log('Role..'); console.log(role);
-    return role[0].id;
+    let fRoles = roles.filter(each => each.name == roleName);
+    // console.log('Role..'); console.log(fRoles);
+    return fRoles[0].id;
   }
   function getPermIdFor(arr) {
     return arr[2]
@@ -80,19 +108,19 @@ exports.seed = function(knex, Promise) {
   }
   function getPermsIdNullCondition(arr){
     // console.log('Array: '); console.log(arr);
-    let perm = perms.filter(each =>
+    let fPerms = perms.filter(each =>
       each.operations === arr[0]
     && each.resource === arr[1]
     && each.condition === null);
-    // console.log('Permission w/o condition: '); console.log(perm);
-    return perm[0].id;
+    // console.log('Permission w/o condition: '); console.log(fPerms);
+    return fPerms[0].id;
   }
   function getPermsIdWithCondition(arr){
-    let perm = perms.filter(each =>
+    let fPerms = perms.filter(each =>
       each.operations === arr[0]
     && each.resource === arr[1]
     && each.condition !== null);
-    // console.log('Permission w/ condition: '); console.log(perm);
-    return perm[0].id;
+    // console.log('Permission w/ condition: '); console.log(fPerms);
+    return fPerms[0].id;
   }
 }
