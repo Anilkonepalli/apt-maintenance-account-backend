@@ -1,8 +1,16 @@
 // [ item, flat_number, for_month, for_year, name, crdr, amount, category, recorded_at, remarks ]
+let today = new Date();
+let year = today.getFullYear();
+let month = today.getMonth() + 1; // month is from 0 to 11 hence +1 is added
+
+console.log('today: '); console.log(today);
+console.log('year: '); console.log(year);
+console.log('month'); console.log(month);
+
 let sampleData = [
-  ['test item1', '01', 12, 2016, 'tester1', 'cr', 600.00, 'Monthly maintenance', '2016-12-08T00:00:00', 'testing maint app'],
-  ['test item2', '02', 01, 2017, 'tester2', 'dr', 100.00, 'Monthly maintenance', '2016-12-08T00:00:00', 'testing maint app'],
-  ['test item3', '03', 03, 2017, 'tester3', 'cr', 600.00, 'Monthly maintenance', '2016-12-08T00:00:00', 'testing maint app']
+  ['test item1', '01', month, year, 'tester1', 'cr', 600.00, 'Monthly maintenance', today, 'testing maint app'],
+  ['test item2', '02', month, year, 'tester2', 'dr', 100.00, 'Monthly maintenance', today, 'testing maint app'],
+  ['test item3', '03', month, year, 'tester3', 'cr', 600.00, 'Monthly maintenance', today, 'testing maint app']
 ];
 let tableName = "maintenance_accounts";
 
@@ -30,7 +38,8 @@ exports.seed = function(knex, Promise) {
       crdr: data[5],
       amount: data[6],
       category: data[7],
-      remarks: data[8]
+      recorded_at: data[8],
+      remarks: data[9]
     };
   }
 
