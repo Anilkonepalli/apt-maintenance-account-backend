@@ -3,10 +3,6 @@ let today = new Date();
 let year = today.getFullYear();
 let month = today.getMonth() + 1; // month is from 0 to 11 hence +1 is added
 
-console.log('today: '); console.log(today);
-console.log('year: '); console.log(year);
-console.log('month'); console.log(month);
-
 let sampleData = [
   ['test item1', '01', month, year, 'tester1', 'cr', 600.00, 'Monthly maintenance', today, 'testing maint app'],
   ['test item2', '02', month, year, 'tester2', 'dr', 100.00, 'Monthly maintenance', today, 'testing maint app'],
