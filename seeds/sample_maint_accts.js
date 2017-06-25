@@ -4,9 +4,9 @@ let year = today.getFullYear();
 let month = today.getMonth() + 1; // month is from 0 to 11 hence +1 is added
 
 let sampleData = [
-  ['test item1', '01', month, year, 'tester1', 'cr', 600.00, 'Monthly maintenance', today, 'testing maint app'],
-  ['test item2', '02', month, year, 'tester2', 'dr', 100.00, 'Monthly maintenance', today, 'testing maint app'],
-  ['test item3', '03', month, year, 'tester3', 'cr', 600.00, 'Monthly maintenance', today, 'testing maint app']
+  ['test item1', 'G1', month, year, 'tester1', 'cr', 600.00, 'Monthly maintenance', today, 'testing maint app'],
+  ['test item2', 'G2', month, year, 'tester2', 'dr', 100.00, 'Monthly maintenance', today, 'testing maint app'],
+  ['test item3', 'G3', month, year, 'tester3', 'cr', 600.00, 'Monthly maintenance', today, 'testing maint app']
 ];
 let tableName = "maintenance_accounts";
 
