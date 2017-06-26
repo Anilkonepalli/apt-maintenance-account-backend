@@ -21,6 +21,23 @@ module.exports = {
     debug: false
   },
 
+  demo: {
+    client: 'mysql',
+    connection: {
+      database: process.env.demo_database,
+      user: process.env.demo_user,
+      password: process.env.demo_password
+    },
+    pool: {
+      min: 2,
+      max: 10
+    },
+    migrations: {
+      tableName: 'knex_migrations'
+    }
+  },
+
+
   production: {
     client: 'mysql',
     connection: {
