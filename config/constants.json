@@ -3,7 +3,7 @@
 	"server": "http://localhost:3002",
 	"appTestUser": { "email": "user1@eastgate.in",	"password": "user1secret" },
 	"logFileName": "./logs/maint-acct.log",
-	"logLevel": "debug",
+	"logLevel": "info",
 	"maxRecordsDisabled": false,
 	"maxRecords": {
 		"accounts": "10",
