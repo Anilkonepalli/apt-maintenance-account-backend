@@ -26,15 +26,17 @@ _Step 3:_  Make a copy of sample.env into .env file and make necessary updates, 
 _Step 4:_  Make necessary updates in config/constants.json file, such as Max Records in resources.  
 _Step 5:_  `knex migrate:latest`, this adds required tables in the database, check it before proceeding with next step.  
 _Step 6:_  `knex seed:run`, this adds sample data into the tables.  
-_Step 7:_  In the hosting environment, NodeJS server cannot be accessed directly.  A proxy setup is needed.  In the apache2 conf file, following changes are to be made.
+_Step 7:_  In the hosting environment, NodeJS server cannot be accessed directly.  A proxy setup is needed.  In the apache2 conf file, following changes are to be made.  
   _a:_  Edit `/etc/apache2/sites_available/<my-domain>.conf` and include lines found inside of VirtualHost tags below:  
-              `<VirtualHost>  
+```
+              <VirtualHost>  
                 ...  
                 #Proxy setup for nodejs server  
                 <Location "/my-apt/api/">  
                   ProxyPass "http://localhost:3002/api"  # assuming nodejs server is running on port 3002   in  the hosting environment  
                 </Location>  
-              </VirtualHost>`  
+              </VirtualHost>
+```
   _b:_   Restart the apache2 server.  
   _c:_   The above proxy setup will redirect now on, say a login request http://www.mydomain.com/my-apt/api/login to http://locahost:3002/api/login on the nodejs server.  
 _Step 8:_  `pm2 start app.server` will add app.server as a service on the hosting environment.  
