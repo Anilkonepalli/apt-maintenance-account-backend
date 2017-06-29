@@ -1,6 +1,6 @@
 {
   "name": "apt-maint-acct-server",
-  "version": "0.0.0",
+  "version": "0.0.2",
   "description": "NodeJS Server side coding of Apartment Maintenance Account",
   "main": "server.js",
   "scripts": {
