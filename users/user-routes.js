@@ -185,7 +185,7 @@ function post(req, res) {
 	function getCountForDupCheck(total) {
 		if(total && total[0].CNT >= constants.maxRecords.users) {
 			let msg = 'Maximum Limit Reached! User registration is closed';
-			logger.log('error', msg);
+			// logger.log('error', msg);
 			throw new Error(msg);
 		}
 		return User
@@ -196,7 +196,7 @@ function post(req, res) {
 	function doSave(count) {
 		if(count) {
 			let msg = 'Duplicate Error! email-id already exists!';
-			logger.log('debug', msg);
+			//logger.log('debug', msg);
 			throw new Error(msg);
 		}
 		logger.log('info', '/api/users >> post()...saving new user profile');
