@@ -7,7 +7,7 @@
 	"maxRecordsDisabled": false,
 	"maxRecords": {
 		"accounts": "10",
-		"users": "10",
+		"users": "100",
 		"flats": "16",
 		"residents": "32",
 		"roles": "6",

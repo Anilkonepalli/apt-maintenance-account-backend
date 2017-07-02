@@ -54,9 +54,11 @@ function createSession(request, response){
 
 			function getNewOrExistingUser(count) { // implementing inner function2
 				logger.log('info', 'Count is '+count);
-				if(count){ // if count > 0, it means user exists in the system
+				if(count > 0){ // if count > 0, it means user exists in the system
+					logger.log('info', 'social user account exist for the user');
 					return User.forge({email: profile_email}).fetch(); // returns Promise containing user model
 				} else { // if count is 0, then create new user and save it into system
+					logger.log('info', 'social user account do not exist; saving new user')
 					return new User({ // returns Promise containing new user model
 						name: profile_name,
 						social_network_id: profile_id,
@@ -69,6 +71,7 @@ function createSession(request, response){
 			function sendJwt(model) {	// implementing inner function3
 					logger.log('info', 'sendJwt(..)...Login through social network...');
 					let user = model.toJSON();
+					logger.log('info', 'social user is: '); logger.log('info', user);
 					let omitList = [
 						'password', 	'confirmed',	 'confirmation_code',
 						'created_at',	'updated_at',	 'deleted_at'
