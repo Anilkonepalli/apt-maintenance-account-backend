@@ -6,10 +6,17 @@ var request = require('superagent');
 var	User 		= require('../users/user-model');
 var	Bookshelf 	= require('../config/database');
 var	constants	= require('../config/constants');
+/*
 var providers = {
 	facebook: { url: 'https://graph.facebook.com/me?fields=id,name,email'	},
 	google: {	url: 'https://www.googleapis.com/oauth2/v3/tokeninfo'	}
-};
+}; */
+
+var providers = {
+	facebook: { url: process.env.facebook_url },
+	google: { url: process.env.google_url }
+}
+
 
 // application routing - for Social login
 function createSession(request, response){
