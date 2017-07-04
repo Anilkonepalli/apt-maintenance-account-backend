@@ -48,7 +48,7 @@ module.exports = {
  * @return {Promise<Any>}
  */
 function allows(userId, resource, model, action) {
-
+	logger.log('debug', 'UserId: '+userId+'; model id: '+model.id);
 	return new Promise( function(resolve, reject) {
 
 		getUserPermissions(userId, resource)
@@ -76,6 +76,10 @@ function allows(userId, resource, model, action) {
 				let modelJson = model.toJSON();
 				logger.log('debug', 'Authorization >> allows....Model is: ');
 				logger.log('debug', modelJson);
+				let noOwners = ['users', 'user-profile'];
+				if(noOwners.includes(resource)){
+					modelJson['owner_id'] = modelJson.id; // add an attribute for evaluation purpose
+				};
 				hasEvaluatedPerms(permissionsWithCondition, modelJson, userId)
 					? resolve(model)
 					: reject(new Error('Unauthorized Access!!!')); // three !!! here; all conditions evaluated to false, return error with message

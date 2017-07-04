@@ -23,6 +23,7 @@ function put(req, res) {
 	let email = req.body.email;
 	let password = req.body.password;
 	let model;
+	let isSocial = false; // is the user logged in through social network
 
 	User
 		.forge({id: req.params.id})
@@ -35,11 +36,18 @@ function put(req, res) {
 
 	function doAuth(model) {
 		this.model = model;
-		return auth.allowsEdit(req.decoded.id, 'users', model);
+		this.isSocial = this.model.toJSON().social_network_id !== null;
+		return auth.allowsEdit(req.decoded.id, 'user-profile', model);
 	}
 	function checkForDuplicate(granted){ // implementing inner function1
 		logger.log('info', 'checkForDuplicate(...)!');
 		logger.log('info', 'granted...'+granted);
+		if(this.isSocial) {// no dup check for social user, so just return count as 0 (zero)
+			this.email = null; // nullify any email string found in the request parameter
+			return new Promise((resolve) => resolve(0));
+		}
+		if(this.model.toJSON().email === this.email) // no dup check if no change in email, just return 0 (zero)
+			return new Promise((resolve) => resolve(0));
 		return User
 			.where({ email: email })
 		  .count('id'); // returns Promise containing count

@@ -4,6 +4,7 @@ var	bcrypt 	= require('bcrypt');
 var request = require('superagent');
 
 var	User 		= require('../users/user-model');
+var Role 		= require('../authorization/role-model');
 var	Bookshelf 	= require('../config/database');
 var	constants	= require('../config/constants');
 
@@ -20,6 +21,8 @@ function createSession(request, response){
 	var profile_name;
 	var profile_id;
 	var profile_email;
+	var userCount;
+	var userModel;
 
 	if( !network || !socialToken){
 		return response.status(400).send("Network name and Social token are needed");
@@ -27,6 +30,8 @@ function createSession(request, response){
 	validateWithProvider(network, socialToken)
 		.then(checkUserAlreadyExist)							// calling inner function1
 		.then(getNewOrExistingUser)								// calling inner function2
+		.then(getDefaultRole)
+		.then(assignDefaultRole)
 		.then(sendJwt)														// calling inner function3
 		.catch(sendError);												// calling inner function4
 
@@ -56,6 +61,7 @@ function createSession(request, response){
 
 			function getNewOrExistingUser(count) { // implementing inner function2
 				logger.log('info', 'Count is '+count);
+				userCount = count;
 				if(count > 0){ // if count > 0, it means user exists in the system
 					logger.log('info', 'social user account exist for the user');
 					return User.forge({email: profile_email}).fetch(); // returns Promise containing user model
@@ -65,14 +71,30 @@ function createSession(request, response){
 						name: profile_name,
 						social_network_id: profile_id,
 						social_network_name: network,
-						email: profile_email
+						email: profile_email,
+						confirmed: 1			
 					}).save();
 				}
 			}
 
-			function sendJwt(model) {	// implementing inner function3
+			function getDefaultRole(uModel) {
+				userModel = uModel;
+				return Role.forge({name: process.env.defaultRole}).fetch(); // default role is 'member-t'
+			}
+
+			function assignDefaultRole(rModel){
+				if(userCount > 0) { // not a new user, then exit
+					logger.log('info', 'No linking for existing user to a default role');
+					return new Promise((resolve) => resolve(false));
+				}
+				let roleId = rModel.id;
+				logger.log('info', 'Linking userId: '+userModel.id+'with roleId: '+roleId);
+				userModel.roles().attach(roleId);
+				return new Promise((resolve) => resolve(true));
+			}
+			function sendJwt(status) {	// implementing inner function3
 					logger.log('info', 'sendJwt(..)...Login through social network...');
-					let user = model.toJSON();
+					let user = userModel.toJSON();
 					logger.log('info', 'social user is: '); logger.log('info', user);
 					let omitList = [
 						'password', 	'confirmed',	 'confirmation_code',
