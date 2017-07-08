@@ -244,7 +244,8 @@ function updateBalance(model) {
 	jmodel = model.toJSON();
 	jmodels = [];
 	currentBalance = 0;
-	logger.log('info', 'update balance in progress....jmodel recorded_at: '+jmodel.recorded_at);
+	logger.log('debug','=========================== Update Balance Starts ===================================');
+	logger.log('debug', 'Update balance in progress....jmodel recorded_at: '+jmodel.recorded_at);
 	return MaintenanceAccounts
 		.query('where', 'recorded_at', '<', jmodel.recorded_at)
 		.orderBy('recorded_at', 'DESC')
@@ -257,17 +258,17 @@ function updateBalance(model) {
 
 		function getModelsAddedOnLaterDate(prevModel){
 			let modelForBalance = null;
-			logger.log('info','Previous model is: '); logger.log('info', prevModel);
+			logger.log('debug','Previous model is: '); logger.log('debug', prevModel);
 			if(prevModel) {
 				recordDate = prevModel.attributes.recorded_at;
 				currentBalance = prevModel.attributes.balance;
-				logger.log('info','Retrieval based on Record Date: '+recordDate);
-				logger.log('info','Current Balance as: '+currentBalance);
+				logger.log('debug','Retrieval based on Record Date: '+recordDate);
+				logger.log('debug','Current Balance as: '+currentBalance);
 				return MaintenanceAccounts
 					.query('where', 'recorded_at', '>', recordDate)
 					.fetch();
 			} else {
-				logger.log('info', 'No prevous model; hence, retrieving all records...');
+				logger.log('debug', 'No prevous model; hence, retrieving all records...');
 				return MaintenanceAccount.fetchAll();
 			}
 		}
@@ -277,17 +278,19 @@ function updateBalance(model) {
 					(model) => model.recorded_at, // sort criteria 1
 					(model) => model.id						// sort criteria 2
 				]);
-			logger.log('info', smodels.length+' records undergo balance update' );
-			logger.log('info', 'using current balance as: '+currentBalance);
+			logger.log('debug', smodels.length+' records undergo balance update' );
+			logger.log('debug', 'using current balance as: '+currentBalance);
 			return calculateBalanceAndApply(smodels, currentBalance);
 		}
 		function sendResponse(models) {
+			logger.log('debug','============================= Update Balance Ends =================================');
 			return new Promise(function(resolve, reject){
 				1 > 0 ? resolve(model) : reject(new Error('Cannot calc balance'));
 			});
 		}
 		function sendError(err) {
 			logger.log('error', err.message);
+			logger.log('debug','============================ Update Balance Ends with Errors ==================================');
 			return res.status(500).json({error: true, data: {message: err.message}});
 		}
 }
@@ -308,8 +311,9 @@ function calculateBalanceAndApply(jmodels, currentBalance) {
 
 	for(i=0; i < jmodels.length; i++){ // calculate new balance and apply
 		let acct = jmodels[i];
-		currBal += (acct.crdr === 'cr') ? acct.amount : 0;
-		currBal -= (acct.crdr === 'dr') ? acct.amount : 0;
+		let crdr = acct.crdr.toLowerCase();
+		currBal += (crdr === 'cr') ? acct.amount : 0;
+		currBal -= (crdr === 'dr') ? acct.amount : 0;
 		aPromise = new MaintenanceAccount({id: acct.id})
 			.save({balance: currBal}, {patch: true}); // save the balance into database
 		promises.push(aPromise);
