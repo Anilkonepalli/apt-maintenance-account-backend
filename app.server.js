@@ -89,6 +89,9 @@ app.route("/api/maintenance-accounts/:id")
 	.delete(account.del)
 	.put(account.put);
 
+app.route("/api/maintenance-accounts/summary/list")
+	.get(account.getSummaries);
+
 
 /////////////////////////  ACCOUNT PERIODIC ROUTES  //////////////////////////////
 let accountp = require('./accounts/maint-acct-periodic-routes');

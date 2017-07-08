@@ -229,6 +229,61 @@ function del(req, res) {
 }
 
 
+// on routes that end in /maintenance-accounts/summary/list
+// ---------------------------------------------------------------------
+function getSummaries(req, res) {
+
+	MaintenanceAccount
+		.fetchAll()
+		.then(doAuth)
+		.then(sendResponse)
+		.catch(sendError);
+
+	function doAuth(models) {
+		logger.log('info', '/api/maintenance-accounts >> getSummaries()...');
+		return auth.allowsView(req.decoded.id, 'account-summary', models.toJSON());
+	}
+
+	// sends Account models after sorting; sorting is based on its recorded_at field and then id field
+	function sendResponse(models) {
+		logger.log('info', 'maint-acct-routes >>getSummaries()...sendResponse(models)... ');
+		//logger.log('info', models);
+		let summaries = {};
+		let summary;
+		let key;
+		let crdr;
+		let totalDiff = 0; // initial amount is zero
+		let result = [];
+		models.forEach(each => {
+			key = each.for_year + '-' + each.for_month;
+			if(! summaries[key]){
+				summaries[key] = {cr: 0, dr: 0, diff: 0, cumulativeDiff: 0};
+			}
+			summary = summaries[key];
+			crdr = each.crdr.toLowerCase();
+			if(crdr === 'cr') summary.cr += each.amount;
+			if(crdr === 'dr') summary.dr += each.amount;
+		});
+		Object.keys(summaries).forEach(each => {
+			summary = summaries[each];
+			summary.diff = summary.cr - summary.dr;
+			summary.cumulativeDiff = summary.diff + totalDiff;
+			totalDiff += summary.diff;
+			summary['yr_mo'] = each;
+			result.push(summary);
+		});
+		return res.json(result);
+	}
+
+	function sendError(err) {
+		logger.log('error', err.message);
+		return res.status(500).json({error: true, data: {message: err.message}});
+	}
+}
+
+
+
+
 /**   Private Function
  * First retrieve record for balance; record previous to added/updated/deleted record
  * is retrieved to know balance and apply it to subsequent records.
@@ -321,4 +376,4 @@ function calculateBalanceAndApply(jmodels, currentBalance) {
 	return Promise.all(promises);
 }
 
-module.exports = { getAll, post, get, put, del };
+module.exports = { getAll, post, get, put, del, getSummaries };

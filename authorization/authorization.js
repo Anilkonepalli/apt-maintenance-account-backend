@@ -48,7 +48,9 @@ module.exports = {
  * @return {Promise<Any>}
  */
 function allows(userId, resource, model, action) {
-	logger.log('debug', 'UserId: '+userId+'; model id: '+model.id);
+	logger.log('debug', 'UserId: '+userId);
+	logger.log('debug', 'model is: ');
+	logger.log('debug', model);
 	return new Promise( function(resolve, reject) {
 
 		getUserPermissions(userId, resource)
