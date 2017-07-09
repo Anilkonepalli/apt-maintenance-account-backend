@@ -11,6 +11,9 @@
 		"flats": "16",
 		"residents": "32",
 		"roles": "6",
-		"permissions": "24"
+		"permissions": "24",
+		"perUser": {
+				"infos": "10"
+		}
 	}
 }
