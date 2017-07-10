@@ -7,7 +7,9 @@ var User 		= Bookshelf.Model.extend({
 	roles: function() {
 		return this.belongsToMany(Role);
 	},
-
+	infos: function() {
+		return this.hasMany(Info);
+	},
 	hello: function(){
 		logger.log('info', 'Hello, this is User Model');
 	}
@@ -15,6 +17,10 @@ var User 		= Bookshelf.Model.extend({
 
 var Role = Bookshelf.Model.extend({
 	tableName: 'roles'
+});
+
+var Info = Bookshelf.Model.extend({
+	tableName: 'infos'
 });
 
 module.exports = Bookshelf.model('User', User);

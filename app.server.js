@@ -54,6 +54,10 @@ app.use(jwt.verifyToken);
 ////////////  ALL ROUTES BELOW REQUIRES JWT, ie. User should have logged In ///////
 
 ///////////////////////  USER ROUTES  /////////////////////////////////
+app.route("/api/users/myinfos/:id")
+	.get(user.getInfos)
+	.put(user.putInfos);
+
 app.route("/api/users/myroles/:id")
 	.get(user.getRoles)
 	.put(user.putRoles);
@@ -78,16 +82,6 @@ app.route("/api/userprofile/:id")
 	.get(userprofile.get)
 	.put(userprofile.put);
 
-
-///////////////////////// INFOS ROUTES  ////////////////////////////////
-/*
-let info = require('./infos/routes');
-app.route("/api/infos")
-	.post(info.post);  // only post of new infos; existing infos are deleted
-
-app.route("/api/infos/:userId")
-	.get(info.get); // only get infos; no update or delete
-*/
 
 /////////////////////////  ACCOUNT ROUTES  //////////////////////////////
 let account = require('./accounts/maint-acct-routes');

@@ -6,6 +6,7 @@ var auth 								= require('../authorization/authorization');
 var emailer							= require('../authentication/emailer');
 var randomstring				= require('randomstring');
 var constants 					= require('../config/constants.json');
+var knex								= Bookshelf.knex;
 
 var Users 	= Bookshelf.Collection.extend({
 	model: User
@@ -26,14 +27,28 @@ function get(req, res) {
 	if(req.params.id === '0') { // respond with a new user model
 		res.json(new User());
 	} else { // respond with fetched user model
-		User.forge( {id: req.params.id} ).fetch()
+		User.forge( {id: req.params.id} ).fetch({withRelated: ['infos']})
 			.then(model => res.json(model))
 			.catch(err => res.send(err));
 	}
 }
 
+// on routes that end in /users/myinfos/:id to get an User with associated infos
+// Note: Below function is redundant as get on User fetches infos; so below method
+// is not used for now.
+// ---------------------------------------------------------------------
+function getInfos(req,res) {
+	User.forge( {id: req.params.id} ).fetch({withRelated: ['infos']})
+		.then(model => {
+			let modelJson = model.toJSON();
+			res.json(modelJson.infos);
+		})
+		.catch(err => res.send(err));
+}
 
-// on routes that end in /Users/rolesfor/:id to get an User with associated roles
+
+
+// on routes that end in /Users/myroles/:id to get an User with associated roles
 // ---------------------------------------------------------------------
 function getRoles(req,res) {
 	User.forge( {id: req.params.id} ).fetch({withRelated: ['roles']})
@@ -120,6 +135,56 @@ function put(req, res) {
 	}
 
 }
+
+
+// on routes that end in /users/myinfos/:id to update an existing User with my infos
+// Note: Below function is not used as the behavior is covered while saving/updating
+// User
+// --------------------------------------------------------------------------------------------
+function putInfos(req, res) {
+
+	let userModel;
+	logger.log('debug', 'Inside user-routes >> putInfos(req,res)...');
+	logger.log('debug', 'req params id: '+req.params.id);
+	User.forge({id: req.params.id}).fetch({require: true})
+		.then(detachExistingInfos)
+		.then(attachNewInfos)
+		.then(sendResponse)
+		.catch(errorToNotify);
+
+	function detachExistingInfos(model){
+		userModel = model;
+		logger.log('debug', 'Inside user-routes >> detachExistingInfos(model)...');
+		logger.log('debug', model.toJSON());
+		//return model.infos().destroy();
+		return knex('infos').where('user_id', req.params.id).del(); // it deletes all rows where user_id = req.params.id
+	}
+
+	function attachNewInfos(delResult){
+		logger.log('debug', 'inside user-routes >> attachNewInfos(model)...');
+		logger.log('debug', userModel.toJSON());
+		logger.log('info', 'myinfos...');
+		logger.log('info', req.body.myInfos);
+		let promises = [];
+		JSON.parse(req.body.myInfos).forEach(each => {
+			logger.log('info', each);
+			promises.push( knex('infos').insert(each) );
+		});
+		//return userModel.infos().attach(req.body.myInfos); // attach new infos
+		return Promise.all(promises);
+	}
+
+	function sendResponse(aColl) {
+		logger.log('debug', 'Inside user-routes >> putInfos() >> sendResponse(aColl)...');
+		res.json({error:false, data:{ message: 'My Infos are attached'}});
+	}
+
+	function errorToNotify(err){
+		res.status(500).json({error: true, data: {message: err.message}});
+	}
+
+}
+
 
 
 // on routes that end in /roles/myroles/:id to update an existing User with myroles
@@ -301,4 +366,4 @@ function confirmSignup(req, res) {
 
 
 
-module.exports = { getAll, post, get, put, del, getRoles, getPermissions, putRoles, getAllPermissions, confirmSignup };
+module.exports = { getAll, post, get, put, del, getInfos, putInfos, getRoles, putRoles, getPermissions, getAllPermissions, confirmSignup };
