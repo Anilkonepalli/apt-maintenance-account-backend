@@ -229,11 +229,12 @@ function putRoles(req, res) {
 // ---------------------------------------------------------------------
 function post(req, res) {
 	logger.log('info', 'adding new user...name: '+req.body.name+', first name: '+req.body.first_name);
-	let tempModel = null;
+	let model = null;
 
 	getTotalForMaxCheck()
 	.then(getCountForDupCheck)
 	.then(doSave)
+	.then(addInfos)
 	.then(sendResponse)
 	.catch(error);
 
@@ -274,11 +275,22 @@ function post(req, res) {
 			confirmation_code: randomstring.generate(50)
 		}).save();
 	}
-
+	function addInfos(model){
+		this.model = model;
+		logger.log('info', 'infos...');
+		logger.log('info', req.body.infos);
+		let promises = [];
+		req.body.infos.forEach(each => {
+			each['user_id'] = model.id;
+			logger.log('info', each);
+			promises.push( knex('infos').insert(each) );
+		});
+		return Promise.all(promises);
+	}
 	function sendResponse(model) {
 		let can_send_email = process.env.can_send_email === 'true';
 		res.json({error: false, data:{emailed: can_send_email}});
-		let modelJson = model.toJSON();
+		let modelJson = this.model.toJSON();
 		let confirmUrl = process.env.ip_address+'signup/'+modelJson.confirmation_code;
 		let template = {
 			subject: 'Thanks for Signing up!',
