@@ -96,7 +96,7 @@ function put(req, res) {
 console.log('Request body is: ...'); console.log(req.body);
 	User
 		.forge({id: req.params.id})
-		.fetch({require: true})
+		.fetch({require: true, withRelated: ['infos']})
 		.then(doAuth)
 		.then(checkForDuplicate)
 		.then(doUpdate)
@@ -144,7 +144,9 @@ console.log('Request body is: ...'); console.log(req.body);
 		let promises = [];
 		let aPromise;
 		req.body.infos.forEach(eachUi => {
-			existingInfo = this.model.infos.filter(eachDb => eachDb.key === eachUi.key);
+			let infos = this.model.toJSON().infos;
+			console.log('model infos in db...'); console.log(infos);
+			existingInfo = infos.filter((eachDb) => eachDb.key === eachUi.key);
 			if(existingInfo.length > 0){ // info exists in db, check whether it is changed
 				if(!eachUi.value){ // info is null or empty, then remove from db
 					aPromise = knex('infos')
@@ -152,7 +154,7 @@ console.log('Request body is: ...'); console.log(req.body);
 											.andWhere('key', '=', eachUi.key)
 											.del();
 					promises.push(aPromise);
-				} else if(existingInfo.value !== eachUi.value)){ // value modified w.r.t. value in db
+				} else if(existingInfo.value !== eachUi.value) { // value modified w.r.t. value in db
 					aPromise = knex('infos')
 						.where('user_id', '=', this.model.id)
 						.andWhere('key', '=', eachUi.key)
