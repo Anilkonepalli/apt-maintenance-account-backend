@@ -1,4 +1,6 @@
 var Bookshelf 	= require('../config/database');
+//require('./info-model');
+//require('../authorization/role-model');
 
 var User 		= Bookshelf.Model.extend({
 	tableName: 'users',
@@ -9,9 +11,6 @@ var User 		= Bookshelf.Model.extend({
 	},
 	infos: function() {
 		return this.hasMany(Info);
-	},
-	hello: function(){
-		logger.log('info', 'Hello, this is User Model');
 	}
 });
 
@@ -23,4 +22,8 @@ var Info = Bookshelf.Model.extend({
 	tableName: 'infos'
 });
 
+
+
+
+// module.exports = Bookshelf.model('User', User);
 module.exports = Bookshelf.model('User', User);

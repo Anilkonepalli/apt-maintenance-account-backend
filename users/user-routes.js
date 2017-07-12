@@ -93,7 +93,7 @@ function put(req, res) {
 	let infos = req.body.infos;
 	let isSocial = false; // is the user logged in through social network
 	let model;
-console.log('Request body is: ...'); console.log(req.body);
+// console.log('Request body is: ...'); console.log(req.body);
 	User
 		.forge({id: req.params.id})
 		.fetch({require: true, withRelated: ['infos']})
@@ -116,8 +116,8 @@ console.log('Request body is: ...'); console.log(req.body);
 			this.email = null; // nullify any email string found in the request parameter
 			return new Promise((resolve) => resolve(0));
 		}
-		console.log('model is:...'); console.log(this.model.toJSON());
-		console.log('current email...'); console.log(req.body.email);
+		//console.log('model is:...'); console.log(this.model.toJSON());
+		//console.log('current email...'); console.log(req.body.email);
 		if(this.model.toJSON().email === req.body.email) // no dup check if no change in email, just return 0 (zero)
 			return new Promise((resolve) => resolve(0));
 		return User
@@ -139,13 +139,13 @@ console.log('Request body is: ...'); console.log(req.body);
 		});
 	}
 	function updateInfos() {
-		console.log('modified infos...'); console.log(req.body.infos);
+		//console.log('modified infos...'); console.log(req.body.infos);
 		let existingInfo;
 		let promises = [];
 		let aPromise;
 		req.body.infos.forEach(eachUi => {
 			let infos = this.model.toJSON().infos;
-			console.log('model infos in db...'); console.log(infos);
+			//console.log('model infos in db...'); console.log(infos);
 			existingInfo = infos.filter((eachDb) => eachDb.key === eachUi.key);
 			if(existingInfo.length > 0){ // info exists in db, check whether it is changed
 				if(!eachUi.value){ // info is null or empty, then remove from db
@@ -360,13 +360,22 @@ function post(req, res) {
 
 // on routes that end in /users/:id to delete an user
 // ---------------------------------------------------------------------
-function del(req, res) { // using full form 'delete' causes error, hence short form 'del' is used here - yet to analyze root cause
-	User.forge({id: req.params.id}).fetch({require: true})
-		.then(doDelete)
+function del(req, res) { // using full form 'delete' causes error, so 'del' is used
+	let userModel;
+
+	User.forge({id: req.params.id}).fetch({require: true, withRelated:['infos']})
+		.then(deleteDependants)
+		.then(doDeleteUser)
 		.catch(notifyError);
 
-	function doDelete(model){
-		model.destroy()
+	function deleteDependants(model){
+		console.log('delete infos...'); console.log(model.infos());
+		userModel = model;
+		//return knex('infos').where('user_id', userModel.id).del();
+		return userModel.infos().destroy();
+	}
+	function doDeleteUser(){
+		userModel.destroy()
 			.then( () => res.json({error: true, data: {message: 'User model successfully deleted'} }))
 			.catch( (err) => res.status(500).json({error: true, data: {message: err.message}}));
 	}
