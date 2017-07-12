@@ -8,8 +8,14 @@ var randomstring				= require('randomstring');
 var constants 					= require('../config/constants.json');
 var knex								= Bookshelf.knex;
 
+var Info 							  = require('./info-model');
+
 var Users 	= Bookshelf.Collection.extend({
 	model: User
+});
+
+var Infos = Bookshelf.Collection.extend({
+	model: Info
 });
 
 // on routes that end in /users
@@ -93,7 +99,7 @@ function put(req, res) {
 	let infos = req.body.infos;
 	let isSocial = false; // is the user logged in through social network
 	let model;
-// console.log('Request body is: ...'); console.log(req.body);
+console.log('Password: ...'); console.log(password);
 	User
 		.forge({id: req.params.id})
 		.fetch({require: true, withRelated: ['infos']})
@@ -130,12 +136,13 @@ function put(req, res) {
 		 throw new Error('Duplicate Error!! email-id already exists!!');
 	 	}
 		logger.log('info', '/api/users >> put()...updating user details');
+		let encyptedPassword = password ? bcrypt.hashSync(password, 10) : password;
 		return this.model.save({
 			name: userName || this.model.get('name'),
 			first_name: firstName || this.model.get('first_name'),
 			last_name: lastName || this.model.get('last_name'),
 			email: email || this.model.get('email'),
-			password: bcrypt.hashSync(password, 10) || this.model.get('password')
+			password: encyptedPassword || this.model.get('password')
 		});
 	}
 	function updateInfos() {
@@ -364,15 +371,25 @@ function del(req, res) { // using full form 'delete' causes error, so 'del' is u
 	let userModel;
 
 	User.forge({id: req.params.id}).fetch({require: true, withRelated:['infos']})
+		.then(getDependants)
 		.then(deleteDependants)
 		.then(doDeleteUser)
 		.catch(notifyError);
 
-	function deleteDependants(model){
-		console.log('delete infos...'); console.log(model.infos());
+	// for now, a work around to delete dependants is done here
+	function getDependants(model){ // yet to explore a better way to delete dependants with soft delete
+		// console.log('model to delete: '); console.log(model);
 		userModel = model;
-		//return knex('infos').where('user_id', userModel.id).del();
-		return userModel.infos().destroy();
+		return Infos.forge({user_id: model.id}).fetch({require: true});
+	}
+
+	function deleteDependants(infos){
+		console.log('delete infos...'); console.log(infos);
+		let promises = [];
+		infos.forEach(each => {
+			promises.push( each.destroy() );
+		});
+		return Promise.all(promises);
 	}
 	function doDeleteUser(){
 		userModel.destroy()

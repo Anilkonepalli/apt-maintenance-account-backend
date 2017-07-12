@@ -1,22 +1,24 @@
-var	User 								= require('../users/user-model');
-var	Bookshelf 					= require('../config/database');
-var getUserPermissions 	= require('../authorization/userPermissionsOnResource');
-var bcrypt 							= require('bcrypt');
-var auth 								= require('../authorization/authorization');
-
+//var	User 								= require('../users/user-model');
+//var	Bookshelf 					= require('../config/database');
+//var getUserPermissions 	= require('../authorization/userPermissionsOnResource');
+//var bcrypt 							= require('bcrypt');
+//var auth 								= require('../authorization/authorization');
+var userRoute           = require('../users/user-routes');
 
 // on routes that end in /userprofile/:id to get an user
 // ---------------------------------------------------------------------
 function get(req, res) {
-		User.forge( {id: req.params.id} ).fetch()
+	return userRoute.get(req, res);
+/*		User.forge( {id: req.params.id} ).fetch()
 			.then(model => res.json(model))
-			.catch(err => res.send(err));
+			.catch(err => res.send(err)); */
 }
 
 // on routes that end in /userprofile/:id to update an existing user
 // ---------------------------------------------------------------------
 function put(req, res) {
-
+	return userRoute.put(req, res);
+/*
 	let userName = req.body.name;
 	let firstName = req.body.first_name;
 	let lastName = req.body.last_name;
@@ -72,7 +74,7 @@ function put(req, res) {
 	function error(err) {
 		logger.log('error', err.message);
 		return res.status(500).json({error: true, data: {message: err.message}});
-	}
+	}  */
 
 }
 

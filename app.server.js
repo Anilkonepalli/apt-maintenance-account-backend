@@ -43,7 +43,7 @@ let user = require('./users/user-routes');
 app.route("/api/users/").post(user.post);
 app.route("/api/signup/:code").put(user.confirmSignup);
 
-let userprofile = require('./userprofile/routes');
+//let userprofile = require('./userprofile/routes');
 
 let socialLogin = require('./authentication/social-login-routes');
 app.route("/api/sociallogin").post(socialLogin.createSession);
@@ -79,8 +79,10 @@ app.route("/api/users/:id")
 
 /////////////////////////  USERPROFILE ROUTES  //////////////////////////////
 app.route("/api/userprofile/:id")
-	.get(userprofile.get)
-	.put(userprofile.put);
+	.get(user.get)
+	.put(user.put);
+	//.get(userprofile.get)
+	//.put(userprofile.put);
 
 
 /////////////////////////  ACCOUNT ROUTES  //////////////////////////////
