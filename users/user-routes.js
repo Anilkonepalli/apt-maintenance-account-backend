@@ -90,24 +90,36 @@ function put(req, res) {
 	let lastName = req.body.last_name;
 	let email = req.body.email;
 	let password = req.body.password;
+	let infos = req.body.infos;
+	let isSocial = false; // is the user logged in through social network
 	let model;
-
+console.log('Request body is: ...'); console.log(req.body);
 	User
 		.forge({id: req.params.id})
 		.fetch({require: true})
 		.then(doAuth)
 		.then(checkForDuplicate)
 		.then(doUpdate)
+		.then(updateInfos)
 		.then(sendResponse)
 		.catch(error);
 
 	function doAuth(model) {
 		this.model = model;
+		this.isSocial = this.model.toJSON().social_network_id !== null;
 		return auth.allowsEdit(req.decoded.id, 'users', model);
 	}
 	function checkForDuplicate(granted){ // implementing inner function1
 		logger.log('info', 'checkForDuplicate(...)!');
 		logger.log('info', 'granted...'+granted);
+		if(this.isSocial) {// no dup check for social user, so just return count as 0 (zero)
+			this.email = null; // nullify any email string found in the request parameter
+			return new Promise((resolve) => resolve(0));
+		}
+		console.log('model is:...'); console.log(this.model.toJSON());
+		console.log('current email...'); console.log(req.body.email);
+		if(this.model.toJSON().email === req.body.email) // no dup check if no change in email, just return 0 (zero)
+			return new Promise((resolve) => resolve(0));
 		return User
 			.where({ email: email })
 		  .count('id'); // returns Promise containing count
@@ -125,6 +137,36 @@ function put(req, res) {
 			email: email || this.model.get('email'),
 			password: bcrypt.hashSync(password, 10) || this.model.get('password')
 		});
+	}
+	function updateInfos() {
+		console.log('modified infos...'); console.log(req.body.infos);
+		let existingInfo;
+		let promises = [];
+		let aPromise;
+		req.body.infos.forEach(eachUi => {
+			existingInfo = this.model.infos.filter(eachDb => eachDb.key === eachUi.key);
+			if(existingInfo.length > 0){ // info exists in db, check whether it is changed
+				if(!eachUi.value){ // info is null or empty, then remove from db
+					aPromise = knex('infos')
+											.where('user_id', '=', this.model.id)
+											.andWhere('key', '=', eachUi.key)
+											.del();
+					promises.push(aPromise);
+				} else if(existingInfo.value !== eachUi.value)){ // value modified w.r.t. value in db
+					aPromise = knex('infos')
+						.where('user_id', '=', this.model.id)
+						.andWhere('key', '=', eachUi.key)
+						.update({
+							value: eachUi.value
+						});
+					promises.push(aPromise);
+				}
+			} else { // no info in db, so add one
+				eachUi['user_id'] = this.model.id;
+				aPromise = knex('infos').insert(eachUi);
+			}
+		});
+		return Promise.all(promises);
 	}
 	function sendResponse() {
 		return res.json({error: false, data:{message: 'User profile updated'}});
