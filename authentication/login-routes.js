@@ -36,7 +36,7 @@ function createSession(request, response){
 				'password',		 'confirmed',		 'confirmation_code',
 				'created_at',	 'updated_at',	 'deleted_at'
 			];
-			logger.log('info', '/api/login >> createSession()...');
+			logger.log('debug', '/api/login >> createSession()...');
 			return response.status(201).send({
 				id_token: jwt.sign(_.omit(user, omitList), constants.secret, {expiresIn: '2h', issuer: 'Apt-Maint'})
 			});
@@ -49,7 +49,7 @@ function createSession(request, response){
 
 		// clear the existing password reset request, as user is able to login with known password
 		function clearPasswordReset(model) {
-			logger.log('info', 'Clearing out password-reset request!');
+			logger.log('debug', 'Clearing out password-reset request!');
 			model.save({
 				confirmation_code: null
 			});
@@ -79,8 +79,8 @@ function forgotPassword(req, res){
 			throw new Error(msg);
 		}
 		let user = model.toJSON();
-		logger.log('info', 'User object: ');
-		logger.log('info', user);
+		logger.log('debug', 'User object: ');
+		logger.log('debug', user);
 		if ( !user.confirmed ) { // User is registered but is not confirmed
 			msg = 'Email confirmation pending!';
 			logger.log('error', msg);
@@ -107,8 +107,8 @@ function forgotPassword(req, res){
 							+ '<a href="' + confirmUrl + '">' + confirmUrl + '</a>'
 							+'.<br><br><i>If the link does not work, copy and paste it into browser url.</i>'
 		};
-		logger.log('info', 'Template is: ');
-		logger.log('info', template);
+		logger.log('debug', 'Template is: ');
+		logger.log('debug', template);
 		emailer.sendMailTo(req.body.email, template);
 		res.json({error: false, data:{emailed: can_send_email}});
 	}
@@ -122,7 +122,6 @@ function forgotPassword(req, res){
 
 // reset password
 function resetPassword(req, res){
-	//console.log('req object: '); console.log(req);
 	if( !req.body.token ){
 		return res.status(400).send("Missing token with reset-password");
 	}

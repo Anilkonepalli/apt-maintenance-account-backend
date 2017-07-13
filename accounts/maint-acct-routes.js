@@ -16,8 +16,8 @@ var MaintenanceAccounts = Bookshelf.Collection.extend({
 function getAll(req, res) {
 	let fromDate = new Date(req.query.fromDate).toISOString().split('T')[0];
 	let toDate = new Date(req.query.toDate).toISOString().split('T')[0];
-	logger.log('info', 'from date string format: '); logger.log('info', fromDate);
-	logger.log('info', 'to date string format: '); logger.log('info', toDate);
+	logger.log('debug', 'from date string format: '); logger.log('debug', fromDate);
+	logger.log('debug', 'to date string format: '); logger.log('debug', toDate);
 
 	MaintenanceAccounts
 		.query('where', 'recorded_at', '>=', fromDate)
@@ -28,14 +28,14 @@ function getAll(req, res) {
 		.catch(sendError);
 
 	function doAuth(models) {
-		logger.log('info', '/api/maintenance-accounts >> getAll()...');
+		logger.log('debug', '/api/maintenance-accounts >> getAll()...');
 		return auth.allowedList(req.decoded.id, 'accounts', models.toJSON());
 	}
 
 	// sends Account models after sorting; sorting is based on its recorded_at field and then id field
 	function sendResponse(models) {
-		logger.log('info', 'maint-acct-routes >>getAll()...sendResponse(models)... ');
-		logger.log('info', models);
+		logger.log('debug', 'maint-acct-routes >>getAll()...sendResponse(models)... ');
+		logger.log('debug', models);
 		let sortedModels = _.sortBy(models, [
 				function(model){ return model.recorded_at; }, // sort criteria 1
 				function(model){ return model.id;	}						// sort criteria 2
@@ -65,7 +65,7 @@ function get(req, res) {
 			.catch(sendError);
 	}
 	function doAuth(model) {
-		logger.log('info', '/api/maintenance-accounts >> get()...');
+		logger.log('debug', '/api/maintenance-accounts >> get()...');
 		return auth.allowsView(req.decoded.id, 'accounts', model);
 	}
 	function sendError(err) {
@@ -104,11 +104,11 @@ function put(req, res) {
 				attributesChanged += 'recorded_at';
 				oldRecordDate = model._previousAttributes.recorded_at;
 				newRecordDate = model.attributes.recorded_at;
-				logger.log('info', 'Old Record Date is: '+oldRecordDate+'; New Record date is: '+newRecordDate);
+				logger.log('debug', 'Old Record Date is: '+oldRecordDate+'; New Record date is: '+newRecordDate);
 				if(oldRecordDate < newRecordDate) {
-					logger.log('info', 'Old Record Date is earlier; hence start balance calc from this old record date');
+					logger.log('debug', 'Old Record Date is earlier; hence start balance calc from this old record date');
 					modelCopy.attributes.recorded_at = oldRecordDate;
-					logger.log('info', 'model used for update is: '); logger.log('info', modelCopy);
+					logger.log('debug', 'model used for update is: '); logger.log('debug', modelCopy);
 				} else {
 					modelCopy.attributes.recorded_at = newRecordDate;
 				}
@@ -118,13 +118,13 @@ function put(req, res) {
 
 		model.on('saved', (obj) => {
 			if(attributesChanged){
-				logger.log('info', "model's attribute(s) "+attributesChanged+' is/are changed');
-				logger.log('info', 'model copy is: '); logger.log('info', modelCopy);
+				logger.log('debug', "model's attribute(s) "+attributesChanged+' is/are changed');
+				logger.log('debug', 'model copy is: '); logger.log('debug', modelCopy);
 				updateBalance(modelCopy);
 			}
 		});
 
-		logger.log('info', '/api/maintenance-accounts >> put()...');
+		logger.log('debug', '/api/maintenance-accounts >> put()...');
 		return model.save({
 			item: req.body.item || model.get('item'),
 			name: req.body.name || model.get('name'),
@@ -171,7 +171,7 @@ function post(req, res) {
 			logger.log('error', msg);
 			throw new Error(msg);
 		}
-		logger.log('info', '/api/maintenance-accounts >> post()->doSave(..)');
+		logger.log('debug', '/api/maintenance-accounts >> post()->doSave(..)');
 		return MaintenanceAccount.forge({
 			item: req.body.item,
 			name: req.body.name,
@@ -212,10 +212,10 @@ function del(req, res) {
 		return auth.allowsDelete(req.decoded.id, 'accounts', model);
 	}
 	function doDelete(model){
-		logger.log('info', '/api/maintenance-accounts >> del()...');
+		logger.log('debug', '/api/maintenance-accounts >> del()...');
 		let modelCopy = model.clone();  // after model deletion, it cannot be accesses, so clone it
 		model.on('destroying', (obj) => {
-			logger.log('info', "Triggered balance re-calculation on removel of this model");
+			logger.log('debug', "Triggered balance re-calculation on removel of this model");
 			updateBalance(modelCopy);
 		});
 		return model.destroy();
@@ -240,14 +240,14 @@ function getSummaries(req, res) {
 		.catch(sendError);
 
 	function doAuth(models) {
-		logger.log('info', '/api/maintenance-accounts >> getSummaries()...');
+		logger.log('debug', '/api/maintenance-accounts >> getSummaries()...');
 		return auth.allowsView(req.decoded.id, 'account-summary', models.toJSON());
 	}
 
 	// sends Account models after sorting; sorting is based on its recorded_at field and then id field
 	function sendResponse(models) {
-		logger.log('info', 'maint-acct-routes >>getSummaries()...sendResponse(models)... ');
-		//logger.log('info', models);
+		logger.log('debug', 'maint-acct-routes >>getSummaries()...sendResponse(models)... ');
+		//logger.log('debug', models);
 		let summaries = {};
 		let summary;
 		let key;
@@ -280,9 +280,6 @@ function getSummaries(req, res) {
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
-
-
-
 
 /**   Private Function
  * First retrieve record for balance; record previous to added/updated/deleted record

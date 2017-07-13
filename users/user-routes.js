@@ -99,7 +99,7 @@ function put(req, res) {
 	let infos = req.body.infos;
 	let isSocial = false; // is the user logged in through social network
 	let model;
-console.log('Password: ...'); console.log(password);
+
 	User
 		.forge({id: req.params.id})
 		.fetch({require: true, withRelated: ['infos']})
@@ -116,14 +116,12 @@ console.log('Password: ...'); console.log(password);
 		return auth.allowsEdit(req.decoded.id, 'users', model);
 	}
 	function checkForDuplicate(granted){ // implementing inner function1
-		logger.log('info', 'checkForDuplicate(...)!');
-		logger.log('info', 'granted...'+granted);
+		logger.log('debug', 'checkForDuplicate(...)!');
+		logger.log('debug', 'granted...'+granted);
 		if(this.isSocial) {// no dup check for social user, so just return count as 0 (zero)
 			this.email = null; // nullify any email string found in the request parameter
 			return new Promise((resolve) => resolve(0));
 		}
-		//console.log('model is:...'); console.log(this.model.toJSON());
-		//console.log('current email...'); console.log(req.body.email);
 		if(this.model.toJSON().email === req.body.email) // no dup check if no change in email, just return 0 (zero)
 			return new Promise((resolve) => resolve(0));
 		return User
@@ -131,11 +129,11 @@ console.log('Password: ...'); console.log(password);
 		  .count('id'); // returns Promise containing count
 	}
 	function doUpdate(count){
-		logger.log('info', 'count is: '+count);
+		logger.log('debug', 'count is: '+count);
 		if(count) {
 		 throw new Error('Duplicate Error!! email-id already exists!!');
 	 	}
-		logger.log('info', '/api/users >> put()...updating user details');
+		logger.log('debug', '/api/users >> put()...updating user details');
 		let encyptedPassword = password ? bcrypt.hashSync(password, 10) : password;
 		return this.model.save({
 			name: userName || this.model.get('name'),
@@ -146,13 +144,11 @@ console.log('Password: ...'); console.log(password);
 		});
 	}
 	function updateInfos() {
-		//console.log('modified infos...'); console.log(req.body.infos);
 		let existingInfo;
 		let promises = [];
 		let aPromise;
 		req.body.infos.forEach(eachUi => {
 			let infos = this.model.toJSON().infos;
-			//console.log('model infos in db...'); console.log(infos);
 			existingInfo = infos.filter((eachDb) => eachDb.key === eachUi.key);
 			if(existingInfo.length > 0){ // info exists in db, check whether it is changed
 				if(!eachUi.value){ // info is null or empty, then remove from db
@@ -207,21 +203,16 @@ function putInfos(req, res) {
 		userModel = model;
 		logger.log('debug', 'Inside user-routes >> detachExistingInfos(model)...');
 		logger.log('debug', model.toJSON());
-		//return model.infos().destroy();
 		return knex('infos').where('user_id', req.params.id).del(); // it deletes all rows where user_id = req.params.id
 	}
 
 	function attachNewInfos(delResult){
 		logger.log('debug', 'inside user-routes >> attachNewInfos(model)...');
 		logger.log('debug', userModel.toJSON());
-		logger.log('info', 'myinfos...');
-		logger.log('info', req.body.myInfos);
 		let promises = [];
 		JSON.parse(req.body.myInfos).forEach(each => {
-			logger.log('info', each);
 			promises.push( knex('infos').insert(each) );
 		});
-		//return userModel.infos().attach(req.body.myInfos); // attach new infos
 		return Promise.all(promises);
 	}
 
@@ -279,7 +270,7 @@ function putRoles(req, res) {
 // on routes that end in /users to post (to add) a new user
 // ---------------------------------------------------------------------
 function post(req, res) {
-	logger.log('info', 'adding new user...name: '+req.body.name+', first name: '+req.body.first_name);
+	logger.log('debug', 'adding new user...name: '+req.body.name+', first name: '+req.body.first_name);
 	let model = null;
 
 	getTotalForMaxCheck()
@@ -316,7 +307,7 @@ function post(req, res) {
 			//logger.log('debug', msg);
 			throw new Error(msg);
 		}
-		logger.log('info', '/api/users >> post()...saving new user profile');
+		logger.log('debug', '/api/users >> post()...saving new user profile');
 		return User.forge({
 			name: req.body.name,
 			first_name: req.body.first_name,
@@ -328,12 +319,12 @@ function post(req, res) {
 	}
 	function addInfos(model){
 		this.model = model;
-		logger.log('info', 'infos...');
-		logger.log('info', req.body.infos);
+		logger.log('debug', 'infos...');
+		logger.log('debug', req.body.infos);
 		let promises = [];
 		req.body.infos.forEach(each => {
 			each['user_id'] = model.id;
-			logger.log('info', each);
+			logger.log('debug', each);
 			promises.push( knex('infos').insert(each) );
 		});
 		return Promise.all(promises);
@@ -378,13 +369,11 @@ function del(req, res) { // using full form 'delete' causes error, so 'del' is u
 
 	// for now, a work around to delete dependants is done here
 	function getDependants(model){ // yet to explore a better way to delete dependants with soft delete
-		// console.log('model to delete: '); console.log(model);
 		userModel = model;
 		return Infos.forge({user_id: model.id}).fetch({require: true});
 	}
 
 	function deleteDependants(infos){
-		console.log('delete infos...'); console.log(infos);
 		let promises = [];
 		infos.forEach(each => {
 			promises.push( each.destroy() );

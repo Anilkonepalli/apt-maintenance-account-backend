@@ -9,7 +9,7 @@ var Permission = Bookshelf.Model.extend({
 	},
 
 	hello: function(){
-		logger.log('info', 'Hello, this is Permission Model');
+		logger.log('debug', 'Hello, this is Permission Model');
 	}
 });
 

@@ -21,11 +21,11 @@ function getAll(req, res) {
 		.catch(error);
 
 	function doAuth(models) {
-		logger.log('info', '/api/residents >> getAll()...');
+		logger.log('debug', '/api/residents >> getAll()...');
 		return auth.allowedList(req.decoded.id, 'residents', models);
 	}
 	function sendResponse(models) {
-		logger.log('info', 'models being sent are: '); logger.log('info', models.toJSON());
+		logger.log('debug', 'models being sent are: '); logger.log('debug', models.toJSON());
 		res.json(models);
 	}
 	function error(err) {
@@ -50,7 +50,7 @@ function get(req, res) {
 			.catch(error);
 	}
 	function doAuth(model) {
-		logger.log('info', '/api/residents >> get()...');
+		logger.log('debug', '/api/residents >> get()...');
 		return auth.allowsView(req.decoded.id, 'residents', model);
 	}
 	function error(err) {
@@ -95,8 +95,8 @@ function put(req, res) {
 		return auth.allowsEdit(req.decoded.id, 'residents', model);
 	}
 	function checkForDuplicate(granted){ // implementing inner function1
-		logger.log('info', 'checkForDuplicate(...)!');
-		logger.log('info', 'granted...'+granted);
+		logger.log('debug', 'checkForDuplicate(...)!');
+		logger.log('debug', 'granted...'+granted);
 		return Resident
 			.where({first_name: firstName,
 						  last_name: lastName,
@@ -105,11 +105,11 @@ function put(req, res) {
 		  .count('id'); // returns Promise containing count
 	}
 	function doUpdate(count){
-		logger.log('info', 'count is: '+count);
+		logger.log('debug', 'count is: '+count);
 		if(count) {
 		 throw new Error('Duplicate Error!');
 	 	}
-		logger.log('info', '/api/residents >> put()...updating resident details');
+		logger.log('debug', '/api/residents >> put()...updating resident details');
 		return this.model.save({
 			first_name: firstName || this.model.get('first_name'),
 			last_name: lastName, // empty string is allowed here
@@ -155,7 +155,7 @@ function post(req, res) {
 	}
 
 	function getCountForDupCheck(total){ // implementing inner function1
-		logger.log('info', 'getCountForDupCheck(...)!!');
+		logger.log('debug', 'getCountForDupCheck(...)!!');
 		if(total && total[0].CNT >= constants.maxRecords.residents) {
 			let msg = 'Maximum Limit Reached! Cannot Save Resident details!';
 			logger.log('error', msg);
@@ -173,7 +173,7 @@ function post(req, res) {
 		if(count) {
 			throw new Error('Duplicate Error!!');
 		}
-		logger.log('info', '/api/residents >> post()...saving new resident details');
+		logger.log('debug', '/api/residents >> post()...saving new resident details');
 
 		return Resident.forge({
 			first_name: firstName,
@@ -205,7 +205,7 @@ function del(req, res) {
 		return auth.allowsDelete(req.decoded.id, 'residents', model);
 	}
 	function doDelete(model){
-		logger.log('info', '/api/residents >> del()...');
+		logger.log('debug', '/api/residents >> del()...');
 		return model.destroy();
 	}
 	function sendResponse() {

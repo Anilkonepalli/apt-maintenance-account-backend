@@ -9,7 +9,7 @@ var Flat = Bookshelf.Model.extend({
 	},
 
 	hello: function(){
-		logger.log('info', 'Hello, this is Flat Model');
+		logger.log('debug', 'Hello, this is Flat Model');
 	}
 });
 

@@ -14,14 +14,14 @@ module.exports = function(userId, resource = null){
 
 		getRoleIdsFor(userId)
 			.then(roleIds => {
-				logger.log('info', 'getRoleIdsFor('+roleIds+')');
+				logger.log('debug', 'getRoleIdsFor('+roleIds+')');
 				return getPermissionsFor(roleIds);
 			})
 			.then(perms => {
 				if(resource){
-					logger.log('info', 'filter permissions for resource: '+resource);
+					logger.log('debug', 'filter permissions for resource: '+resource);
 					let permsForResource = perms.filter(each => each.resource === resource);
-					logger.log('info', permsForResource);
+					logger.log('debug', permsForResource);
 					resolve(permsForResource);
 				} else {
 					logger.log('debug', 'resource is null; so send all permissions...');

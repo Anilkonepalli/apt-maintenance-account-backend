@@ -117,7 +117,7 @@ function post(req, res) {
 	}
 
 	function doSave(total){
-		logger.log('info', 'doSave(...)!!');
+		logger.log('debug', 'doSave(...)!!');
 		if(total && total[0].CNT >= constants.maxRecords.roles) {
 			let msg = 'Maximum Limit Reached! Cannot Save Role details!';
 			logger.log('error', msg);

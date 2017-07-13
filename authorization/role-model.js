@@ -1,6 +1,4 @@
 var Bookshelf 		= require('../config/database');
-//require('../users/user-model');
-// var PermissionRole 	= Bookshelf.Model.extend({tableName: 'permissions_roles'});
 
 var Role = Bookshelf.Model.extend({
 	tableName: 'roles',
@@ -14,7 +12,7 @@ var Role = Bookshelf.Model.extend({
 	},
 
 	hello: function(){
-		logger.log('info', 'Hello, this is Role Model');
+		logger.log('debug', 'Hello, this is Role Model');
 	}
 });
 

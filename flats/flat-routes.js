@@ -21,11 +21,11 @@ function getAll(req, res) {
 		.catch(error);
 
 	function doAuth(models) {
-		logger.log('info', '/api/flats >> getAll()...');
+		logger.log('debug', '/api/flats >> getAll()...');
 		return auth.allowedList(req.decoded.id, 'flats', models);
 	}
 	function sendResponse(models) {
-		logger.log('info', 'models being sent are: '); logger.log('info', models.toJSON());
+		logger.log('debug', 'models being sent are: '); logger.log('debug', models.toJSON());
 		res.json(models);
 	}
 	function error(err) {
@@ -50,7 +50,7 @@ function get(req, res) {
 			.catch(error);
 	}
 	function doAuth(model) {
-		logger.log('info', '/api/flats >> get()...');
+		logger.log('debug', '/api/flats >> get()...');
 		return auth.allowsView(req.decoded.id, 'flats', model);
 	}
 	function error(err) {
@@ -96,19 +96,19 @@ function put(req, res) {
 		return auth.allowsEdit(req.decoded.id, 'flats', model);
 	}
 	function checkForDuplicate(granted){ // implementing inner function1
-		logger.log('info', 'checkForDuplicate(...)!');
-		logger.log('info', 'granted...'+granted);
+		logger.log('debug', 'checkForDuplicate(...)!');
+		logger.log('debug', 'granted...'+granted);
 		return Flat
 			.where({block_number: blockNumber,
 						  flat_number: flatNumber })
 		  .count('id'); // returns Promise containing count
 	}
 	function doUpdate(count){
-		logger.log('info', 'count is: '+count);
+		logger.log('debug', 'count is: '+count);
 		if(count) {
 		 throw new Error('Duplicate Error!');
 	 	}
-		logger.log('info', '/api/flats >> put()...updating flat details');
+		logger.log('debug', '/api/flats >> put()...updating flat details');
 		return this.model.save({
 			block_number: blockNumber || this.model.get('block_number'),
 			flat_number: flatNumber || this.model.get('flat_number')
@@ -183,7 +183,7 @@ function post(req, res) {
 	}
 
 	function getCountForDupCheck(total){ // implementing inner function1
-		logger.log('info', 'getCountForDupCheck(...)!!');
+		logger.log('debug', 'getCountForDupCheck(...)!!');
 		if(total && total[0].CNT >= constants.maxRecords.flats) {
 			let msg = 'Maximum Limit Reached! Cannot Save Flat details!';
 			logger.log('error', msg);
@@ -199,7 +199,7 @@ function post(req, res) {
 		if(count) {
 			throw new Error('Duplicate Error!!');
 		}
-		logger.log('info', '/api/flats >> post()...saving new flat details');
+		logger.log('debug', '/api/flats >> post()...saving new flat details');
 		return Flat.forge({
 			block_number: blockNumber,
 			flat_number: flatNumber
@@ -229,7 +229,7 @@ function del(req, res) {
 		return auth.allowsDelete(req.decoded.id, 'flats', model);
 	}
 	function doDelete(model){
-		logger.log('info', '/api/flats >> del()...');
+		logger.log('debug', '/api/flats >> del()...');
 		return model.destroy();
 	}
 	function sendResponse() {

@@ -36,7 +36,7 @@ function createSession(request, response){
 		.catch(sendError);												// calling inner function4
 
 			function checkUserAlreadyExist(userProfile){ // implementing inner function1
-				logger.log('info', 'checkUserAlreadyExist(..)');
+				logger.log('debug', 'checkUserAlreadyExist(..)');
 				extractDataFrom(userProfile);
 				return User.where('email', profile_email).count('id'); // returns Promise containing count
 			}
@@ -60,19 +60,19 @@ function createSession(request, response){
 			}
 
 			function getNewOrExistingUser(count) { // implementing inner function2
-				logger.log('info', 'Count is '+count);
+				logger.log('debug', 'Count is '+count);
 				userCount = count;
 				if(count > 0){ // if count > 0, it means user exists in the system
-					logger.log('info', 'social user account exist for the user');
+					logger.log('debug', 'social user account exist for the user');
 					return User.forge({email: profile_email}).fetch(); // returns Promise containing user model
 				} else { // if count is 0, then create new user and save it into system
-					logger.log('info', 'social user account do not exist; saving new user')
+					logger.log('debug', 'social user account do not exist; saving new user')
 					return new User({ // returns Promise containing new user model
 						name: profile_name,
 						social_network_id: profile_id,
 						social_network_name: network,
 						email: profile_email,
-						confirmed: 1			
+						confirmed: 1
 					}).save();
 				}
 			}
@@ -84,18 +84,18 @@ function createSession(request, response){
 
 			function assignDefaultRole(rModel){
 				if(userCount > 0) { // not a new user, then exit
-					logger.log('info', 'No linking for existing user to a default role');
+					logger.log('debug', 'No linking for existing user to a default role');
 					return new Promise((resolve) => resolve(false));
 				}
 				let roleId = rModel.id;
-				logger.log('info', 'Linking userId: '+userModel.id+'with roleId: '+roleId);
+				logger.log('debug', 'Linking userId: '+userModel.id+'with roleId: '+roleId);
 				userModel.roles().attach(roleId);
 				return new Promise((resolve) => resolve(true));
 			}
 			function sendJwt(status) {	// implementing inner function3
-					logger.log('info', 'sendJwt(..)...Login through social network...');
+					logger.log('debug', 'sendJwt(..)...Login through social network...');
 					let user = userModel.toJSON();
-					logger.log('info', 'social user is: '); logger.log('info', user);
+					logger.log('debug', 'social user is: '); logger.log('debug', user);
 					let omitList = [
 						'password', 	'confirmed',	 'confirmation_code',
 						'created_at',	'updated_at',	 'deleted_at'
@@ -112,7 +112,7 @@ function createSession(request, response){
 }
 
 function validateWithProvider(network, socialToken) {
-	logger.log('info', 'validateWithProvider...');
+	logger.log('debug', 'validateWithProvider...');
 
 	return new Promise(function(resolve, reject) {
 		// Send a GET request to Facebook with the token as query string
