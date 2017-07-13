@@ -147,17 +147,22 @@ function put(req, res) {
 		let existingInfo;
 		let promises = [];
 		let aPromise;
+		logger.log('debug', 'Updating Infos....'); logger.log('debug', req.body.infos);
 		req.body.infos.forEach(eachUi => {
 			let infos = this.model.toJSON().infos;
+			logger.log('debug', 'Infos in db...'); logger.log('debug', infos);
 			existingInfo = infos.filter((eachDb) => eachDb.key === eachUi.key);
+			logger.log('debug', 'Existing Info..'); logger.log('debug', existingInfo);
 			if(existingInfo.length > 0){ // info exists in db, check whether it is changed
 				if(!eachUi.value){ // info is null or empty, then remove from db
+					logger.log('debug', 'Removing empty info...'); logger.log(eachUi);
 					aPromise = knex('infos')
 											.where('user_id', '=', this.model.id)
 											.andWhere('key', '=', eachUi.key)
 											.del();
 					promises.push(aPromise);
 				} else if(existingInfo.value !== eachUi.value) { // value modified w.r.t. value in db
+					logger.log('debug', 'Updating modified info...old value: '+existingInfo.value+', to new value: '+eachUi.value);
 					aPromise = knex('infos')
 						.where('user_id', '=', this.model.id)
 						.andWhere('key', '=', eachUi.key)
@@ -168,7 +173,9 @@ function put(req, res) {
 				}
 			} else { // no info in db, so add one
 				eachUi['user_id'] = this.model.id;
+				logger.log('debug', 'adding new info...'); logger.log('debug', eachUi);
 				aPromise = knex('infos').insert(eachUi);
+				promises.push(aPromise);
 			}
 		});
 		return Promise.all(promises);

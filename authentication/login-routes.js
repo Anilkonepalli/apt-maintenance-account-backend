@@ -15,7 +15,7 @@ function createSession(request, response){
 		return response.status(400).send("Email and Password needed");
 	}
 	// Get User details of email
-	User.forge( {email: request.body.email} ).fetch()
+	User.forge( {email: request.body.email} ).fetch({withRelated:['infos']})
 		.then(model => {
 			if(!model) throw new Error('Invalid Email!'); // no user exist for the given email id
 			let user = model.toJSON();
