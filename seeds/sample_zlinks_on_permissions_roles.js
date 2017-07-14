@@ -11,7 +11,8 @@ let sampleData = [
       ['R', 'permissions', null],
       ['R', 'flats-residents', null],
       ['R', 'users-roles', null],
-      ['R', 'roles-permissions', null]
+      ['R', 'roles-permissions', null],
+      ['R', 'account-summary', null]
     ]
   },
   {
@@ -24,10 +25,17 @@ let sampleData = [
     ]
   },
   {
+    roleName: 'member-o',
+    permissions: [
+      ['R', 'account-summary', null]
+    ]
+  },
+  {
     roleName: 'supervisor',
     permissions: [
       ['CRU', 'accounts', null], // Create, Read, Update permissions on 'accounts' module
-      ['RU', 'user-profile', 'hasCondition']
+      ['RU', 'user-profile', 'hasCondition'],
+      ['R', 'account-summary', null]
     ]
   },
   {
@@ -38,7 +46,7 @@ let sampleData = [
   },
   {
     roleName: 'admin',
-    permissions: [ // 3, 5, 6, 7, 9, 20, 22, 24, 26, 31
+    permissions: [
       ['CRUD', 'accounts', null],
       ['CRUD', 'roles', null],
       ['CRUD', 'flats', null],
@@ -48,7 +56,8 @@ let sampleData = [
       ['RU', 'flats-residents', null],
       ['RU', 'users-roles', null],
       ['RU', 'roles-permissions', null],
-      ['RU', 'user-profile', 'hasCondition']
+      ['RU', 'user-profile', 'hasCondition'],
+      ['R', 'account-summary', null]
     ]
   }
 

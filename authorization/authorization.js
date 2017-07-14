@@ -49,6 +49,8 @@ module.exports = {
  */
 function allows(userId, resource, model, action) {
 	logger.log('debug', 'UserId: '+userId);
+	logger.log('debug', 'Resource Name: '+resource);
+	logger.log('debug', 'Action: '+action);
 	logger.log('debug', 'model is: ');
 	logger.log('debug', model);
 	return new Promise( function(resolve, reject) {

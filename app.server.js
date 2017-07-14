@@ -80,7 +80,7 @@ app.route("/api/users/:id")
 /////////////////////////  USERPROFILE ROUTES  //////////////////////////////
 app.route("/api/userprofile/:id")
 	.get(user.get)
-	.put(user.put);
+	.put(user.putProfile);
 	//.get(userprofile.get)
 	//.put(userprofile.put);
 

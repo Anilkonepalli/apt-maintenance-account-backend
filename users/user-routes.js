@@ -18,6 +18,8 @@ var Infos = Bookshelf.Collection.extend({
 	model: Info
 });
 
+var myResourceName; // possible resource names are: users, user-profile
+
 // on routes that end in /users
 // get all the user models (accessed at GET http://localhost:3002/api/users)
 // ---------------------------------------------------------------------
@@ -90,7 +92,17 @@ function getPermissions(req, res) {
 // on routes that end in /users/:id to update an existing user
 // ---------------------------------------------------------------------
 function put(req, res) {
+	myResourceName = 'users';
+	return putCommon(req. res);
+}
 
+// on routes that end in /users/myinfos/:id to update an existing User with my infos
+function putProfile(req, res) {
+	myResourceName = 'user-profile';
+	return putCommon(req, res);
+}
+
+function putCommon(req, res){
 	let userName = req.body.name;
 	let firstName = req.body.first_name;
 	let lastName = req.body.last_name;
@@ -113,7 +125,8 @@ function put(req, res) {
 	function doAuth(model) {
 		this.model = model;
 		this.isSocial = this.model.toJSON().social_network_id !== null;
-		return auth.allowsEdit(req.decoded.id, 'users', model);
+		// return auth.allowsEdit(req.decoded.id, 'users', model);
+		return auth.allowsEdit(req.decoded.id, myResourceName, model);
 	}
 	function checkForDuplicate(granted){ // implementing inner function1
 		logger.log('debug', 'checkForDuplicate(...)!');
@@ -444,4 +457,4 @@ function confirmSignup(req, res) {
 
 
 
-module.exports = { getAll, post, get, put, del, getInfos, putInfos, getRoles, putRoles, getPermissions, getAllPermissions, confirmSignup };
+module.exports = { getAll, post, get, put, del, putProfile, getInfos, putInfos, getRoles, putRoles, getPermissions, getAllPermissions, confirmSignup };
