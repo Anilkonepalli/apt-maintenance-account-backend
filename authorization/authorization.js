@@ -121,6 +121,8 @@ function viewables(userId, resource, modelsJson) {
 				// permissions with no condition take precedence, hence pass the model for futher processing
 				if(pCount > pwcCount) resolve(modelsJson);
 				// evaluate condition in each of the permissionsWithCondition
+logger.log('debug', 'modelsJson: ');
+logger.log('debug', modelsJson);				 
 				let viewables = modelsJson.filter(eachModel => {
 					return hasEvaluatedPerms(permissionsWithCondition, eachModel, userId);
 				});
