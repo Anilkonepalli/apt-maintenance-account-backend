@@ -1,4 +1,5 @@
 var getUserPermissions = require('./userPermissionsOnResource');
+var Utility 					 = require('./utility-class');
 
 /**
  * Answers a Promise with boolean value indicating
@@ -11,8 +12,8 @@ var getUserPermissions = require('./userPermissionsOnResource');
  */
 module.exports = {
 
-	allowedList: function(userId, resource, modelsJson, className) { // answers list containing authorized models only
-		return viewables(userId, resource, modelsJson, className);
+	allowedList: function(userId, resource, modelsJson) { // answers list containing authorized models only
+		return viewables(userId, resource, modelsJson);
 	},
 	allowsAdd: function(userId, resource) {
 		return new Promise( function(resolve, reject) {
@@ -102,7 +103,7 @@ function allows(userId, resource, model, action) {
  * @param {class} className
  * @return {Promise<[Any]>}
  */
-function viewables(userId, resource, modelsJson, className) {
+function viewables(userId, resource, modelsJson) {
 
 	return new Promise( function(resolve, reject) {
 
@@ -124,10 +125,10 @@ function viewables(userId, resource, modelsJson, className) {
 				// evaluate condition in each of the permissionsWithCondition
 logger.log('debug', 'modelsJson: ');
 logger.log('debug', modelsJson);
-/*				let viewables = modelsJson.filter(eachModel => {
+				let viewables = modelsJson.filter(eachModel => {
 					return hasEvaluatedPerms(permissionsWithCondition, eachModel, userId);
-				});  */
-				let viewables = evaluate(permissionsWithCondition, modelsJson, userId, className);
+				});
+				//let viewables = evaluate(permissionsWithCondition, modelsJson, userId, className);
 				logger.log('debug', 'Viewables models are: ....');
 				logger.log('debug', viewables);
 				resolve(viewables);
@@ -157,6 +158,22 @@ function pwc(perms) {
  */
 function hasEvaluatedPerms(permissionsWithCondition, modelJson, userId) {
 	let evaluatedPerms = permissionsWithCondition.filter(perm => { 	// filter for permission that
+		// let fn = new Function("data", perm.condition);					// evaluates its condition to true
+		let data = {
+			user_id: userId,
+			model: modelJson
+		}
+		//let result = fn(data);
+		//return result;
+		let utility = new Utility(perm.condition, data);
+		return utility.evaluate();
+	});
+	return evaluatedPerms.length > 0;
+}
+
+/*
+function hasEvaluatedPerms(permissionsWithCondition, modelJson, userId) {
+	let evaluatedPerms = permissionsWithCondition.filter(perm => { 	// filter for permission that
 		let fn = new Function("data", perm.condition);					// evaluates its condition to true
 		let data = {
 			user_id: userId,
@@ -167,8 +184,10 @@ function hasEvaluatedPerms(permissionsWithCondition, modelJson, userId) {
 	});
 	return evaluatedPerms.length > 0;
 }
+*/
 
-function evaluate(permissionsWithCondition, modelsJson, userId, className) {
+/*
+function evaluate(permissionsWithCondition, modelsJson, userId) {
 	console.log('inside evaluate()...');
 	console.log('No. of conditions: '+permissionsWithCondition.length+' ');
 	console.log('models are: ');console.log(modelsJson);
@@ -177,8 +196,8 @@ function evaluate(permissionsWithCondition, modelsJson, userId, className) {
 	let obj = new className(modelsJson);
 	console.log('Dynamic object...'); console.log(obj);
 	console.log('calling method on dynamic object...');
-	let result = obj.accountsBelongOnlyToFlatOf(userId);
-	console.log('Result of calling method...'); console.log(result);
+	let accts = obj.accountsOf(userId);
+	console.log('Result of calling method...'); console.log(accts);
 	permissionsWithCondition.forEach(eachPerm => {
 		console.log('processing...'+eachPerm.condition);
 		let evalCondition = function(userId) {
@@ -192,3 +211,5 @@ function evaluate(permissionsWithCondition, modelsJson, userId, className) {
 	});
 	return result;
 }
+
+*/

@@ -3,7 +3,6 @@ var	MaintenanceAccount 	= require('./maint-acct-model');
 var auth 								= require('../authorization/authorization');
 var _ 									= require('lodash');
 var constants 					= require('../config/constants.json');
-var AccountUtility 			= require('./maint-account-utility-class');
 
 var MaintenanceAccounts = Bookshelf.Collection.extend({
 	model: MaintenanceAccount
@@ -30,7 +29,7 @@ function getAll(req, res) {
 
 	function doAuth(models) {
 		logger.log('debug', '/api/maintenance-accounts >> getAll()...');
-		return auth.allowedList(req.decoded.id, 'accounts', models.toJSON(), AccountUtility);
+		return auth.allowedList(req.decoded.id, 'accounts', models.toJSON());
 	}
 
 	// sends Account models after sorting; sorting is based on its recorded_at field and then id field
