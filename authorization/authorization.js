@@ -105,7 +105,53 @@ function allows(userId, resource, model, action) {
  */
 function viewables(userId, resource, modelsJson) {
 
-	return new Promise( function(resolve, reject) {
+	let permissionsWithCondition;
+
+	return getUserPermissions(userId, resource)
+		.then(canRejectConditionInPermissions)
+		.then(proceedToEvalCondition)
+		.catch(handleError);
+
+	function handleError(err) {
+		return Promise.reject(err);
+	}
+
+	function canRejectConditionInPermissions(perms){
+		// if no permissions found, throw error
+		if(perms.length < 1) throw new Error('No permissions on '+resource);
+
+		// find permissions with condition
+		permissionsWithCondition = pwc(perms);
+		let pwcCount = permissionsWithCondition.length;
+
+		// if permission(s) exist but has no condition, just return true,
+		if(pwcCount < 1) return Promise.resolve(true);
+
+		let pCount = perms.length;
+		// permissions with no condition take precedence, just return true.
+		if(pCount > pwcCount)	return Promise.resolve(true);
+
+		// condition in perms cannot be rejected
+		return Promise.resolve(false);
+	}
+
+	function proceedToEvalCondition(rejected){
+		if(rejected) return Promise.resolve(modelsJson);
+		let data = {
+			user_id: userId,
+			model: null
+		}
+		let viewables = modelsJson.filter(eachModel => {
+			data.model = eachModel;
+			return hasEvaluatedPerms(permissionsWithCondition, data);
+		});
+		logger.log('debug', 'Viewables models are: ....');
+		logger.log('debug', viewables);
+		return Promise.resolve(viewables);
+	}
+
+
+/*	return new Promise( function(resolve, reject) {
 
 		getUserPermissions(userId, resource)
 			.then(perms => {
@@ -122,20 +168,21 @@ function viewables(userId, resource, modelsJson) {
 				let pCount = perms.length;
 				// permissions with no condition take precedence, hence pass the model for futher processing
 				if(pCount > pwcCount) resolve(modelsJson);
-				// evaluate condition in each of the permissionsWithCondition
 logger.log('debug', 'modelsJson: ');
 logger.log('debug', modelsJson);
 				let viewables = modelsJson.filter(eachModel => {
-					return hasEvaluatedPerms(permissionsWithCondition, eachModel, userId);
+					let data = {
+						user_id: userId,
+						model: eachModel
+					}
+					return hasEvaluatedPerms(permissionsWithCondition, data);
 				});
-				//let viewables = evaluate(permissionsWithCondition, modelsJson, userId, className);
 				logger.log('debug', 'Viewables models are: ....');
 				logger.log('debug', viewables);
 				resolve(viewables);
 			})
 			.catch(err => reject(err));
-
-	});
+	});  */
 
 }
 
@@ -156,60 +203,10 @@ function pwc(perms) {
  * @param  {number}  userId
  * @return {Boolean}
  */
-function hasEvaluatedPerms(permissionsWithCondition, modelJson, userId) {
+function hasEvaluatedPerms(permissionsWithCondition, data) {
 	let evaluatedPerms = permissionsWithCondition.filter(perm => { 	// filter for permission that
-		// let fn = new Function("data", perm.condition);					// evaluates its condition to true
-		let data = {
-			user_id: userId,
-			model: modelJson
-		}
-		//let result = fn(data);
-		//return result;
 		let utility = new Utility(perm.condition, data);
 		return utility.evaluate();
 	});
 	return evaluatedPerms.length > 0;
 }
-
-/*
-function hasEvaluatedPerms(permissionsWithCondition, modelJson, userId) {
-	let evaluatedPerms = permissionsWithCondition.filter(perm => { 	// filter for permission that
-		let fn = new Function("data", perm.condition);					// evaluates its condition to true
-		let data = {
-			user_id: userId,
-			model: modelJson
-		}
-		let result = fn(data);
-		return result;
-	});
-	return evaluatedPerms.length > 0;
-}
-*/
-
-/*
-function evaluate(permissionsWithCondition, modelsJson, userId) {
-	console.log('inside evaluate()...');
-	console.log('No. of conditions: '+permissionsWithCondition.length+' ');
-	console.log('models are: ');console.log(modelsJson);
-	let result = [];
-	let tempResult;
-	let obj = new className(modelsJson);
-	console.log('Dynamic object...'); console.log(obj);
-	console.log('calling method on dynamic object...');
-	let accts = obj.accountsOf(userId);
-	console.log('Result of calling method...'); console.log(accts);
-	permissionsWithCondition.forEach(eachPerm => {
-		console.log('processing...'+eachPerm.condition);
-		let evalCondition = function(userId) {
-			this.extFn = new Function('user_id', eachPerm.condition);
-			return this.extFn(userId);
-		}
-		tempResult = evalCondition.call(obj, userId);
-
-		console.log('Temp Result... '); console.log(tempResult);
-		result.push(tempResult);
-	});
-	return result;
-}
-
-*/

@@ -2,7 +2,8 @@
 
 class Parser {
   static getFunction(condition) {
-    return new Function("data", condition);
+    let statement = 'return this.'+condition+'();';
+    return new Function(statement);
   }
 }
 
