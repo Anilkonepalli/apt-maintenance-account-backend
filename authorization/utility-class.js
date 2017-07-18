@@ -9,6 +9,17 @@ class Parser {
 
 class Utility {
 
+  static dependantAPIs() {
+    return [
+      'userOwnAccounts'
+    ];
+  }
+
+  static hasDependencies(conditions){
+    let dependants = conditions.filter(each => this.dependantAPIs.includes(each));
+    return dependants.length > 0;
+  }
+
   constructor(condition, data) {
     this.dynamicFunction = Parser.getFunction(condition);
   }

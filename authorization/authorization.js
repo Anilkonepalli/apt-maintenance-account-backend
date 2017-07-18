@@ -85,6 +85,7 @@ function allows(userId, resource, model, action) {
 				if(noOwners.includes(resource)){
 					modelJson['owner_id'] = modelJson.id; // add an attribute for evaluation purpose
 				};
+				.then(getDependants)
 				hasEvaluatedPerms(permissionsWithCondition, modelJson, userId)
 					? resolve(model)
 					: reject(new Error('Unauthorized Access!!!')); // three !!! here; all conditions evaluated to false, return error with message
@@ -109,8 +110,9 @@ function viewables(userId, resource, modelsJson) {
 
 	return getUserPermissions(userId, resource)
 		.then(canRejectConditionInPermissions)
-		.then(proceedToEvalCondition)
-		.catch(handleError);
+		.then(checkForDependencies)
+		.then(getDependants)
+		.catch(ha ndleError);
 
 	function handleError(err) {
 		return Promise.reject(err);
@@ -120,7 +122,7 @@ function viewables(userId, resource, modelsJson) {
 		// if no permissions found, throw error
 		if(perms.length < 1) throw new Error('No permissions on '+resource);
 
-		// find permissions with condition
+		// find  {permissions with condition
 		permissionsWithCondition = pwc(perms);
 		let pwcCount = permissionsWithCondition.length;
 
@@ -135,12 +137,24 @@ function viewables(userId, resource, modelsJson) {
 		return Promise.resolve(false);
 	}
 
-	function proceedToEvalCondition(rejected){
+	function checkForDependencies(rejected) {
 		if(rejected) return Promise.resolve(modelsJson);
 		let data = {
 			user_id: userId,
 			model: null
 		}
+		let flatNumbersNeeded = Utility.hasDependencies(permissionsWithCondition);
+		return Promise.resolve(flatNumbersNeeded);
+	}
+
+	function getDependants(flatNumbersNeeded) {
+		if(flatNumbersNeeded){
+			return knex('residents').where('owner_id', '=', userId);
+		} else {
+			return Promise.resolve('[]');
+		}
+  }
+
 		let viewables = modelsJson.filter(eachModel => {
 			data.model = eachModel;
 			return hasEvaluatedPerms(permissionsWithCondition, data);
