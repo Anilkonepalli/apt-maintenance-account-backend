@@ -35,7 +35,7 @@ function getAll(req, res) {
 	// sends Account models after sorting; sorting is based on its recorded_at field and then id field
 	function sendResponse(models) {
 		logger.log('debug', 'maint-acct-routes >>getAll()...sendResponse(models)... ');
-		logger.log('debug', models);
+		// logger.log('debug', models);
 		let sortedModels = _.sortBy(models, [
 				function(model){ return model.recorded_at; }, // sort criteria 1
 				function(model){ return model.id;	}						// sort criteria 2

@@ -85,7 +85,6 @@ function allows(userId, resource, model, action) {
 				if(noOwners.includes(resource)){
 					modelJson['owner_id'] = modelJson.id; // add an attribute for evaluation purpose
 				};
-				.then(getDependants)
 				hasEvaluatedPerms(permissionsWithCondition, modelJson, userId)
 					? resolve(model)
 					: reject(new Error('Unauthorized Access!!!')); // three !!! here; all conditions evaluated to false, return error with message
@@ -107,12 +106,13 @@ function allows(userId, resource, model, action) {
 function viewables(userId, resource, modelsJson) {
 
 	let permissionsWithCondition;
+	let conditions;
 
 	return getUserPermissions(userId, resource)
 		.then(canRejectConditionInPermissions)
-		.then(checkForDependencies)
-		.then(getDependants)
-		.catch(ha ndleError);
+		.then(getAdditionalData)
+		.then(evaluateCondition)
+		.catch(handleError);
 
 	function handleError(err) {
 		return Promise.reject(err);
@@ -137,67 +137,21 @@ function viewables(userId, resource, modelsJson) {
 		return Promise.resolve(false);
 	}
 
-	function checkForDependencies(rejected) {
+	function getAdditionalData(rejected) {
 		if(rejected) return Promise.resolve(modelsJson);
-		let data = {
-			user_id: userId,
-			model: null
-		}
-		let flatNumbersNeeded = Utility.hasDependencies(permissionsWithCondition);
-		return Promise.resolve(flatNumbersNeeded);
+		conditions = permissionsWithCondition.map(each => each.condition);
+		return Utility.getAdditionalData(conditions, userId);
 	}
-
-	function getDependants(flatNumbersNeeded) {
-		if(flatNumbersNeeded){
-			return knex('residents').where('owner_id', '=', userId);
-		} else {
-			return Promise.resolve('[]');
-		}
-  }
-
+	function evaluateCondition(additionalData) {
+		let data = { user_id: userId };
+		Utility.attachAdditionalData(conditions, additionalData, data);
+		console.log('inside evaluateCondition...data is: '); console.log(data);
 		let viewables = modelsJson.filter(eachModel => {
-			data.model = eachModel;
+			data['model'] = eachModel;
 			return hasEvaluatedPerms(permissionsWithCondition, data);
 		});
-		logger.log('debug', 'Viewables models are: ....');
-		logger.log('debug', viewables);
 		return Promise.resolve(viewables);
 	}
-
-
-/*	return new Promise( function(resolve, reject) {
-
-		getUserPermissions(userId, resource)
-			.then(perms => {
-				// if no permissions found, throw error
-				if(perms.length < 1) throw new Error('No permissions on '+resource);
-
-				// find permissions with condition
-				let permissionsWithCondition = pwc(perms);
-				let pwcCount = permissionsWithCondition.length;
-
-				// if permission(s) exist but has no condition, pass the model for futher processing
-				if(pwcCount < 1) resolve(modelsJson);
-
-				let pCount = perms.length;
-				// permissions with no condition take precedence, hence pass the model for futher processing
-				if(pCount > pwcCount) resolve(modelsJson);
-logger.log('debug', 'modelsJson: ');
-logger.log('debug', modelsJson);
-				let viewables = modelsJson.filter(eachModel => {
-					let data = {
-						user_id: userId,
-						model: eachModel
-					}
-					return hasEvaluatedPerms(permissionsWithCondition, data);
-				});
-				logger.log('debug', 'Viewables models are: ....');
-				logger.log('debug', viewables);
-				resolve(viewables);
-			})
-			.catch(err => reject(err));
-	});  */
-
 }
 
 /**
@@ -219,8 +173,8 @@ function pwc(perms) {
  */
 function hasEvaluatedPerms(permissionsWithCondition, data) {
 	let evaluatedPerms = permissionsWithCondition.filter(perm => { 	// filter for permission that
-		let utility = new Utility(perm.condition, data);
-		return utility.evaluate();
+		let utility = new Utility(perm.condition);
+		return utility.evaluate(data);
 	});
 	return evaluatedPerms.length > 0;
 }
