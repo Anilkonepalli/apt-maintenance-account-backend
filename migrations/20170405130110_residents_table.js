@@ -8,6 +8,8 @@ exports.up = function(knex, Promise) {
   		table.string('first_name', 20).notNull();
   		table.string('last_name', 20).nullable();
       table.string('is_a', 20).notNull().defaultTo('owner'); // is_a can be of owner, relative, tenant, friend, guest to a Flat(s)
+      table.date('occupied_on').nullable();
+      table.date('vacated_on').nullable();
   		table.string('remarks', 254).nullable();
       table.integer('owner_id').defaultTo(0); // owner_id as 0 indicates admin only access; here owner means who entered this record
 		  table.timestamp('created_at').nullable().defaultTo(knex.fn.now());

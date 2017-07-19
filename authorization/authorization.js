@@ -107,6 +107,7 @@ function viewables(userId, resource, modelsJson) {
 
 	let permissionsWithCondition;
 	let conditions;
+	let conditionsRejected;
 
 	return getUserPermissions(userId, resource)
 		.then(canRejectConditionInPermissions)
@@ -138,14 +139,17 @@ function viewables(userId, resource, modelsJson) {
 	}
 
 	function getAdditionalData(rejected) {
-		if(rejected) return Promise.resolve(modelsJson);
+		conditionsRejected = rejected;
+		if(conditionsRejected) return Promise.resolve(modelsJson);
 		conditions = permissionsWithCondition.map(each => each.condition);
 		return Utility.getAdditionalData(conditions, userId);
 	}
 	function evaluateCondition(additionalData) {
+		logger.log('debug', '>> authorization.js evaluateCondition(..)');
+		if(conditionsRejected) return Promise.resolve(modelsJson);
 		let data = { user_id: userId };
 		Utility.attachAdditionalData(conditions, additionalData, data);
-		console.log('inside evaluateCondition...data is: '); console.log(data);
+		//console.log('inside evaluateCondition...data is: '); console.log(data);
 		let viewables = modelsJson.filter(eachModel => {
 			data['model'] = eachModel;
 			return hasEvaluatedPerms(permissionsWithCondition, data);
@@ -176,5 +180,6 @@ function hasEvaluatedPerms(permissionsWithCondition, data) {
 		let utility = new Utility(perm.condition);
 		return utility.evaluate(data);
 	});
+	logger.log('debug', 'return evaluated permissions length');
 	return evaluatedPerms.length > 0;
 }

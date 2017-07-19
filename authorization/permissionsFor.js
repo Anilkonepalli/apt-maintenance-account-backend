@@ -21,6 +21,8 @@ module.exports = function(roleIds){
 				logger.log('debug', roles);
 				let permissions = [];
 				roles.forEach(eachModel => {
+					logger.log('debug', 'each role model is: ');
+					logger.log('debug', eachModel);
 					perms = eachModel.permissions;
 					permissions = permissions.concat(perms);
 				});
