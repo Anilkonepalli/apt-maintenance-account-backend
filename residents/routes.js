@@ -79,6 +79,8 @@ function put(req, res) {
 	let lastName = req.body.last_name;
 	let isA = req.body.is_a;
 	let ownerId = req.body.owner_id;
+	let occupiedOn = req.body.occupied_on;
+	let vacatedOn = req.body.vacated_on;
 	let model;
 
 	Resident
@@ -97,6 +99,11 @@ function put(req, res) {
 	function checkForDuplicate(granted){ // implementing inner function1
 		logger.log('debug', 'checkForDuplicate(...)!');
 		logger.log('debug', 'granted...'+granted);
+		let jModel = this.model.toJSON();
+		if(jModel.first_name === firstName
+			&& jModel.last_name === lastName){
+				return Promise.resolve(0); // if no change in names, return count as zero
+		}
 		return Resident
 			.where({first_name: firstName,
 						  last_name: lastName,
@@ -114,6 +121,8 @@ function put(req, res) {
 			first_name: firstName || this.model.get('first_name'),
 			last_name: lastName, // empty string is allowed here
 			is_a: isA || this.model.get('is_a'),
+			occupied_on: occupiedOn, // null or blank allowed
+			vacated_on: vacatedOn, // null allowed
 			owner_id: ownerId || this.model.get('owner_id')
 		});
 	}
@@ -136,6 +145,8 @@ function post(req, res) {
 	let lastName = req.body.last_name;
 	let isA = req.body.is_a;
 	let ownerId = req.body.owner_id;
+	let occupiedOn = req.body.occupied_on;
+	let vacatedOn = req.body.vacated_on;
 
 	auth.allowsAdd(req.decoded.id, 'residents')
 		.then(getTotalForMaxCheck)
@@ -179,6 +190,8 @@ function post(req, res) {
 			first_name: firstName,
 			last_name: lastName,
 			is_a: isA,
+			occupied_on: occupiedOn,
+			vacated_on: vacatedOn,
 			owner_id: ownerId
 		}).save();
 	}
