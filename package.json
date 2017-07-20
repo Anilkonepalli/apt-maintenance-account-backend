@@ -1,6 +1,6 @@
 {
   "name": "apt-maint-acct-server",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Apartment Maintenance Account Tracking Application - Server Side in NodeJS",
   "main": "server.js",
   "scripts": {

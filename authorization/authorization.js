@@ -85,7 +85,8 @@ function allows(userId, resource, model, action) {
 				if(noOwners.includes(resource)){
 					modelJson['owner_id'] = modelJson.id; // add an attribute for evaluation purpose
 				};
-				hasEvaluatedPerms(permissionsWithCondition, modelJson, userId)
+				let data = { user_id: userId, model: modelJson };
+				hasEvaluatedPerms(permissionsWithCondition, data)
 					? resolve(model)
 					: reject(new Error('Unauthorized Access!!!')); // three !!! here; all conditions evaluated to false, return error with message
 			})

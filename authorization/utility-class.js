@@ -45,6 +45,7 @@ class Utility {
   }
 
   evaluate(data) {
+
     return this.dynamicFunction(data);
   }
 
@@ -66,8 +67,10 @@ class Utility {
     return flatNumbers.includes(data.model.flat_number);
   }
 
-  userOwnRecord() {
-    return this.data.user_id === this.data.model.owner_id;
+  userOwnRecord(data) {
+    logger.log('debug', 'inside Utility class >> userOwnRecord()...');
+    logger.log('debug', 'data is: '); logger.log(data);
+    return data.user_id === data.model.owner_id;
   }
 }
 
