@@ -93,7 +93,7 @@ function getPermissions(req, res) {
 // ---------------------------------------------------------------------
 function put(req, res) {
 	myResourceName = 'users';
-	return putCommon(req. res);
+	return putCommon(req, res);
 }
 
 // on routes that end in /users/myinfos/:id to update an existing User with my infos
@@ -103,6 +103,9 @@ function putProfile(req, res) {
 }
 
 function putCommon(req, res){
+	console.log('Rquest obj: ...'); console.log(req);
+	console.log('req body: ...'); console.log(req.body);
+	console.log('req params: ...'); console.log(req.params);
 	let userName = req.body.name;
 	let firstName = req.body.first_name;
 	let lastName = req.body.last_name;

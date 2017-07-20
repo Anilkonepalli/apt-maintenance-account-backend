@@ -1,9 +1,9 @@
 // [ operations, resource, condition, description]
 let sampleData = [
   ['R', 'accounts', null, 'Grants READ ONLY permissions to ANY USERS'],
-  ['RUD', 'users', 'return data.user_id === data.model.owner_id', 'Grants RUD PERMISSIONS to user\'s OWN RECORDS'],
+  ['RUD', 'users', 'userOwnRecord', 'Grants RUD PERMISSIONS to user\'s OWN RECORDS'],
   ['CRUD', 'accounts', null, 'Grants ALL PERMISSIONS to ANY USERS'],
-  ['R', 'accounts', 'return data.user_id == data.model.owner_id', 'Grants READ ONLY permissions to USER SPECIFIC record'],
+  ['R', 'accounts', 'userOwnAccounts', 'Grants READ ONLY permissions to USER SPECIFIC record'],
   ['CRUD', 'roles', null, 'Grants ALL PERMISSIONS to ANY USERS'],
   ['CRUD', 'flats', null, 'Grants ALL PERMISSIONS to ANY USERS'],
   ['CRUD', 'residents', null, 'Grants ALL PERMISSIONS to ANY USERS'],
@@ -22,8 +22,7 @@ let sampleData = [
   ['R', 'roles-permissions', null, 'Grants READ ONLY permission to ANY USERS'],
   ['D', 'accounts', null, 'Grants DELETE permission to ANY USERS'],
   ['CRU', 'accounts', null, 'Grants ALL but Delete permissions to ANY USERS'],
-  ['R', 'accounts', 'return params.user_id === params.model.owner_id', 'Grants READ ONLY permissions to USER SPECIFIC record'],
-  ['RU', 'user-profile', 'return data.user_id === data.model.owner_id', 'Grants RU permissions to USER\'s OWN RECORD'],
+  ['RU', 'user-profile', 'userOwnRecord', 'Grants RU permissions to USER\'s OWN RECORD'],
   ['R', 'account-summary', null, 'Grands READ ONLY permission to ANY USERS'],
   ['R', 'balance', null, 'Grands READ ONLY permission to ANY USERS'],
 ];
