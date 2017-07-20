@@ -56,9 +56,19 @@ class Utility {
   }
 
   userOwnAccounts(data) {
-    // console.log('inside userOwnAccounts()...');
-    //console.log(data.resident.flats);
-    //return true;
+    logger.log('debug', 'inside userOwnAccounts()...');
+    logger.log('debug', data.resident);
+    let today = new Date();
+    let occupiedDate = today;
+    let vacatedDate = today;
+    if(data.resident.occupied_on)
+      occupiedDate = new Date(data.resident.occupied_on);
+    if(data.resident.vacated_on)
+      vacatedDate = new Date(data.resident.vacated_on);
+    if(today < occupiedDate || today > vacatedDate) {
+      logger.log('debug', 'Not Residing at present');
+      return false; // not residing and hence no accounts to view
+    }
     let flatNumbers = data.resident.flats.map(each => each.flat_number);
     return flatNumbers.includes(data.model.flat_number);
   }
