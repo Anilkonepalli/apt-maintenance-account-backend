@@ -24,7 +24,8 @@ let sampleData = [
   ['CRU', 'accounts', null, 'Grants ALL but Delete permissions to ANY USERS'],
   ['R', 'accounts', 'return params.user_id === params.model.owner_id', 'Grants READ ONLY permissions to USER SPECIFIC record'],
   ['RU', 'user-profile', 'return data.user_id === data.model.owner_id', 'Grants RU permissions to USER\'s OWN RECORD'],
-  ['R', 'account-summary', null, 'Grands READ ONLY permission to ANY USERS']
+  ['R', 'account-summary', null, 'Grands READ ONLY permission to ANY USERS'],
+  ['R', 'balance', null, 'Grands READ ONLY permission to ANY USERS'],
 ];
 let tableName = "permissions";
 
