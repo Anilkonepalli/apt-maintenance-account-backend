@@ -125,7 +125,6 @@ function putCommon(req, res){
 	function doAuth(model) {
 		this.model = model;
 		this.isSocial = this.model.toJSON().social_network_id !== null;
-		// return auth.allowsEdit(req.decoded.id, 'users', model);
 		return auth.allowsEdit(req.decoded.id, myResourceName, model);
 	}
 	function checkForDuplicate(granted){ // implementing inner function1
@@ -313,7 +312,6 @@ function post(req, res) {
 	function getCountForDupCheck(total) {
 		if(total && total[0].CNT >= constants.maxRecords.users) {
 			let msg = 'Maximum Limit Reached! User registration is closed';
-			// logger.log('error', msg);
 			throw new Error(msg);
 		}
 		return User
@@ -324,7 +322,6 @@ function post(req, res) {
 	function doSave(count) {
 		if(count) {
 			let msg = 'Duplicate Error! email-id already exists!';
-			//logger.log('debug', msg);
 			throw new Error(msg);
 		}
 		logger.log('debug', '/api/users >> post()...saving new user profile');
@@ -454,7 +451,5 @@ function confirmSignup(req, res) {
 	}
 
 }
-
-
 
 module.exports = { getAll, post, get, put, del, putProfile, getInfos, putInfos, getRoles, putRoles, getPermissions, getAllPermissions, confirmSignup };

@@ -149,7 +149,6 @@ function viewables(userId, resource, modelsJson) {
 		if(conditionsRejected) return Promise.resolve(modelsJson);
 		let data = { user_id: userId };
 		Utility.attachAdditionalData(conditions, additionalData, data);
-		//console.log('inside evaluateCondition...data is: '); console.log(data);
 		let viewables = modelsJson.filter(eachModel => {
 			data['model'] = eachModel;
 			return hasEvaluatedPerms(permissionsWithCondition, data);

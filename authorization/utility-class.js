@@ -1,9 +1,5 @@
 var	Bookshelf 					= require('../config/database');
-//var knex								= Bookshelf.knex;
 var	Resident            = require('../residents/model');
-/* var Residents = Bookshelf.Collection.extend({
-	model: Resident
-}); */
 
 class Parser {
   static getFunction(condition) {
@@ -20,7 +16,6 @@ class Utility {
 		conditions.forEach(condition => {
 			switch(condition) {
 				case 'userOwnAccounts':
-					//promise = knex('residents').where('owner_id', '=', userId);
 					promise = Resident
                       .where({owner_id: userId})
                       .fetch({withRelated:['flats']});
@@ -50,8 +45,6 @@ class Utility {
   }
 
   evaluate(data) {
-    // console.log('inside evaluate()...');
-    // console.log(data);
     return this.dynamicFunction(data);
   }
 
