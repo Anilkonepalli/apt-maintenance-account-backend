@@ -254,8 +254,10 @@ function getSummaries(req, res) {
 		let crdr;
 		let totalDiff = 0; // initial amount is zero
 		let result = [];
+		let prefix = '';
 		models.forEach(each => {
-			key = each.for_year + '-' + each.for_month;
+			prefix = each.for_month < 10 ? '0' : '';
+			key = each.for_year + '-' + prefix + each.for_month; // eg: 2017-01
 			if(! summaries[key]){
 				summaries[key] = {cr: 0, dr: 0, diff: 0, cumulativeDiff: 0};
 			}
