@@ -266,7 +266,9 @@ function getSummaries(req, res) {
 			if(crdr === 'cr') summary.cr += each.amount;
 			if(crdr === 'dr') summary.dr += each.amount;
 		});
-		Object.keys(summaries).forEach(each => {
+		let keys = Object.keys(summaries);
+		let skeys = _.sortBy(keys); 
+		skeys.forEach(each => {
 			summary = summaries[each];
 			summary.diff = summary.cr - summary.dr;
 			summary.cumulativeDiff = summary.diff + totalDiff;
