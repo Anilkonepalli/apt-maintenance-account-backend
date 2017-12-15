@@ -31,7 +31,6 @@ app.use(bodyParser.text());
 app.use(bodyParser.json({ type: 'application/json' }));
 app.use(cors());
 
-
 app.get("/", (req, res) => res.json({ message: "Welcome to Maintenance Accounts Tracking App"}));
 
 let login = require('./authentication/login-routes');
@@ -40,10 +39,8 @@ app.route("/api/login/forgot-password").post(login.forgotPassword);
 app.route("/api/login").post(login.createSession);
 
 let user = require('./users/user-routes');
-app.route("/api/users/").post(user.post);
-app.route("/api/signup/:code").put(user.confirmSignup);
-
-//let userprofile = require('./userprofile/routes');
+app.route("/api/users/").post(user.post);  // Register new user
+app.route("/api/signup/:code").put(user.confirmSignup); // Confirm new user 
 
 let socialLogin = require('./authentication/social-login-routes');
 app.route("/api/sociallogin").post(socialLogin.createSession);
@@ -81,8 +78,6 @@ app.route("/api/users/:id")
 app.route("/api/userprofile/:id")
 	.get(user.get)
 	.put(user.putProfile);
-	//.get(userprofile.get)
-	//.put(userprofile.put);
 
 
 /////////////////////////  ACCOUNT ROUTES  //////////////////////////////

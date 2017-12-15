@@ -11,9 +11,11 @@ var randomstring = require('randomstring');
 
 // application routing
 function createSession(request, response){
+
 	if( !request.body.email || !request.body.password){
 		return response.status(400).send("Email and Password needed");
 	}
+
 	// Get User details of email
 	User.forge( {email: request.body.email} ).fetch({withRelated:['infos']})
 		.then(model => {
@@ -39,6 +41,7 @@ function createSession(request, response){
 			logger.log('debug', '/api/login >> createSession()...');
 			return response.status(201).send({
 				id_token: jwt.sign(_.omit(user, omitList), constants.secret, {expiresIn: '2h', issuer: 'Apt-Maint'})
+				//id_token: jwt.sign(_.omit(user, omitList), constants.secret, {expiresIn: 60*2, issuer: 'Apt-Maint'}) // expires in 5 minutes for testing purpose
 			});
 
 		})

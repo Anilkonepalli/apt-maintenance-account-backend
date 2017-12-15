@@ -163,7 +163,7 @@ function putCommon(req, res){
 		let promises = [];
 		let aPromise;
 		logger.log('debug', 'Updating Infos....'); logger.log('debug', req.body.infos);
-		req.body.infos.forEach(eachUi => {
+		req.body.infos && req.body.infos.forEach(eachUi => {
 			let infos = this.model.toJSON().infos;
 			logger.log('debug', 'Infos in db...'); logger.log('debug', infos);
 			existingInfo = infos.filter((eachDb) => eachDb.key === eachUi.key);
