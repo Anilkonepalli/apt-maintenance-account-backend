@@ -131,8 +131,11 @@ function putCommon(req, res){
 		return auth.allowsEdit(req.decoded.id, myResourceName, model);
 	}
 	function checkForDuplicate(granted){ // implementing inner function1
-		logger.log('debug', 'checkForDuplicate(...)!');
-		logger.log('debug', 'granted...'+granted);
+		logger.log('debug', 'checkForDuplicate(....)!!');
+		logger.log('debug', 'granted....'+granted);
+		logger.log('debug', 'email....'+email);
+		logger.log('debug', 'this.email....'+this.email);
+		logger.log('debug', 'req.body.email....'+req.body.email);
 		if(this.isSocial) {// no dup check for social user, so just return count as 0 (zero)
 			this.email = null; // nullify any email string found in the request parameter
 			return new Promise((resolve) => resolve(0));
@@ -140,7 +143,7 @@ function putCommon(req, res){
 		if(this.model.toJSON().email === req.body.email) // no dup check if no change in email, just return 0 (zero)
 			return new Promise((resolve) => resolve(0));
 		return User
-			.where({ email: email })
+			.where({ email: req.body.email })
 		  .count('id'); // returns Promise containing count
 	}
 	function doUpdate(count){
