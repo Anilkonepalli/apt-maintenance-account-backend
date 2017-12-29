@@ -1,9 +1,0 @@
-{"level":"error","message":"Undefined binding(s) detected when compiling SELECT query: select count(`id`) as `count` from `users` where `email` = ? and `users`.`deleted_at` is null","timestamp":"2017-12-16T13:06:20.538Z"}
-{"level":"error","message":"Unauthorized Access!!","timestamp":"2017-12-16T13:27:01.582Z"}
-{"level":"error","message":"Undefined binding(s) detected when compiling SELECT query: select count(`id`) as `count` from `users` where `email` = ? and `users`.`deleted_at` is null","timestamp":"2017-12-16T13:28:25.959Z"}
-{"level":"error","message":"Undefined binding(s) detected when compiling SELECT query: select count(`id`) as `count` from `users` where `email` = ? and `users`.`deleted_at` is null","timestamp":"2017-12-16T13:48:28.398Z"}
-{"level":"error","message":"Undefined binding(s) detected when compiling SELECT query: select count(`id`) as `count` from `users` where `email` = ? and `users`.`deleted_at` is null","timestamp":"2017-12-16T13:50:34.084Z"}
-{"level":"error","message":"Undefined binding(s) detected when compiling SELECT query: select count(`id`) as `count` from `users` where `email` = ? and `users`.`deleted_at` is null","timestamp":"2017-12-16T13:56:04.295Z"}
-{"level":"error","message":"Undefined binding(s) detected when compiling SELECT query: select count(`id`) as `count` from `users` where `email` = ? and `users`.`deleted_at` is null","timestamp":"2017-12-16T13:59:07.608Z"}
-{"level":"error","message":"Undefined binding(s) detected when compiling SELECT query: select count(`id`) as `count` from `users` where `email` = ? and `users`.`deleted_at` is null","timestamp":"2017-12-16T14:02:34.671Z"}
-{"level":"error","message":"Unauthorized Access!!","timestamp":"2017-12-16T14:29:45.620Z"}
