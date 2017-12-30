@@ -40,8 +40,8 @@ function createSession(request, response){
 			];
 			logger.log('debug', '/api/login >> createSession()...');
 			return response.status(201).send({
-				//id_token: jwt.sign(_.omit(user, omitList), constants.secret, {expiresIn: '2h', issuer: 'Apt-Maint'})
-				id_token: jwt.sign(_.omit(user, omitList), constants.secret, {expiresIn: 60*2, issuer: 'Apt-Maint'}) // expires in 2 minutes for testing purpose
+				id_token: jwt.sign(_.omit(user, omitList), constants.secret, {expiresIn: '2h', issuer: 'Apt-Maint'})
+				//id_token: jwt.sign(_.omit(user, omitList), constants.secret, {expiresIn: 60*2, issuer: 'Apt-Maint'}) // expires in 2 minutes for testing purpose
 			});
 
 		})
