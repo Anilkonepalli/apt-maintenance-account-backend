@@ -1,6 +1,7 @@
-var	Role 		= require('./role-model');
+var	Role 				= require('./role-model');
 var	Bookshelf 	= require('../config/database');
 var constants 	= require('../config/constants.json');
+var auth 				= require('./authorization');
 
 var Roles 		= Bookshelf.Collection.extend({
 	model: Role
@@ -41,11 +42,20 @@ function getPermissions(req, res) {
 // on routes that end in /Roles/:id to update an existing Role
 // ---------------------------------------------------------------------
 function put(req, res) {
+	let model;
+
 	Role.forge({id: req.params.id}).fetch({require: true})
+		.then(doAuth)
 		.then(doUpdate)
 		.catch(notifyError);
 
-	function doUpdate(model){
+	function doAuth(model) {
+		this.model = model;
+		return auth.allowsEdit(req.decoded.id, 'roles', model);
+	}
+
+	function doUpdate(granted){
+		let model = this.model
 		model.save({
 			name: req.body.name || model.get('name'),
 			description: req.body.description || model.get('description'),
