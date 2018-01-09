@@ -10,7 +10,7 @@
 		"users": "100",
 		"flats": "16",
 		"residents": "320",
-		"roles": "6",
+		"roles": "60000",
 		"permissions": "30",
 		"perUser": {
 				"infos": "10"

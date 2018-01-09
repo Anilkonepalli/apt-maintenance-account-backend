@@ -51,7 +51,7 @@ function put(req, res) {
 
 	function doAuth(model) {
 		this.model = model;
-		return auth.allowsEdit(req.decoded.id, 'roles', model);
+		return auth.allowsEdit(req.decoded.id, 'roles', model); // check whether logged user is allowed to Edit this role model
 	}
 
 	function doUpdate(granted){
@@ -111,7 +111,8 @@ function putPermissions(req, res) {
 // ---------------------------------------------------------------------
 function post(req, res) {
 
-	getTotalForMaxCheck()
+	auth.allowsAdd(req.decoded.id, 'roles') // check whether logged user is allowed to add a Role
+		.then(getTotalForMaxCheck)
 		.then(doSave)
 		.then(sendResponse)
 		.catch(error);
