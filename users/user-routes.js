@@ -382,17 +382,23 @@ function post(req, res) {
 // on routes that end in /users/:id to delete an user
 // ---------------------------------------------------------------------
 function del(req, res) { // using full form 'delete' causes error, so 'del' is used
-	let userModel;
+	let model;
 
 	User.forge({id: req.params.id}).fetch({require: true, withRelated:['infos']})
+		.then(doAuth)
 		.then(getDependants)
 		.then(deleteDependants)
 		.then(doDeleteUser)
 		.catch(notifyError);
 
+	function doAuth(model) {
+		this.model = model;
+		return auth.allowsDelete(req.decoded.id, 'users', model); // check whether logged user is allowed to Delete role model
+	}
+
 	// for now, a work around to delete dependants is done here
-	function getDependants(model){ // yet to explore a better way to delete dependants with soft delete
-		userModel = model;
+	function getDependants(granted){ // yet to explore a better way to delete dependants with soft delete
+		//userModel = model;
 		return Infos.forge({user_id: model.id}).fetch({require: true});
 	}
 
@@ -404,7 +410,7 @@ function del(req, res) { // using full form 'delete' causes error, so 'del' is u
 		return Promise.all(promises);
 	}
 	function doDeleteUser(){
-		userModel.destroy()
+		model.destroy()
 			.then( () => res.json({error: true, data: {message: 'User model successfully deleted'} }))
 			.catch( (err) => res.status(500).json({error: true, data: {message: err.message}}));
 	}

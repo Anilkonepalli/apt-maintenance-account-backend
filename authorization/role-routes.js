@@ -154,11 +154,21 @@ function post(req, res) {
 // on routes that end in /Roles/:id to delete an Role
 // ---------------------------------------------------------------------
 function del(req, res) {
+
+	let model;
+
 	Role.forge({id: req.params.id}).fetch({require: true})
+		.then(doAuth)
 		.then(doDelete)
 		.catch(notifyError);
 
-	function doDelete(model){
+	function doAuth(model) {
+		this.model = model;
+		return auth.allowsDelete(req.decoded.id, 'roles', model); // check whether logged user is allowed to Delete role model
+	}
+
+	function doDelete(granted){
+		let model = this.model
 		model.destroy()
 			.then( () => res.json({error: true, data: {message: 'Role model successfully deleted'} }))
 			.catch( (err) => res.status(500).json({error: true, data: {message: err.message}}));
