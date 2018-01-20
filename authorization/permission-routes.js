@@ -1,7 +1,7 @@
 var	Permission 	= require('./permission-model');
 var	Bookshelf 	= require('../config/database');
 var constants 	= require('../config/constants.json');
-
+var auth 				= require('./authorization');
 var Permissions = Bookshelf.Collection.extend({
 	model: Permission
 });
@@ -31,14 +31,20 @@ function get(req, res) {
 // on routes that end in /Permissions/:id to update an existing permission
 // ---------------------------------------------------------------------
 function put(req, res) {
-
+	let model;
 	logger.log('debug', 'Inside permission-routes >> put(req,res)...');
 	logger.log('debug', 'req params id: '+req.params.id);
 
 	Permission.forge({id: req.params.id}).fetch({require: true})
+		.then(doAuth)
 		.then(savePermission)
 		.then(sendResponse)
 		.catch(errorToNotify);
+
+		function doAuth(model) {
+			this.model = model;
+			return auth.allowsEdit(req.decoded.id, 'permissions', model); // check whether logged user is allowed to Edit this role model
+		}
 
 		function savePermission(model) {
 			logger.log('debug', 'Inside permission-routes >> savePermission(model)...');
@@ -66,7 +72,9 @@ function put(req, res) {
 // on routes that end in /Permissions to post (to add) a new permission
 // ---------------------------------------------------------------------
 function post(req, res) {
-	getTotalForMaxCheck()
+
+	auth.allowsAdd(req.decoded.id, 'permissions') // check whether logged user is allowed to add a Role
+		.then(getTotalForMaxCheck)
 		.then(doSave)
 		.then(sendResponse)
 		.catch(error);
@@ -105,9 +113,18 @@ function post(req, res) {
 // on routes that end in /Permissions/:id to delete an permission
 // ---------------------------------------------------------------------
 function del(req, res) {
+
+	let model;
+
 	Permission.forge({id: req.params.id}).fetch({require: true})
+		.then(doAuth)
 		.then(doDelete)
 		.catch(notifyError);
+
+	function doAuth(model) {
+		this.model = model;
+		return auth.allowsDelete(req.decoded.id, 'permissions', model); // check whether logged user is allowed to Delete role model
+	}
 
 	function doDelete(model){
 		model.destroy()
