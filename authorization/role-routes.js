@@ -79,14 +79,24 @@ function putPermissions(req, res) {
 	let roleModel;
 	logger.log('debug', 'Inside role-routes >> putPermissions(req,res)...');
 	logger.log('debug', 'req params id: '+req.params.id);
-	Role.forge({id: req.params.id}).fetch({require: true, withRelated:['permissions']})
+	//Role.forge({id: req.params.id}).fetch({require: true, withRelated:['permissions']})
+	retrieveModelWithPermissions()
+		.then(doAuth)
 		.then(detachExistingPermissions)
 		.then(attachNewPermissions)
+		.then(retrieveModelWithPermissions) // re-retrieve the model so as to get new permissions
 		.then(sendResponse)
 		.catch(errorToNotify);
 
-	function detachExistingPermissions(model){ // remove existing permissions first
-		roleModel = model;
+	function retrieveModelWithPermissions() {
+		return Role.forge({id: req.params.id}).fetch({require: true, withRelated:['permissions']})
+	}
+	function doAuth(model) {
+		this.roleModel = model;
+		return auth.allowsEdit(req.decoded.id, 'roles-permissions', model); // check whether logged user is allowed to Edit this role model
+	}
+	function detachExistingPermissions(granted){ // remove existing permissions first
+		let model = this.roleModel;
 		logger.log('debug', 'Inside role-routes >> detachExistingPermissions(model)...');
 		logger.log('debug', model.toJSON());
 		return model.permissions().detach();
@@ -98,8 +108,15 @@ function putPermissions(req, res) {
 		return roleModel.permissions().attach(req.body.mypermissionsIds); // attach new permissions
 	}
 
-	function sendResponse(aColl) {
+/*	function sendResponse(aColl) {
+		logger.log('debug', 'exploring aColl after putPermissions')
+		logger.log('debug', aColl.toJSON())
 		res.json({error:false, data:{ message: 'My Permissions are attached to Role' }});
+	} */
+
+	function sendResponse(model) {
+		let modelJson = model.toJSON();
+		res.json(modelJson.permissions);
 	}
 
 	function errorToNotify(err){

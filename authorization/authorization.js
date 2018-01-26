@@ -54,28 +54,31 @@ function allows(userId, resource, model, action) {
 	logger.log('debug', 'Action: '+action);
 	logger.log('debug', 'model is: ');
 	logger.log('debug', model);
-	return new Promise( function(resolve, reject) {
+//	return new Promise( function(resolve, reject) {
 
-		getUserPermissions(userId, resource)
-			.then(perms => {
+		return getUserPermissions(userId, resource)
+			.then(processPermissions)
+			.catch(handleError);
+
+		function processPermissions(perms) {
+logger.log('debug', 'Retrieved permissions are:'); logger.log('debug', perms)
 				// find permissions with granted 'action'
-				let permissions = perms.filter(perm => {
-					return perm.operations.indexOf(action) > -1;
-				});
+				let permissions = perms.filter(each => each.operations.indexOf(action) > -1);
+logger.log('debug', 'permissions after filtering...'); logger.log('debug', permissions)
 				let pCount = permissions.length;
-
+logger.log('debug', 'permissions count: '); logger.log('debug', pCount);
 				// if no permissions found, then reject it with error message
-				if(pCount < 1) reject(new Error('Unauthorized Access!!')); // two !! here
-
-				// find permissions with condition
+				// if(pCount == 0) return Promise.reject(new Error('Unauthorized Access!!')); // two !! here
+				if(pCount == 0) throw new Error('Unauthorized Access!!'); // two !! here
+					// find permissions with condition
 				let permissionsWithCondition = pwc(permissions);
 				let pwcCount = permissionsWithCondition.length;
 
 				// if permission(s) exist but has no condition, pass the model for futher processing
-				if(pwcCount < 1) resolve(model);
+				if(pwcCount < 1) return Promise.resolve(model);
 
 				// permissions with no condition take precedence, hence pass the model for futher processing
-				if(pCount > pwcCount) resolve(model);
+				if(pCount > pwcCount) return Promise.resolve(model);
 
 				// evaluate condition in each of the permissionsWithCondition
 				let modelJson = model.toJSON();
@@ -86,15 +89,73 @@ function allows(userId, resource, model, action) {
 					modelJson['owner_id'] = modelJson.id; // add an attribute for evaluation purpose
 				};
 				let data = { user_id: userId, model: modelJson };
-				hasEvaluatedPerms(permissionsWithCondition, data)
-					? resolve(model)
-					: reject(new Error('Unauthorized Access!!!')); // three !!! here; all conditions evaluated to false, return error with message
+				if(hasEvaluatedPerms(permissionsWithCondition, data)){
+					return Promise.resolve(model)
+				} else {
+					throw new Error('Unauthorized Access!!!'); // three !!! here; all conditions evaluated to false, return error with message
+				}
+			}
+
+		function handleError(err){
+			return Promise.reject(err);
+		}
+}
+
+/*
+
+function allows(userId, resource, model, action) {
+	logger.log('debug', 'UserId: '+userId);
+	logger.log('debug', 'Resource Name: '+resource);
+	logger.log('debug', 'Action: '+action);
+	logger.log('debug', 'model is: ');
+	logger.log('debug', model);
+	return new Promise( function(resolve, reject) {
+
+		getUserPermissions(userId, resource)
+			.then(perms => {
+logger.log('debug', 'Retrieved permissions are:'); logger.log('debug', perms)
+				// find permissions with granted 'action'
+				let permissions = perms.filter(perm => {
+					return perm.operations.indexOf(action) > -1;
+				});
+				logger.log('debug', 'permissions after filtering...'); logger.log('debug', permissions)
+				let pCount = permissions.length;
+				logger.log('debug', 'permissions count: '); logger.log('debug', pCount);
+				// if no permissions found, then reject it with error message
+				if(pCount == 0) {
+					reject(new Error('Unauthorized Access!!')); // two !! here
+				} else { // pCount > 0
+					// find permissions with condition
+					let permissionsWithCondition = pwc(permissions);
+					let pwcCount = permissionsWithCondition.length;
+
+					// if permission(s) exist but has no condition, pass the model for futher processing
+					if(pwcCount < 1) resolve(model);
+
+					// permissions with no condition take precedence, hence pass the model for futher processing
+					if(pCount > pwcCount) resolve(model);
+
+					// evaluate condition in each of the permissionsWithCondition
+					let modelJson = model.toJSON();
+					logger.log('debug', 'Authorization >> allows....Model is: ');
+					logger.log('debug', modelJson);
+					let noOwners = ['users', 'user-profile'];
+					if(noOwners.includes(resource)){
+						modelJson['owner_id'] = modelJson.id; // add an attribute for evaluation purpose
+					};
+					let data = { user_id: userId, model: modelJson };
+					hasEvaluatedPerms(permissionsWithCondition, data)
+						? resolve(model)
+						: reject(new Error('Unauthorized Access!!!')); // three !!! here; all conditions evaluated to false, return error with message
+				} // pCount > 0
 			})
 			.catch(err => reject(err));
 
 	});
 
 }
+*/
+
 
 /**
  * Answers filter out models that are view authorized
