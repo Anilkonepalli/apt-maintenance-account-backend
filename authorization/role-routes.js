@@ -89,6 +89,7 @@ function putPermissions(req, res) {
 		.catch(errorToNotify);
 
 	function retrieveModelWithPermissions() {
+		logger.log('debug', 'retrieving role with permissions');
 		return Role.forge({id: req.params.id}).fetch({require: true, withRelated:['permissions']})
 	}
 	function doAuth(model) {
@@ -104,8 +105,8 @@ function putPermissions(req, res) {
 
 	function attachNewPermissions(){
 		logger.log('debug', 'inside role-routes >> attachNewPermissions(model)...');
-		logger.log('debug', roleModel.toJSON());
-		return roleModel.permissions().attach(req.body.mypermissionsIds); // attach new permissions
+		logger.log('debug', this.roleModel.toJSON());
+		return this.roleModel.permissions().attach(req.body.mypermissionsIds); // attach new permissions
 	}
 
 /*	function sendResponse(aColl) {
@@ -116,6 +117,8 @@ function putPermissions(req, res) {
 
 	function sendResponse(model) {
 		let modelJson = model.toJSON();
+		logger.log('debug', 'inside role-routes >> sendResponse(model)')
+		logger.log('debug', modelJson)
 		res.json(modelJson.permissions);
 	}
 
