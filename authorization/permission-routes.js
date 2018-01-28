@@ -9,6 +9,7 @@ var Permissions = Bookshelf.Collection.extend({
 // on routes that end in /Permissions
 // ---------------------------------------------------------------------
 function getAll(req, res) {
+	logger.log('debug', 'permissions >> getAll()')
 	Permissions.forge().fetch()
 		.then(models => res.json(models))
 		.catch(err => res.send(err));
