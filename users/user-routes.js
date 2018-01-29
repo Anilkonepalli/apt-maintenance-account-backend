@@ -24,7 +24,7 @@ var myResourceName; // possible resource names are: users, user-profile
 // get all the user models (accessed at GET http://localhost:3002/api/users)
 // ---------------------------------------------------------------------
 function getAll(req, res) {
-	Users.forge().fetch()
+	Users.forge().fetch({withRelated: ['infos']})
 		.then(models => res.json(models))
 		.catch(err => res.send(err));
 }
