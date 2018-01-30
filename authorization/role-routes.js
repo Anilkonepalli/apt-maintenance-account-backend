@@ -77,8 +77,8 @@ function put(req, res) {
 // --------------------------------------------------------------------------------------------
 function putPermissions(req, res) {
 	let roleModel;
-	logger.log('debug', 'Inside role-routes >> putPermissions(req,res)...');
-	logger.log('debug', 'req params id: '+req.params.id);
+	logger.debug('Inside role-routes >> putPermissions(req,res)...');
+	logger.debug('req params id: '+req.params.id);
 	//Role.forge({id: req.params.id}).fetch({require: true, withRelated:['permissions']})
 	retrieveModelWithPermissions()
 		.then(doAuth)
@@ -89,7 +89,7 @@ function putPermissions(req, res) {
 		.catch(errorToNotify);
 
 	function retrieveModelWithPermissions() {
-		logger.log('debug', 'retrieving role with permissions');
+		logger.debug('retrieving role with permissions');
 		return Role.forge({id: req.params.id}).fetch({require: true, withRelated:['permissions']})
 	}
 	function doAuth(model) {
@@ -98,27 +98,27 @@ function putPermissions(req, res) {
 	}
 	function detachExistingPermissions(granted){ // remove existing permissions first
 		let model = this.roleModel;
-		logger.log('debug', 'Inside role-routes >> detachExistingPermissions(model)...');
-		logger.log('debug', model.toJSON());
+		logger.debug('Inside role-routes >> detachExistingPermissions(model)...');
+		logger.debug(model.toJSON());
 		return model.permissions().detach();
 	}
 
 	function attachNewPermissions(){
-		logger.log('debug', 'inside role-routes >> attachNewPermissions(model)...');
-		logger.log('debug', this.roleModel.toJSON());
+		logger.debug('inside role-routes >> attachNewPermissions(model)...');
+		logger.debug(this.roleModel.toJSON());
 		return this.roleModel.permissions().attach(req.body.mypermissionsIds); // attach new permissions
 	}
 
 /*	function sendResponse(aColl) {
-		logger.log('debug', 'exploring aColl after putPermissions')
-		logger.log('debug', aColl.toJSON())
+		logger.debug('exploring aColl after putPermissions')
+		logger.debug(aColl.toJSON())
 		res.json({error:false, data:{ message: 'My Permissions are attached to Role' }});
 	} */
 
 	function sendResponse(model) {
 		let modelJson = model.toJSON();
-		logger.log('debug', 'inside role-routes >> sendResponse(model)')
-		logger.log('debug', modelJson)
+		logger.debug('inside role-routes >> sendResponse(model)')
+		logger.debug(modelJson)
 		res.json(modelJson.permissions);
 	}
 
@@ -140,15 +140,15 @@ function post(req, res) {
 	function getTotalForMaxCheck() {
 		let tableName = Role.prototype.tableName;
 		if(constants.maxRecordsDisabled) {
-			logger.log('debug', 'Max Records DISABLED!');
+			logger.debug('Max Records DISABLED!');
 			return new Promise((resolve) => resolve(''));
 		}
-		logger.log('debug', 'Max Records ENABLED');
+		logger.debug('Max Records ENABLED');
 		return Bookshelf.knex(tableName).count('id as CNT');
 	}
 
 	function doSave(total){
-		logger.log('debug', 'doSave(...)!!');
+		logger.debug('doSave(...)!!');
 		if(total && total[0].CNT >= constants.maxRecords.roles) {
 			let msg = 'Maximum Limit Reached! Cannot Save Role details!';
 			logger.log('error', msg);

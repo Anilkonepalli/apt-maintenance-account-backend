@@ -21,11 +21,11 @@ function getAll(req, res) {
 		.catch(error);
 
 	function doAuth(models) {
-		logger.log('debug', '/api/flats >> getAll()...');
+		logger.debug('/api/flats >> getAll()...');
 		return auth.allowedList(req.decoded.id, 'flats', models);
 	}
 	function sendResponse(models) {
-		logger.log('debug', 'models being sent are: '); logger.log('debug', models.toJSON());
+		logger.debug('models being sent are: '); logger.debug(models.toJSON());
 		res.json(models);
 	}
 	function error(err) {
@@ -50,7 +50,7 @@ function get(req, res) {
 			.catch(error);
 	}
 	function doAuth(model) {
-		logger.log('debug', '/api/flats >> get()...');
+		logger.debug('/api/flats >> get()...');
 		return auth.allowsView(req.decoded.id, 'flats', model);
 	}
 	function error(err) {
@@ -62,12 +62,12 @@ function get(req, res) {
 // on routes that end in /flats/myresidents/:id to get residents for flat id
 // ---------------------------------------------------------------------
 function getResidents(req, res) {
-	logger.log('debug', 'Inside flat-routes >> getResidents() for flat id: '+req.params.id);
+	logger.debug('Inside flat-routes >> getResidents() for flat id: '+req.params.id);
 	Flat.forge( {id: req.params.id} ).fetch({withRelated: ['residents']})
 		.then(model => {
-			logger.log('debug', 'Flat model is retrieved...');
+			logger.debug('Flat model is retrieved...');
 			let modelJson = model.toJSON();
-			logger.log('debug', modelJson);
+			logger.debug(modelJson);
 			res.json(modelJson.residents);
 		})
 		.catch(err => res.send(err));
@@ -96,19 +96,19 @@ function put(req, res) {
 		return auth.allowsEdit(req.decoded.id, 'flats', model);
 	}
 	function checkForDuplicate(granted){ // implementing inner function1
-		logger.log('debug', 'checkForDuplicate(...)!');
-		logger.log('debug', 'granted...'+granted);
+		logger.debug('checkForDuplicate(...)!');
+		logger.debug('granted...'+granted);
 		return Flat
 			.where({block_number: blockNumber,
 						  flat_number: flatNumber })
 		  .count('id'); // returns Promise containing count
 	}
 	function doUpdate(count){
-		logger.log('debug', 'count is: '+count);
+		logger.debug('count is: '+count);
 		if(count) {
 		 throw new Error('Duplicate Error!');
 	 	}
-		logger.log('debug', '/api/flats >> put()...updating flat details');
+		logger.debug('/api/flats >> put()...updating flat details');
 		return this.model.save({
 			block_number: blockNumber || this.model.get('block_number'),
 			flat_number: flatNumber || this.model.get('flat_number')
@@ -128,8 +128,8 @@ function put(req, res) {
 // --------------------------------------------------------------------------------------------
 function putResidents(req, res) {
 	let flatModel;
-	logger.log('debug', 'Inside flat-routes >> putResidents(req,res)...');
-	logger.log('debug', 'req params id: '+req.params.id);
+	logger.debug('Inside flat-routes >> putResidents(req,res)...');
+	logger.debug('req params id: '+req.params.id);
 	Flat.forge({id: req.params.id}).fetch({require: true, withRelated:['residents']})
 		.then(detachExistingResidents)
 		.then(attachNewResidents)
@@ -138,13 +138,13 @@ function putResidents(req, res) {
 
 	function detachExistingResidents(model){ // remove existing residents first
 		flatModel = model;
-		logger.log('debug', 'Inside flat-routes >> detachExistingResidents(model)...');
-		logger.log('debug', model.toJSON());
+		logger.debug('Inside flat-routes >> detachExistingResidents(model)...');
+		logger.debug(model.toJSON());
 		return model.residents().detach();
 	}
 	function attachNewResidents(){
-		logger.log('debug', 'inside flat-routes >> attachNewResidents(model)...');
-		logger.log('debug', flatModel.toJSON());
+		logger.debug('inside flat-routes >> attachNewResidents(model)...');
+		logger.debug(flatModel.toJSON());
 		return flatModel.residents().attach(req.body.myresidentsIds); // attach new residents
 	}
 
@@ -175,15 +175,15 @@ function post(req, res) {
 	function getTotalForMaxCheck(granted) {
 		let tableName = Flat.prototype.tableName;
 		if(constants.maxRecordsDisabled) {
-			logger.log('debug', 'Max Records DISABLED!');
+			logger.debug('Max Records DISABLED!');
 			return new Promise((resolve) => resolve(''));
 		}
-		logger.log('debug', 'Max Records ENABLED');
+		logger.debug('Max Records ENABLED');
 		return Bookshelf.knex(tableName).count('id as CNT');
 	}
 
 	function getCountForDupCheck(total){ // implementing inner function1
-		logger.log('debug', 'getCountForDupCheck(...)!!');
+		logger.debug('getCountForDupCheck(...)!!');
 		if(total && total[0].CNT >= constants.maxRecords.flats) {
 			let msg = 'Maximum Limit Reached! Cannot Save Flat details!';
 			logger.log('error', msg);
@@ -199,7 +199,7 @@ function post(req, res) {
 		if(count) {
 			throw new Error('Duplicate Error!!');
 		}
-		logger.log('debug', '/api/flats >> post()...saving new flat details');
+		logger.debug('/api/flats >> post()...saving new flat details');
 		return Flat.forge({
 			block_number: blockNumber,
 			flat_number: flatNumber
@@ -229,7 +229,7 @@ function del(req, res) {
 		return auth.allowsDelete(req.decoded.id, 'flats', model);
 	}
 	function doDelete(model){
-		logger.log('debug', '/api/flats >> del()...');
+		logger.debug('/api/flats >> del()...');
 		return model.destroy();
 	}
 	function sendResponse() {

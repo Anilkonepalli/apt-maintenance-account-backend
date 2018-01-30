@@ -14,18 +14,18 @@ module.exports = function(userId, resource = null){
 
 		getRoleIdsFor(userId)
 			.then(roleIds => {
-				logger.log('debug', 'getRoleIdsFor('+roleIds+')');
+				logger.debug('getRoleIdsFor('+roleIds+')');
 				return getPermissionsFor(roleIds);
 			})
 			.then(perms => {
 				if(resource){
-					logger.log('debug', 'filter permissions for resource: '+resource);
+					logger.debug('filter permissions for resource: '+resource);
 					let permsForResource = perms.filter(each => each.resource === resource);
-					logger.log('debug', permsForResource);
+					logger.debug(permsForResource);
 					resolve(permsForResource);
 				} else {
-					logger.log('debug', 'resource is null; so send all permissions...');
-					logger.log('debug', perms);
+					logger.debug('resource is null; so send all permissions...');
+					logger.debug(perms);
 					resolve(perms);
 				}
 			})

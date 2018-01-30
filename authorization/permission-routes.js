@@ -9,7 +9,7 @@ var Permissions = Bookshelf.Collection.extend({
 // on routes that end in /Permissions
 // ---------------------------------------------------------------------
 function getAll(req, res) {
-	logger.log('debug', 'permissions >> getAll()')
+	logger.debug('permissions >> getAll()')
 	Permissions.forge().fetch()
 		.then(models => res.json(models))
 		.catch(err => res.send(err));
@@ -19,10 +19,10 @@ function getAll(req, res) {
 // ---------------------------------------------------------------------
 function get(req, res) {
 	if(req.params.id === '0') { // respond with a new permission model
-		logger.log('debug', '/api/permissions >> get(new)...');
+		logger.debug('/api/permissions >> get(new)...');
 		res.json(new Permission());
 	} else { // respond with fetched permission model
-		logger.log('debug', '/api/permissions >> get(existing)...');
+		logger.debug('/api/permissions >> get(existing)...');
 		Permission.forge( {id: req.params.id} ).fetch()
 			.then(model => res.json(model))
 			.catch(err => res.send(err));
@@ -33,8 +33,8 @@ function get(req, res) {
 // ---------------------------------------------------------------------
 function put(req, res) {
 	let model;
-	logger.log('debug', 'Inside permission-routes >> put(req,res)...');
-	logger.log('debug', 'req params id: '+req.params.id);
+	logger.debug('Inside permission-routes >> put(req,res)...');
+	logger.debug('req params id: '+req.params.id);
 
 	Permission.forge({id: req.params.id}).fetch({require: true})
 		.then(doAuth)
@@ -48,8 +48,8 @@ function put(req, res) {
 		}
 
 		function savePermission(model) {
-			logger.log('debug', 'Inside permission-routes >> savePermission(model)...');
-			logger.log('debug', model.toJSON());
+			logger.debug('Inside permission-routes >> savePermission(model)...');
+			logger.debug(model.toJSON());
 
 			return model.save({
 				operations: req.body.operations || model.get('operations'),
@@ -60,7 +60,7 @@ function put(req, res) {
 		}
 
 		function sendResponse() {
-			logger.log('debug', 'Inside permission-routes >> sendResponse()...');
+			logger.debug('Inside permission-routes >> sendResponse()...');
 			res.json({error: false, data:{message: 'Permission Details Updated'}});
 		}
 
@@ -83,14 +83,14 @@ function post(req, res) {
 	function getTotalForMaxCheck() {
 		let tableName = Permission.prototype.tableName;
 		if(constants.maxRecordsDisabled) {
-			logger.log('debug', 'Max Records DISABLED!');
+			logger.debug('Max Records DISABLED!');
 			return new Promise((resolve) => resolve(''));
 		}
-		logger.log('debug', 'Max Records ENABLED');
+		logger.debug('Max Records ENABLED');
 		return Bookshelf.knex(tableName).count('id as CNT');
 	}
 	function doSave(total){
-		logger.log('debug', 'doSave(...)!!');
+		logger.debug('doSave(...)!!');
 		if(total && total[0].CNT >= constants.maxRecords.permissions) {
 			let msg = 'Maximum Limit Reached! Cannot Save Permission details!';
 			logger.log('error', msg);

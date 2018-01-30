@@ -49,11 +49,11 @@ module.exports = {
  * @return {Promise<Any>}
  */
 function allows(userId, resource, model, action) {
-	logger.log('debug', 'UserId: '+userId);
-	logger.log('debug', 'Resource Name: '+resource);
-	logger.log('debug', 'Action: '+action);
-	logger.log('debug', 'model is: ');
-	logger.log('debug', model);
+	logger.debug('UserId: '+userId);
+	logger.debug('Resource Name: '+resource);
+	logger.debug('Action: '+action);
+	logger.debug('model is: ');
+	logger.debug(model);
 //	return new Promise( function(resolve, reject) {
 
 		return getUserPermissions(userId, resource)
@@ -61,12 +61,12 @@ function allows(userId, resource, model, action) {
 			.catch(handleError);
 
 		function processPermissions(perms) {
-logger.log('debug', 'Retrieved permissions are:'); logger.log('debug', perms)
+logger.debug('Retrieved permissions are:'); logger.debug(perms)
 				// find permissions with granted 'action'
 				let permissions = perms.filter(each => each.operations.indexOf(action) > -1);
-logger.log('debug', 'permissions after filtering...'); logger.log('debug', permissions)
+logger.debug('permissions after filtering...'); logger.debug(permissions)
 				let pCount = permissions.length;
-logger.log('debug', 'permissions count: '); logger.log('debug', pCount);
+logger.debug('permissions count: '); logger.debug(pCount);
 				// if no permissions found, then reject it with error message
 				// if(pCount == 0) return Promise.reject(new Error('Unauthorized Access!!')); // two !! here
 				if(pCount == 0) throw new Error('Unauthorized Access!!'); // two !! here
@@ -82,8 +82,8 @@ logger.log('debug', 'permissions count: '); logger.log('debug', pCount);
 
 				// evaluate condition in each of the permissionsWithCondition
 				let modelJson = model.toJSON();
-				logger.log('debug', 'Authorization >> allows....Model is: ');
-				logger.log('debug', modelJson);
+				logger.debug('Authorization >> allows....Model is: ');
+				logger.debug(modelJson);
 				let noOwners = ['users', 'user-profile'];
 				if(noOwners.includes(resource)){
 					modelJson['owner_id'] = modelJson.id; // add an attribute for evaluation purpose
@@ -104,23 +104,23 @@ logger.log('debug', 'permissions count: '); logger.log('debug', pCount);
 /*
 
 function allows(userId, resource, model, action) {
-	logger.log('debug', 'UserId: '+userId);
-	logger.log('debug', 'Resource Name: '+resource);
-	logger.log('debug', 'Action: '+action);
-	logger.log('debug', 'model is: ');
-	logger.log('debug', model);
+	logger.debug('UserId: '+userId);
+	logger.debug('Resource Name: '+resource);
+	logger.debug('Action: '+action);
+	logger.debug('model is: ');
+	logger.debug(model);
 	return new Promise( function(resolve, reject) {
 
 		getUserPermissions(userId, resource)
 			.then(perms => {
-logger.log('debug', 'Retrieved permissions are:'); logger.log('debug', perms)
+logger.debug('Retrieved permissions are:'); logger.debug(perms)
 				// find permissions with granted 'action'
 				let permissions = perms.filter(perm => {
 					return perm.operations.indexOf(action) > -1;
 				});
-				logger.log('debug', 'permissions after filtering...'); logger.log('debug', permissions)
+				logger.debug('permissions after filtering...'); logger.debug(permissions)
 				let pCount = permissions.length;
-				logger.log('debug', 'permissions count: '); logger.log('debug', pCount);
+				logger.debug('permissions count: '); logger.debug(pCount);
 				// if no permissions found, then reject it with error message
 				if(pCount == 0) {
 					reject(new Error('Unauthorized Access!!')); // two !! here
@@ -137,8 +137,8 @@ logger.log('debug', 'Retrieved permissions are:'); logger.log('debug', perms)
 
 					// evaluate condition in each of the permissionsWithCondition
 					let modelJson = model.toJSON();
-					logger.log('debug', 'Authorization >> allows....Model is: ');
-					logger.log('debug', modelJson);
+					logger.debug('Authorization >> allows....Model is: ');
+					logger.debug(modelJson);
 					let noOwners = ['users', 'user-profile'];
 					if(noOwners.includes(resource)){
 						modelJson['owner_id'] = modelJson.id; // add an attribute for evaluation purpose
@@ -207,7 +207,7 @@ function viewables(userId, resource, modelsJson) {
 		return Utility.getAdditionalData(conditions, userId);
 	}
 	function evaluateCondition(additionalData) {
-		logger.log('debug', '>> authorization.js evaluateCondition(..)');
+		logger.debug('>> authorization.js evaluateCondition(..)');
 		if(conditionsRejected) return Promise.resolve(modelsJson);
 		let data = { user_id: userId };
 		Utility.attachAdditionalData(conditions, additionalData, data);
@@ -241,6 +241,6 @@ function hasEvaluatedPerms(permissionsWithCondition, data) {
 		let utility = new Utility(perm.condition);
 		return utility.evaluate(data);
 	});
-	logger.log('debug', 'return evaluated permissions length');
+	logger.debug('return evaluated permissions length');
 	return evaluatedPerms.length > 0;
 }

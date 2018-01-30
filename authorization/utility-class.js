@@ -50,8 +50,8 @@ class Utility {
   }
 
   userOwnAccounts(data) {
-    logger.log('debug', 'inside userOwnAccounts()...');
-    logger.log('debug', data.resident);
+    logger.debug('inside userOwnAccounts()...');
+    logger.debug(data.resident);
     let today = new Date();
     let occupiedDate = new Date('2999-01-01');
     let vacatedDate = new Date('2999-12-31');
@@ -60,7 +60,7 @@ class Utility {
     if(data.resident.vacated_on)
       vacatedDate = new Date(data.resident.vacated_on);
     if(today < occupiedDate || today > vacatedDate) {
-      logger.log('debug', 'Not Residing at present');
+      logger.debug('Not Residing at present');
       return false; // not residing and hence no accounts to view
     }
     let flatNumbers = data.resident.flats.map(each => each.flat_number);
@@ -68,8 +68,8 @@ class Utility {
   }
 
   userOwnRecord(data) {
-    logger.log('debug', 'inside Utility class >> userOwnRecord()...');
-    logger.log('debug', 'data is: '); logger.log(data);
+    logger.debug('inside Utility class >> userOwnRecord()...');
+    logger.debug('data is: '); logger.log(data);
     return data.user_id === data.model.owner_id;
   }
 }

@@ -21,10 +21,10 @@ module.exports = function(userId) {
 			.then(model => {
 				let user = model.toJSON();
 				let roleIds = [];
-				logger.log('debug', 'User is: ....');
-				logger.log('debug', user);
-				logger.log('debug', 'User role: ...');
-				logger.log('debug', user.roles);
+				logger.debug('User is: ....');
+				logger.debug(user);
+				logger.debug('User role: ...');
+				logger.debug(user.roles);
 				user.roles.forEach(eachRole => {
 					roleIds.push(eachRole.id);
 					let inhIds = getInheritedIds(eachRole);

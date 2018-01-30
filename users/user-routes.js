@@ -72,7 +72,7 @@ function getRoles(req,res) {
 // ---------------------------------------------------------------------
 function getAllPermissions(req, res) {
 	let userId = req.decoded.id;
-	logger.log('debug', 'getAllPermissions(..)..userId is: '+userId);
+	logger.debug('getAllPermissions(..)..userId is: '+userId);
 	getUserPermissions(userId)
 		.then(perms => res.json(perms))
 		.catch(err => res.send(err));
@@ -131,11 +131,11 @@ function putCommon(req, res){
 		return auth.allowsEdit(req.decoded.id, myResourceName, model);
 	}
 	function checkForDuplicate(granted){ // implementing inner function1
-		logger.log('debug', 'checkForDuplicate(....)!!');
-		logger.log('debug', 'granted....'+granted);
-		logger.log('debug', 'email....'+email);
-		logger.log('debug', 'this.email....'+this.email);
-		logger.log('debug', 'req.body.email....'+req.body.email);
+		logger.debug('checkForDuplicate(....)!!');
+		logger.debug('granted....'+granted);
+		logger.debug('email....'+email);
+		logger.debug('this.email....'+this.email);
+		logger.debug('req.body.email....'+req.body.email);
 		if(this.isSocial) {// no dup check for social user, so just return count as 0 (zero)
 			this.email = null; // nullify any email string found in the request parameter
 			return new Promise((resolve) => resolve(0));
@@ -147,11 +147,11 @@ function putCommon(req, res){
 		  .count('id'); // returns Promise containing count
 	}
 	function doUpdate(count){
-		logger.log('debug', 'count is: '+count);
+		logger.debug('count is: '+count);
 		if(count) {
 		 throw new Error('Duplicate Error!! email-id already exists!!');
 	 	}
-		logger.log('debug', '/api/users >> put()...updating user details');
+		logger.debug('/api/users >> put()...updating user details');
 		let encyptedPassword = password ? bcrypt.hashSync(password, 10) : password;
 		return this.model.save({
 			name: userName || this.model.get('name'),
@@ -165,22 +165,22 @@ function putCommon(req, res){
 		let existingInfo;
 		let promises = [];
 		let aPromise;
-		logger.log('debug', 'Updating Infos....'); logger.log('debug', req.body.infos);
+		logger.debug('Updating Infos....'); logger.debug(req.body.infos);
 		req.body.infos && req.body.infos.forEach(eachUi => {
 			let infos = this.model.toJSON().infos;
-			logger.log('debug', 'Infos in db...'); logger.log('debug', infos);
+			logger.debug('Infos in db...'); logger.debug(infos);
 			existingInfo = infos.filter((eachDb) => eachDb.key === eachUi.key);
-			logger.log('debug', 'Existing Info..'); logger.log('debug', existingInfo);
+			logger.debug('Existing Info..'); logger.debug(existingInfo);
 			if(existingInfo.length > 0){ // info exists in db, check whether it is changed
 				if(!eachUi.value){ // info is null or empty, then remove from db
-					logger.log('debug', 'Removing empty info...'); logger.log(eachUi);
+					logger.debug('Removing empty info...'); logger.log(eachUi);
 					aPromise = knex('infos')
 											.where('user_id', '=', this.model.id)
 											.andWhere('key', '=', eachUi.key)
 											.del();
 					promises.push(aPromise);
 				} else if(existingInfo.value !== eachUi.value) { // value modified w.r.t. value in db
-					logger.log('debug', 'Updating modified info...old value: '+existingInfo.value+', to new value: '+eachUi.value);
+					logger.debug('Updating modified info...old value: '+existingInfo.value+', to new value: '+eachUi.value);
 					aPromise = knex('infos')
 						.where('user_id', '=', this.model.id)
 						.andWhere('key', '=', eachUi.key)
@@ -191,7 +191,7 @@ function putCommon(req, res){
 				}
 			} else { // no info in db, so add one
 				eachUi['user_id'] = this.model.id;
-				logger.log('debug', 'adding new info...'); logger.log('debug', eachUi);
+				logger.debug('adding new info...'); logger.debug(eachUi);
 				aPromise = knex('infos').insert(eachUi);
 				promises.push(aPromise);
 			}
@@ -216,8 +216,8 @@ function putCommon(req, res){
 function putInfos(req, res) {
 
 	let userModel;
-	logger.log('debug', 'Inside user-routes >> putInfos(req,res)...');
-	logger.log('debug', 'req params id: '+req.params.id);
+	logger.debug('Inside user-routes >> putInfos(req,res)...');
+	logger.debug('req params id: '+req.params.id);
 	User.forge({id: req.params.id}).fetch({require: true})
 		.then(detachExistingInfos)
 		.then(attachNewInfos)
@@ -226,14 +226,14 @@ function putInfos(req, res) {
 
 	function detachExistingInfos(model){
 		userModel = model;
-		logger.log('debug', 'Inside user-routes >> detachExistingInfos(model)...');
-		logger.log('debug', model.toJSON());
+		logger.debug('Inside user-routes >> detachExistingInfos(model)...');
+		logger.debug(model.toJSON());
 		return knex('infos').where('user_id', req.params.id).del(); // it deletes all rows where user_id = req.params.id
 	}
 
 	function attachNewInfos(delResult){
-		logger.log('debug', 'inside user-routes >> attachNewInfos(model)...');
-		logger.log('debug', userModel.toJSON());
+		logger.debug('inside user-routes >> attachNewInfos(model)...');
+		logger.debug(userModel.toJSON());
 		let promises = [];
 		JSON.parse(req.body.myInfos).forEach(each => {
 			promises.push( knex('infos').insert(each) );
@@ -242,7 +242,7 @@ function putInfos(req, res) {
 	}
 
 	function sendResponse(aColl) {
-		logger.log('debug', 'Inside user-routes >> putInfos() >> sendResponse(aColl)...');
+		logger.debug('Inside user-routes >> putInfos() >> sendResponse(aColl)...');
 		res.json({error:false, data:{ message: 'My Infos are attached'}});
 	}
 
@@ -259,8 +259,8 @@ function putInfos(req, res) {
 function putRoles(req, res) {
 
 	let userModel;
-	logger.log('debug', 'Inside user-routes >> putRoles(req,res)...');
-	logger.log('debug', 'req params id: '+req.params.id);
+	logger.debug('Inside user-routes >> putRoles(req,res)...');
+	logger.debug('req params id: '+req.params.id);
 	//User.forge({id: req.params.id}).fetch({require: true, withRelated:['roles']})
 	retrieveModelWithRoles()
 		.then(doAuth)
@@ -271,7 +271,7 @@ function putRoles(req, res) {
 		.catch(errorToNotify);
 
 	function retrieveModelWithRoles() {
-		logger.log('debug', 'retrieving role with permissions');
+		logger.debug('retrieving role with permissions');
 		return User.forge({id: req.params.id}).fetch({require: true, withRelated:['roles']})
 	}
 
@@ -282,26 +282,27 @@ function putRoles(req, res) {
 
 	function detachExistingRoles(granted){
 		let model = this.userModel;
-		logger.log('debug', 'Inside user-routes >> detachExistingRoles(model)...');
-		logger.log('debug', model.toJSON());
+		logger.debug('Inside user-routes >> detachExistingRoles(model)...');
+		logger.debug(model.toJSON());
 		return model.roles().detach();
 	}
 
 	function attachNewRoles(){
-		logger.log('debug', 'inside user-routes >> attachNewRoles(model)...');
-		logger.log('debug', this.userModel.toJSON());
+		logger.debug('inside user-routes >> attachNewRoles(model)...');
+		//logger.debug(this.userModel.toJSON());
+		logger.debug(req.body.myrolesIds)
 		return this.userModel.roles().attach(req.body.myrolesIds); // attach new roles
 	}
 /*
 	function sendResponse(aColl) {
-		logger.log('debug', 'Inside user-routes >> sendResponse(aColl)...');
+		logger.debug('Inside user-routes >> sendResponse(aColl)...');
 		res.json({error:false, data:{ message: 'My Roles are attached'}});
 	}
 */
 	function sendResponse(model) {
 		let modelJson = model.toJSON();
-		logger.log('debug', 'inside user-routes >> sendResponse(model)')
-		logger.log('debug', modelJson)
+		logger.debug('inside user-routes >> sendResponse(model)')
+		logger.debug(modelJson.roles)
 		res.json(modelJson.roles);
 	}
 
@@ -315,7 +316,7 @@ function putRoles(req, res) {
 // on routes that end in /users to post (to add) a new user
 // ---------------------------------------------------------------------
 function post(req, res) {
-	logger.log('debug', 'adding new user...name: '+req.body.name+', first name: '+req.body.first_name);
+	logger.debug('adding new user...name: '+req.body.name+', first name: '+req.body.first_name);
 	let model = null;
 
 	getTotalForMaxCheck()
@@ -328,10 +329,10 @@ function post(req, res) {
 	function getTotalForMaxCheck() {
 		let tableName = User.prototype.tableName;
 		if(constants.maxRecordsDisabled) {
-			logger.log('debug', 'Max Records DISABLED!');
+			logger.debug('Max Records DISABLED!');
 			return new Promise((resolve) => resolve(''));
 		}
-		logger.log('debug', 'Max Records ENABLED');
+		logger.debug('Max Records ENABLED');
 		return Bookshelf.knex(tableName).count('id as CNT');
 	}
 
@@ -350,7 +351,7 @@ function post(req, res) {
 			let msg = 'Duplicate Error! email-id already exists!';
 			throw new Error(msg);
 		}
-		logger.log('debug', '/api/users >> post()...saving new user profile');
+		logger.debug('/api/users >> post()...saving new user profile');
 		return User.forge({
 			name: req.body.name,
 			first_name: req.body.first_name,
@@ -362,12 +363,12 @@ function post(req, res) {
 	}
 	function addInfos(model){
 		this.model = model;
-		logger.log('debug', 'infos...');
-		logger.log('debug', req.body.infos);
+		logger.debug('infos...');
+		logger.debug(req.body.infos);
 		let promises = [];
 		req.body.infos.forEach(each => {
 			each['user_id'] = model.id;
-			logger.log('debug', each);
+			logger.debug(each);
 			promises.push( knex('infos').insert(each) );
 		});
 		return Promise.all(promises);
@@ -384,10 +385,10 @@ function post(req, res) {
 							+ '<a href="' + confirmUrl + '">' + confirmUrl + '</a>'
 							+'.<br><br><i>If the link does not work, copy and paste it into browser url.</i>'
 		};
-		logger.log('debug', 'Template is: ');
-		logger.log('debug', template);
-		logger.log('debug', 'confirmation_code: '+modelJson.confirmation_code);
-		logger.log('debug', modelJson);
+		logger.debug('Template is: ');
+		logger.debug(template);
+		logger.debug('confirmation_code: '+modelJson.confirmation_code);
+		logger.debug(modelJson);
 		emailer.sendMailTo(req.body.email, template);
 	}
 
@@ -466,8 +467,8 @@ function confirmSignup(req, res) {
 			.fetch({require: true});
 	}
 	function updateStatus(model) {
-		logger.log('debug', 'inside user-routes >> updateStatus for model: ');
-		logger.log('debug', model);
+		logger.debug('inside user-routes >> updateStatus for model: ');
+		logger.debug(model);
 		this.model = model;
 		return this.model.save({
 			confirmed: 1,
