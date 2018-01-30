@@ -261,14 +261,27 @@ function putRoles(req, res) {
 	let userModel;
 	logger.log('debug', 'Inside user-routes >> putRoles(req,res)...');
 	logger.log('debug', 'req params id: '+req.params.id);
-	User.forge({id: req.params.id}).fetch({require: true, withRelated:['roles']})
+	//User.forge({id: req.params.id}).fetch({require: true, withRelated:['roles']})
+	retrieveModelWithRoles()
+		.then(doAuth)
 		.then(detachExistingRoles)
 		.then(attachNewRoles)
+		.then(retrieveModelWithRoles)
 		.then(sendResponse)
 		.catch(errorToNotify);
 
-	function detachExistingRoles(model){
-		userModel = model;
+	function retrieveModelWithRoles() {
+		logger.log('debug', 'retrieving role with permissions');
+		return User.forge({id: req.params.id}).fetch({require: true, withRelated:['roles']})
+	}
+
+	function doAuth(model) {
+		this.userModel = model;
+		return auth.allowsEdit(req.decoded.id, 'users-roles', model); // check whether logged user is allowed to Edit users-roles link
+	}
+
+	function detachExistingRoles(granted){
+		let model = this.userModel;
 		logger.log('debug', 'Inside user-routes >> detachExistingRoles(model)...');
 		logger.log('debug', model.toJSON());
 		return model.roles().detach();
@@ -276,13 +289,20 @@ function putRoles(req, res) {
 
 	function attachNewRoles(){
 		logger.log('debug', 'inside user-routes >> attachNewRoles(model)...');
-		logger.log('debug', userModel.toJSON());
-		return userModel.roles().attach(req.body.myrolesIds); // attach new roles
+		logger.log('debug', this.userModel.toJSON());
+		return this.userModel.roles().attach(req.body.myrolesIds); // attach new roles
 	}
-
+/*
 	function sendResponse(aColl) {
 		logger.log('debug', 'Inside user-routes >> sendResponse(aColl)...');
 		res.json({error:false, data:{ message: 'My Roles are attached'}});
+	}
+*/
+	function sendResponse(model) {
+		let modelJson = model.toJSON();
+		logger.log('debug', 'inside user-routes >> sendResponse(model)')
+		logger.log('debug', modelJson)
+		res.json(modelJson.roles);
 	}
 
 	function errorToNotify(err){
