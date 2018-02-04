@@ -147,7 +147,7 @@ function putResidents(req, res) {
 		this.flatModel = model;
 		return auth.allowsEdit(req.decoded.id, 'flats-residents', model); // check whether logged user is allowed to Edit
 	}
-	function detachExistingResidents(model){ // remove existing residents first
+	function detachExistingResidents(granted){ // remove existing residents first
 		let model = this.flatModel;
 		logger.debug('Inside flat-routes >> detachExistingResidents(model)...');
 		logger.debug(model.toJSON());
@@ -155,8 +155,8 @@ function putResidents(req, res) {
 	}
 	function attachNewResidents(){
 		logger.debug('inside flat-routes >> attachNewResidents(model)...');
-		logger.debug(flatModel.toJSON());
-		return flatModel.residents().attach(req.body.myresidentsIds); // attach new residents
+		logger.debug(this.flatModel.toJSON());
+		return this.flatModel.residents().attach(req.body.myresidentsIds); // attach new residents
 	}
 /*
 	function sendResponse(aColl) {
