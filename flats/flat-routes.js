@@ -130,14 +130,25 @@ function putResidents(req, res) {
 	let flatModel;
 	logger.debug('Inside flat-routes >> putResidents(req,res)...');
 	logger.debug('req params id: '+req.params.id);
-	Flat.forge({id: req.params.id}).fetch({require: true, withRelated:['residents']})
+//	Flat.forge({id: req.params.id}).fetch({require: true, withRelated:['residents']})
+	retrieveModelWithResidents()
+		.then(doAuth)
 		.then(detachExistingResidents)
 		.then(attachNewResidents)
+		.then(retrieveModelWithResidents)
 		.then(sendResponse)
 		.catch(errorToNotify);
 
+	function retrieveModelWithResidents() {
+		logger.debug('retrieving flat with residents');
+		return Flat.forge({id: req.params.id}).fetch({require: true, withRelated:['residents']})
+	}
+	function doAuth(model) {
+		this.flatModel = model;
+		return auth.allowsEdit(req.decoded.id, 'flats-residents', model); // check whether logged user is allowed to Edit
+	}
 	function detachExistingResidents(model){ // remove existing residents first
-		flatModel = model;
+		let model = this.flatModel;
 		logger.debug('Inside flat-routes >> detachExistingResidents(model)...');
 		logger.debug(model.toJSON());
 		return model.residents().detach();
@@ -147,10 +158,18 @@ function putResidents(req, res) {
 		logger.debug(flatModel.toJSON());
 		return flatModel.residents().attach(req.body.myresidentsIds); // attach new residents
 	}
-
+/*
 	function sendResponse(aColl) {
 		res.json({error:false, data:{ message: 'My Residents are attached to Flat' }});
 	}
+*/
+	function sendResponse(model) {
+		let modelJson = model.toJSON();
+		logger.debug('inside flat-routes >> sendResponse(model)')
+		logger.debug(modelJson)
+		res.json(modelJson.residents);
+	}
+
 
 	function errorToNotify(err){
 		res.status(500).json({error: true, data: {message: err.message}});

@@ -8,7 +8,7 @@
 	"maxRecords": {
 		"accounts": "100",
 		"users": "100",
-		"flats": "16",
+		"flats": "1600",
 		"residents": "320",
 		"roles": "60000",
 		"permissions": "30",
