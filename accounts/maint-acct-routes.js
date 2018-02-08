@@ -135,7 +135,9 @@ function put(req, res) {
 			for_year: req.body.for_year || model.get('for_year'),
 			crdr: req.body.crdr || model.get('crdr'),
 			amount: req.body.amount || model.get('amount'),
+			category: req.body.category || model.get('category'),
 			recorded_at: req.body.recorded_at || model.get('recorded_at'),
+			remarks: req.body.remarks || model.get('remarks'),
 			owner_id: req.body.owner_id || model.get('owner_id')
 		});
 	}
