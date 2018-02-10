@@ -65,6 +65,7 @@ function put(req, res) {
 		}
 
 		function errorToNotify(err){
+			logger.error(err);
 			res.status(500).json({error: true, data: {message: err.message}});
 		}
 
@@ -78,7 +79,7 @@ function post(req, res) {
 		.then(getTotalForMaxCheck)
 		.then(doSave)
 		.then(sendResponse)
-		.catch(error);
+		.catch(errorToNotify);
 
 	function getTotalForMaxCheck() {
 		let tableName = Permission.prototype.tableName;
@@ -106,7 +107,8 @@ function post(req, res) {
 	function sendResponse(model){
 		return res.json({error: false, data:{model}});
 	}
-	function error(err){
+	function errorToNotify(err){
+		logger.error(err);
 		return res.status(500).json({error: true, data:{message: err.message}});
 	}
 }
@@ -120,7 +122,7 @@ function del(req, res) {
 	Permission.forge({id: req.params.id}).fetch({require: true})
 		.then(doAuth)
 		.then(doDelete)
-		.catch(notifyError);
+		.catch(errorToNotify);
 
 	function doAuth(model) {
 		this.model = model;
@@ -132,7 +134,8 @@ function del(req, res) {
 			.then( () => res.json({error: true, data: {message: 'Permission model successfully deleted'} }))
 			.catch( (err) => res.status(500).json({error: true, data: {message: err.message}}));
 	}
-	function notifyError(err){
+	function errorToNotify(err){
+		logger.error(err);
 		res.status(500).json({error: true, data: {message: err.message}});
 	}
 }

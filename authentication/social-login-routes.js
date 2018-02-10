@@ -33,7 +33,7 @@ function createSession(request, response){
 		.then(getDefaultRole)
 		.then(assignDefaultRole)
 		.then(sendJwt)														// calling inner function3
-		.catch(sendError);												// calling inner function4
+		.catch(errorToNotify);												// calling inner function4
 
 			function checkUserAlreadyExist(userProfile){ // implementing inner function1
 				logger.log('debug', 'checkUserAlreadyExist(..)');
@@ -105,8 +105,8 @@ function createSession(request, response){
 					});
 			}
 
-			function sendError(err){ // implementing inner function4
-				logger.log('error', err.message);
+			function errorToNotify(err){ // implementing inner function4
+				logger.error(err);
 				response.status(500).json({error: true, data: {message: err.message}});
 			}
 }

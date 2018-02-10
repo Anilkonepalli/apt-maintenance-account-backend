@@ -27,7 +27,7 @@ function getAll(req, res) {
 		.fetch()
 		.then(doAuth)
 		.then(sendResponse)
-		.catch(sendError);
+		.catch(errorToNotify);
 
 	function doAuth(models) {
 		logger.debug('/api/maintenance-accounts >> getAll()...');
@@ -45,8 +45,8 @@ function getAll(req, res) {
 		res.json(sortedModels);
 	}
 
-	function sendError(err) {
-		logger.error(err.message);
+	function errorToNotify(err) {
+		logger.error(err);
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
@@ -57,20 +57,21 @@ function get(req, res) {
 	if(req.params.id === '0') { // respond with a new account model
 		auth.allowsAdd(req.decoded.id, 'accounts') // is authorized to add ?
 			.then(granted => res.json(new MaintenanceAccount()))
-			.catch(sendError);
+			.catch(errorToNotify);
 	} else { // respond with fetched account model
 		MaintenanceAccount
 			.forge( {id: req.params.id} )
 			.fetch()
 			.then(doAuth) // is authorized to view?
 			.then(model => res.json(model))
-			.catch(sendError);
+			.catch(errorToNotify);
 	}
 	function doAuth(model) {
 		logger.debug('/api/maintenance-accounts >> get()...');
 		return auth.allowsView(req.decoded.id, 'accounts', model);
 	}
-	function sendError(err) {
+	function errorToNotify(err) {
+		logger.error(err)
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
@@ -83,7 +84,7 @@ function put(req, res) {
 		.then(doAuth)
 		.then(doUpdate)
 		.then(sendResponse)
-		.catch(sendError);
+		.catch(errorToNotify);
 
 	function doAuth(model) {
 		return auth.allowsEdit(req.decoded.id, 'accounts', model);
@@ -144,7 +145,8 @@ function put(req, res) {
 	function sendResponse(model) {
 		return res.json({error: false, data:{message: 'Account Details Updated'}});
 	}
-	function sendError(err) {
+	function errorToNotify(err) {
+		logger.error(err);
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
@@ -157,7 +159,7 @@ function post(req, res) {
 		.then(doSave)
 		.then(setBalance)
 		.then(sendResponse)
-		.catch(sendError);
+		.catch(errorToNotify);
 
 	function getTotalForMaxCheck(granted) {
 		let tableName = MaintenanceAccount.prototype.tableName;
@@ -196,7 +198,8 @@ function post(req, res) {
 	function sendResponse(model) {
 		return res.json({error: false, data:{model}});
 	}
-	function sendError(err) {
+	function errorToNotify(err) {
+		logger.error(err);
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
@@ -210,7 +213,7 @@ function del(req, res) {
 		.then(doAuth)
 		.then(doDelete)
 		.then(sendResponse)
-		.catch(sendError);
+		.catch(errorToNotify);
 
 	function doAuth(model) {
 		return auth.allowsDelete(req.decoded.id, 'accounts', model);
@@ -227,7 +230,8 @@ function del(req, res) {
 	function sendResponse() {
 		return res.json({error: false, data:{message: 'Account Details Successfully Deleted'}});
 	}
-	function sendError(err) {
+	function errorToNotify(err) {
+		logger.error(err);
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
@@ -241,7 +245,7 @@ function getSummaries(req, res) {
 		.fetchAll()
 		.then(doAuth)
 		.then(sendResponse)
-		.catch(sendError);
+		.catch(errorToNotify);
 
 	function doAuth(models) {
 		logger.debug('/api/maintenance-accounts >> getSummaries()...');
@@ -283,8 +287,8 @@ function getSummaries(req, res) {
 		return res.json(result);
 	}
 
-	function sendError(err) {
-		logger.error(err.message);
+	function errorToNotify(err) {
+		logger.error(err);
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
@@ -304,7 +308,7 @@ function updateBalance(model) {
 	jmodel = model.toJSON();
 	jmodels = [];
 	currentBalance = 0;
-	logger.log('debug','=========================== Update Balance Starts ===================================');
+	logger.debug('=========================== Update Balance Starts ===================================');
 	logger.debug('Update balance in progress....jmodel recorded_at: '+jmodel.recorded_at);
 	return MaintenanceAccounts
 		.query('where', 'recorded_at', '<', jmodel.recorded_at)
@@ -314,16 +318,16 @@ function updateBalance(model) {
 		.then(getModelsAddedOnLaterDate)
 		.then(processAll)
 		.then(sendResponse)
-		.catch(sendError);
+		.catch(errorToNotify);
 
 		function getModelsAddedOnLaterDate(prevModel){
 			let modelForBalance = null;
-			logger.log('debug','Previous model is: '); logger.debug(prevModel);
+			logger.debug('Previous model is: '); logger.debug(prevModel);
 			if(prevModel) {
 				recordDate = prevModel.attributes.recorded_at;
 				currentBalance = prevModel.attributes.balance;
-				logger.log('debug','Retrieval based on Record Date: '+recordDate);
-				logger.log('debug','Current Balance as: '+currentBalance);
+				logger.debug('Retrieval based on Record Date: '+recordDate);
+				logger.debug('Current Balance as: '+currentBalance);
 				return MaintenanceAccounts
 					.query('where', 'recorded_at', '>', recordDate)
 					.fetch();
@@ -343,14 +347,14 @@ function updateBalance(model) {
 			return calculateBalanceAndApply(smodels, currentBalance);
 		}
 		function sendResponse(models) {
-			logger.log('debug','============================= Update Balance Ends =================================');
+			logger.debug('============================= Update Balance Ends =================================');
 			return new Promise(function(resolve, reject){
 				1 > 0 ? resolve(model) : reject(new Error('Cannot calc balance'));
 			});
 		}
-		function sendError(err) {
+		function errorToNotify(err) {
 			logger.error(err.message);
-			logger.log('debug','============================ Update Balance Ends with Errors ==================================');
+			logger.error('============================ Update Balance Ends with Errors ==================================');
 			return res.status(500).json({error: true, data: {message: err.message}});
 		}
 }

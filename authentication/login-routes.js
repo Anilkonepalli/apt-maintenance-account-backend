@@ -23,7 +23,7 @@ function createSession(request, response){
 			let user = model.toJSON();
 			if ( !user.confirmed ) {
 				let msg = 'Email confirmation pending!';
-				logger.log('error', msg)
+				logger.error(msg)
 				throw new Error(msg);
 			}
 			if( user.confirmed && user.confirmation_code ) {
@@ -31,7 +31,7 @@ function createSession(request, response){
 			}
 			if(! bcrypt.compareSync(request.body.password, user.password)) {
 				let msg = 'Email or Password do not match!!';
-				logger.log('error', msg)
+				logger.error(msg)
 				throw new Error(msg);
 			}
 			let omitList = [
@@ -72,13 +72,13 @@ function forgotPassword(req, res){
 		.fetch()
 		.then(assignResetToken)
 		.then(sendResponse)
-		.catch(error);
+		.catch(errorToNotify);
 
 	function assignResetToken(model) {
 		let msg = '';
 		if (!model) { // no user exist for the given email id
 			msg = 'Invalid Email!';
-			logger.log('error', msg);
+			logger.error(msg);
 			throw new Error(msg);
 		}
 		let user = model.toJSON();
@@ -86,12 +86,12 @@ function forgotPassword(req, res){
 		logger.log('debug', user);
 		if ( !user.confirmed ) { // User is registered but is not confirmed
 			msg = 'Email confirmation pending!';
-			logger.log('error', msg);
+			logger.error(msg);
 			throw new Error(msg);
 		}
 		if (user.confirmed && user.confirmation_code) {
 			msg = 'Password Reset Request Already Exists!!';
-			logger.log('error', msg);
+			logger.error(msg);
 			throw new Error(msg);
 		}
 		return model.save({ // field 'confirmation_code' is used for reset token too
@@ -115,8 +115,8 @@ function forgotPassword(req, res){
 		emailer.sendMailTo(req.body.email, template);
 		res.json({error: false, data:{emailed: can_send_email}});
 	}
-	function error(err) {
-			logger.log('error', err.message);
+	function errorToNotify(err) {
+			logger.error(err);
 			return res.status(500).json({error: true, data: {message: err.message}});
 	}
 
@@ -137,13 +137,13 @@ function resetPassword(req, res){
 		.fetch()
 		.then(updatePassword)
 		.then(sendResponse)
-		.catch(error);
+		.catch(errorToNotify);
 
 	function updatePassword(model) {
 		let msg = '';
 		if (!model) { // no user exist for the given email id
 			msg = 'Invalid Token!';
-			logger.log('error', msg);
+			logger.error(msg);
 			throw new Error(msg);
 		}
 		let user = model.toJSON();
@@ -151,7 +151,7 @@ function resetPassword(req, res){
 		logger.log('debug', user);
 		if ( !user.confirmed ) { // User is registered but is not confirmed
 			msg = 'Registration confirmation pending!';
-			logger.log('error', msg);
+			logger.error(msg);
 			throw new Error(msg);
 		}
 		return model.save({ // field 'confirmation_code' is used for reset token too
@@ -164,8 +164,8 @@ function resetPassword(req, res){
 		let user = model.toJSON();
 		res.json({error: false, data:{message: 'Password reset is done!'}});
 	}
-	function error(err) {
-			logger.log('error', err.message);
+	function errorToNotify(err) {
+			logger.error(err);
 			return res.status(500).json({error: true, data: {message: err.message}});
 	}
 

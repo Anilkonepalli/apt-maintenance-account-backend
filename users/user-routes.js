@@ -123,7 +123,7 @@ function putCommon(req, res){
 		.then(doUpdate)
 		.then(updateInfos)
 		.then(sendResponse)
-		.catch(error);
+		.catch(errorToNotify);
 
 	function doAuth(model) {
 		this.model = model;
@@ -173,7 +173,7 @@ function putCommon(req, res){
 			logger.debug('Existing Info..'); logger.debug(existingInfo);
 			if(existingInfo.length > 0){ // info exists in db, check whether it is changed
 				if(!eachUi.value){ // info is null or empty, then remove from db
-					logger.debug('Removing empty info...'); logger.log(eachUi);
+					logger.debug('Removing empty info...'); logger.debug(eachUi);
 					aPromise = knex('infos')
 											.where('user_id', '=', this.model.id)
 											.andWhere('key', '=', eachUi.key)
@@ -201,8 +201,8 @@ function putCommon(req, res){
 	function sendResponse() {
 		return res.json({error: false, data:{message: 'User profile updated'}});
 	}
-	function error(err) {
-		logger.log('error', err.message);
+	function errorToNotify(err) {
+		logger.error(err);
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 
@@ -247,6 +247,7 @@ function putInfos(req, res) {
 	}
 
 	function errorToNotify(err){
+		logger.error(err);
 		res.status(500).json({error: true, data: {message: err.message}});
 	}
 
@@ -307,6 +308,7 @@ function putRoles(req, res) {
 	}
 
 	function errorToNotify(err){
+		logger.error(err);
 		res.status(500).json({error: true, data: {message: err.message}});
 	}
 
@@ -324,7 +326,7 @@ function post(req, res) {
 	.then(doSave)
 	.then(addInfos)
 	.then(sendResponse)
-	.catch(error);
+	.catch(errorToNotify);
 
 	function getTotalForMaxCheck() {
 		let tableName = User.prototype.tableName;
@@ -392,8 +394,8 @@ function post(req, res) {
 		emailer.sendMailTo(req.body.email, template);
 	}
 
-	function error(err) {
-		logger.log('error', err.message);
+	function errorToNotify(err) {
+		logger.error(err);
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 
@@ -404,26 +406,30 @@ function post(req, res) {
 // ---------------------------------------------------------------------
 function del(req, res) { // using full form 'delete' causes error, so 'del' is used
 	let model;
-
+	logger.debug('Inside user.routes >> del(req,res).............');
 	User.forge({id: req.params.id}).fetch({require: true, withRelated:['infos']})
 		.then(doAuth)
 		.then(getDependants)
 		.then(deleteDependants)
 		.then(doDeleteUser)
-		.catch(notifyError);
+		.then(sendResponse)
+		.catch(errorToNotify);
 
 	function doAuth(model) {
 		this.model = model;
+		logger.debug('user routes >> doAuth(model).................')
 		return auth.allowsDelete(req.decoded.id, 'users', model); // check whether logged user is allowed to Delete role model
 	}
 
 	// for now, a work around to delete dependants is done here
 	function getDependants(granted){ // yet to explore a better way to delete dependants with soft delete
 		//userModel = model;
-		return Infos.forge({user_id: model.id}).fetch({require: true});
+		logger.debug('user routes >> getDependants(granted)...................id: '+this.model.id)
+		return Infos.forge({user_id: this.model.id}).fetch({require: false}); // require is set to false, so that EmptyResponse/NotFoundError, if any, is rejected
 	}
 
 	function deleteDependants(infos){
+		logger.debug('user routes >> deleteDependants(infos).................')
 		let promises = [];
 		infos.forEach(each => {
 			promises.push( each.destroy() );
@@ -431,11 +437,17 @@ function del(req, res) { // using full form 'delete' causes error, so 'del' is u
 		return Promise.all(promises);
 	}
 	function doDeleteUser(){
-		model.destroy()
+		logger.debug('user routes >> doDeleteUser() .......................');
+		return this.model.destroy();
+		/* this.model.destroy()
 			.then( () => res.json({error: true, data: {message: 'User model successfully deleted'} }))
-			.catch( (err) => res.status(500).json({error: true, data: {message: err.message}}));
+			.catch( (err) => res.status(500).json({error: true, data: {message: err.message}})); */
 	}
-	function notifyError(err){
+	function sendResponse() {
+		return res.json({error: true, data: {message: 'User model successfully deleted'}});
+	}
+	function errorToNotify(err){
+		logger.error(err);
 		res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
@@ -451,7 +463,7 @@ function confirmSignup(req, res) {
 		.then(fetchRecord)
 		.then(updateStatus)
 		.then(sendResponse)
-		.catch(error);
+		.catch(errorToNotify);
 
 	function checkForRecord() {
 		return User
@@ -478,8 +490,8 @@ function confirmSignup(req, res) {
 	function sendResponse() {
 		return res.json({error: false, data:{message: 'Signup process is now completed!'}});
 	}
-	function error(err) {
-		logger.log('error', err.message);
+	function errorToNotify(err) {
+		logger.error(err);
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 

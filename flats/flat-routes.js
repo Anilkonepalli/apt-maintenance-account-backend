@@ -18,7 +18,7 @@ function getAll(req, res) {
 		.fetch()
 		.then(doAuth)
 		.then(sendResponse)
-		.catch(error);
+		.catch(errorToNotify);
 
 	function doAuth(models) {
 		logger.debug('/api/flats >> getAll()...');
@@ -28,8 +28,8 @@ function getAll(req, res) {
 		logger.debug('models being sent are: '); logger.debug(models.toJSON());
 		res.json(models);
 	}
-	function error(err) {
-		logger.log('error', err.message);
+	function errorToNotify(err) {
+		logger.error(err);
 		res.send({status: 500, data: null, message: err.message});
 	}
 }
@@ -40,20 +40,21 @@ function get(req, res) {
 	if(req.params.id === '0') { // respond with a new flat model
 		auth.allowsAdd(req.decoded.id, 'flats') // is authorized to add ?
 			.then(granted => res.json(new Flat()))
-			.catch(error);
+			.catch(errorToNotify);
 	} else { // respond with fetched flat model
 		Flat
 			.forge( {id: req.params.id} )
 			.fetch()
 			.then(doAuth) // is authorized to view?
 			.then(model => res.json(model))
-			.catch(error);
+			.catch(errorToNotify);
 	}
 	function doAuth(model) {
 		logger.debug('/api/flats >> get()...');
 		return auth.allowsView(req.decoded.id, 'flats', model);
 	}
-	function error(err) {
+	function errorToNotify(err) {
+		logger.error(err)
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
@@ -89,7 +90,7 @@ function put(req, res) {
 		.then(checkForDuplicate)
 		.then(doUpdate)
 		.then(sendResponse)
-		.catch(error);
+		.catch(errorToNotify);
 
 	function doAuth(model) {
 		this.model = model;
@@ -117,8 +118,8 @@ function put(req, res) {
 	function sendResponse() {
 		return res.json({error: false, data:{message: 'Flat Details Updated'}});
 	}
-	function error(err) {
-		logger.log('error', err.message);
+	function errorToNotify(err) {
+		logger.error(err);
 		res.statusMessage = err.message;
 		res.status(500).send();
 	}
@@ -170,8 +171,8 @@ function putResidents(req, res) {
 		res.json(modelJson.residents);
 	}
 
-
 	function errorToNotify(err){
+		logger.error(err);
 		res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
@@ -189,7 +190,7 @@ function post(req, res) {
 		.then(getCountForDupCheck)
 		.then(doSave)
 		.then(sendResponse)
-		.catch(error);
+		.catch(errorToNotify);
 
 	function getTotalForMaxCheck(granted) {
 		let tableName = Flat.prototype.tableName;
@@ -227,8 +228,8 @@ function post(req, res) {
 	function sendResponse(model) {
 		return res.json({error: false, data:{model}});
 	}
-	function error(err) {
-		logger.log('error', err.message);
+	function errorToNotify(err) {
+		logger.error(err);
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
@@ -242,7 +243,7 @@ function del(req, res) {
 		.then(doAuth)
 		.then(doDelete)
 		.then(sendResponse)
-		.catch(error);
+		.catch(errorToNotify);
 
 	function doAuth(model) {
 		return auth.allowsDelete(req.decoded.id, 'flats', model);
@@ -254,7 +255,8 @@ function del(req, res) {
 	function sendResponse() {
 		return res.json({error: false, data:{message: 'Flat Details Successfully Deleted'}});
 	}
-	function error(err) {
+	function errorToNotify(err) {
+		logger.error(err);
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }

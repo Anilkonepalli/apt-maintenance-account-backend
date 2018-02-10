@@ -29,7 +29,7 @@ function getAll(req, res) {
 		.then(getFlats)
 		.then(fillMissingModels)
 		.then(sendResponse)
-		.catch(sendError);
+		.catch(errorToNotify);
 
 	function doAuth(models) {
 		availableModels = models;
@@ -73,8 +73,8 @@ function getAll(req, res) {
 			]);
 		res.json(sortedModels);
 	}
-	function sendError(err) {
-		logger.log('error', err.message);
+	function errorToNotify(err) {
+		logger.error(err);
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
