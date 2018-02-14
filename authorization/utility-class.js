@@ -53,7 +53,7 @@ class Utility {
     logger.debug('inside userOwnAccounts()...');
     logger.debug(data.resident);
     let today = new Date();
-    let occupiedDate = new Date('2999-01-01');
+    let occupiedDate = new Date('1999-01-01');
     let vacatedDate = new Date('2999-12-31');
     if(data.resident.occupied_on)
       occupiedDate = new Date(data.resident.occupied_on);
