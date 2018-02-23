@@ -43,7 +43,7 @@ _Step 8:_  `pm2 start app.server` will add app.server as a service on the hostin
 _Step 9:_  If front end application is already installed, then go to host url, say http://www.mydomain.com/my-apt.  The home page of this application can be seen.  Now, try to login with user id as guest@eastgate.in and password as password123.  It should now show application with menu items such as 'Accounts' and 'Settings'.  
 
 ## Front-end / Client-side  
-A front-end code, written using ReactJS-ReduxJS framework, is available.  Pleae refer  [here](https://github.com/mohankumaranna/apt-maint-react).    
+A front-end code, written using React-Redux framework, is available.  Pleae refer  [here](https://github.com/mohankumaranna/apt-maint-react).    
 
 Also, another front-end code, written using Angular framework is available.  Pleae refer  [here](https://github.com/mohankumaranna/apt-maintenance-account).    
 
