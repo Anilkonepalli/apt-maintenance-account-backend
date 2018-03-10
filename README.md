@@ -33,7 +33,7 @@ _Step 7:_  In the hosting environment, NodeJS server cannot be accessed directly
                 ...  
                 #Proxy setup for nodejs server  
                 <Location "/my-apt/api/">  
-                  ProxyPass "http://localhost:3002/api"  # assuming nodejs server is running on port 3002   in  the hosting environment  
+                  ProxyPass "http://localhost:3002/api/"  # assuming nodejs server is running on port 3002   in  the hosting environment  
                 </Location>  
               </VirtualHost>
 ```
