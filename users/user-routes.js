@@ -368,7 +368,7 @@ function post(req, res) {
 		logger.debug('infos...');
 		logger.debug(req.body.infos);
 		let promises = [];
-		req.body.infos.forEach(each => {
+		req.body.infos && req.body.infos.forEach(each => {
 			each['user_id'] = model.id;
 			logger.debug(each);
 			promises.push( knex('infos').insert(each) );
