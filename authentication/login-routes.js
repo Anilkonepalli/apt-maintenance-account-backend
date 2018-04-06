@@ -19,7 +19,11 @@ function createSession(request, response){
 	// Get User details of email
 	User.forge( {email: request.body.email} ).fetch({withRelated:['infos']})
 		.then(model => {
-			if(!model) throw new Error('Invalid Email!'); // no user exist for the given email id
+			if(!model){
+				let msg = 'Invalid Credentials!'
+				logger.error(msg)
+				throw new Error(msg); // no user exist for the given email id
+			}
 			let user = model.toJSON();
 			if ( !user.confirmed ) {
 				let msg = 'Email confirmation pending!';
@@ -30,7 +34,7 @@ function createSession(request, response){
 				clearPasswordReset(model);
 			}
 			if(! bcrypt.compareSync(request.body.password, user.password)) {
-				let msg = 'Email or Password do not match!!';
+				let msg = 'Invalid Credentials!!';
 				logger.error(msg)
 				throw new Error(msg);
 			}
