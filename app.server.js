@@ -40,7 +40,7 @@ app.route("/api/login").post(login.createSession);
 
 let user = require('./users/user-routes');
 app.route("/api/users/").post(user.post);  // Register new user
-app.route("/api/signup/:code").put(user.confirmSignup); // Confirm new user 
+app.route("/api/signup/:code").put(user.confirmSignup); // Confirm new user
 
 let socialLogin = require('./authentication/social-login-routes');
 app.route("/api/sociallogin").post(socialLogin.createSession);
@@ -156,6 +156,20 @@ app.route("/api/permissions/:id")
 	.delete(permission.del)
 	.put(permission.put);
 
+
+/////////////////////////  DURATIONS ROUTES  //////////////////////////////
+let duration = require('./durations/routes')
+app.route("/api/durations")
+	.get(duration.getAll)
+	.post(duration.post)
+
+app.route("/api/durations/active/:key")
+	.get(duration.getActive);
+
+app.route("/api/durations/:id")
+	.get(duration.get)
+	.delete(duration.del)
+	.put(duration.put)
 
 //////////// Launch NodeJS server with port #3002
 app.listen(3002, function(){

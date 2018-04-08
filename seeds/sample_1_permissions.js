@@ -25,6 +25,9 @@ let sampleData = [
   ['RU', 'user-profile', 'userOwnRecord', 'Grants RU permissions to USER\'s OWN RECORD'],
   ['R', 'account-summary', null, 'Grands READ ONLY permission to ANY USERS'],
   ['R', 'balance', null, 'Grands READ ONLY permission to ANY USERS'],
+  ['CRUD', 'durations', null, 'Grants ALL Permissions to ANY USERS'],
+  ['CRU', 'durations', null, 'Grants CRU permissions to ANY USERS'],
+  ['R', 'durations', null, 'Grants READ ONLY permission to ANY USERS']
 ];
 let tableName = "permissions";
 

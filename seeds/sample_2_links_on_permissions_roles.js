@@ -13,7 +13,8 @@ let sampleData = [
       ['R', 'users-roles', null],
       ['R', 'roles-permissions', null],
       ['R', 'account-summary', null],
-      ['R', 'balance', null]
+      ['R', 'balance', null],
+      ['R', 'durations', null]
     ]
   },
   {
@@ -38,7 +39,8 @@ let sampleData = [
       ['CRU', 'accounts', null], // Create, Read, Update permissions on 'accounts' module
       ['RU', 'user-profile', 'hasCondition'],
       ['R', 'account-summary', null],
-      ['R', 'balance', null]
+      ['R', 'balance', null],
+      ['CRU', 'durations', null]
     ]
   },
   {
@@ -61,7 +63,8 @@ let sampleData = [
       ['RU', 'roles-permissions', null],
       ['RU', 'user-profile', 'hasCondition'],
       ['R', 'account-summary', null],
-      ['R', 'balance', null]
+      ['R', 'balance', null],
+      ['CRUD', 'durations', null]
     ]
   }
 
