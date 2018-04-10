@@ -69,7 +69,7 @@ function getActive(req, res) {
 	} else { // respond with fetched re model
 		let today = new Date().toISOString().split('T')[0];
 		Duration
-			.query('where', 'key', '==', req.params.key)
+			.query('where', 'key', '=', req.params.key)
 			.query('where', 'effective_from', '<=', today)
 			.query('where', 'effective_to', '>=', today)
 			.fetch()
