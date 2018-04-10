@@ -59,6 +59,33 @@ function get(req, res) {
 	}
 }
 
+// on routes that end in /durations-active to get a duration
+// ---------------------------------------------------------------------
+function getActive(req, res) {
+	//let today = new Date().toISOString().split('T')[0];
+	logger.debug('key: '+req.body.key);
+	logger.debug('date: '+req.body.date);
+	Duration
+		.query('where', 'key', '=', req.body.key)
+		.query('where', 'effective_from', '<=', req.body.date)
+		.query('where', 'effective_to', '>=', req.body.date)
+		.fetch()
+		.then(doAuth) // is authorized to view?
+		.then(model => res.json(model))
+		.catch(errorToNotify);
+
+	function doAuth(model) {
+		logger.debug('/api/durations >> get()...');
+		return auth.allowsView(req.decoded.id, 'durations', model);
+	}
+	function errorToNotify(err) {
+		logger.error(err)
+		return res.status(500).json({error: true, data: {message: err.message}});
+	}
+}
+
+/*
+
 // on routes that end in /durations/active/:key to get a duration
 // ---------------------------------------------------------------------
 function getActive(req, res) {
@@ -86,6 +113,9 @@ function getActive(req, res) {
 		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
+
+
+*/
 
 
 // on routes that end in /durations/:id to update an existing duration

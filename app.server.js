@@ -163,8 +163,8 @@ app.route("/api/durations")
 	.get(duration.getAll)
 	.post(duration.post)
 
-app.route("/api/durations/active/:key")
-	.get(duration.getActive);
+app.route("/api/durations-active")
+	.post(duration.getActive);
 
 app.route("/api/durations/:id")
 	.get(duration.get)
