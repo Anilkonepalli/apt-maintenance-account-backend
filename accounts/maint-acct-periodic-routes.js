@@ -57,6 +57,7 @@ function getAll(req, res) {
 		jflats.forEach(e => {
 			if ( !flatNumbers.includes(e.flat_number) ) { // check for missing flat number
 				acct = new MaintenanceAccount().toJSON();
+				acct.id = 0;
 				acct.flat_number = e.flat_number;
 				acct.for_month = req.query.month;
 				acct.for_year = req.query.year;
