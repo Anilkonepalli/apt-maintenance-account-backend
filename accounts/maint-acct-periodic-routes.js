@@ -46,6 +46,7 @@ function getAll(req, res) {
 	function getFlats(models) {
 		return Flats.forge().fetch();
 	}
+
 	function fillMissingModels(flatz) {
 		flats = flatz;
 		jflats = flatz.toJSON();
@@ -62,6 +63,13 @@ function getAll(req, res) {
 				acct.for_month = req.query.month;
 				acct.for_year = req.query.year;
 				acct.recorded_at = today;
+				acct.crdr = 'cr';
+				acct.item = 'Monthly Maintenance Fee';
+				acct.name = e.flat_number+' Resident';
+				acct.amount = 600;
+				acct.balance = '';
+				acct.category = 'Monthly Maintenance';
+				acct.remarks = 'Paid monthly maintenance';
 				jmodels.push(acct);
 			}
 		});
