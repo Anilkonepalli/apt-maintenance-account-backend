@@ -88,4 +88,49 @@ function getAll(req, res) {
 	}
 }
 
-module.exports = { getAll };
+// on routes that end in /maintenance-accounts-for/
+// ---------------------------------------------------------------------
+function getMonthlyAccountsFor(req, res) {
+
+	//let availableModels = [];
+	//let jmodels = [];
+	//let flats = [];
+	//let jflats = [];
+
+	MaintenanceAccounts
+		.query('where', 'flat_number', '=', req.query.flatNumber)
+		.query('where', 'for_month', '=', +req.query.month)
+		.query('where', 'for_year', '=', +req.query.year)
+		.fetch()
+		.then(doAuth)
+		.then(sendResponse)
+		.catch(errorToNotify);
+
+	function doAuth(models) {
+		//availableModels = models;
+		//jmodels = models.toJSON();
+		logger.log('info',
+							 '/api/maintenance-accounts-for >> getMonthlyAccountFor('
+							 +req.query.flatNumber
+							 +', '
+							 +req.query.month
+							 +', '
+							 +req.query.year
+							 +')'
+		);
+		return auth.allowedList(req.decoded.id, 'accounts', models);
+	}
+	// sends Account model for the gien flat number, transaction month and year
+	function sendResponse(authorizedModels) {
+		logger.log('info', 'authorizedModels................')
+		logger.log('info', authorizedModels)
+		res.json(authorizedModels);
+	}
+	function errorToNotify(err) {
+		logger.error(err);
+		return res.status(500).json({error: true, data: {message: err.message}});
+	}
+}
+
+
+module.exports = { getAll, getMonthlyAccountsFor };

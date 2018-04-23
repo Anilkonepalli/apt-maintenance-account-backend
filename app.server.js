@@ -99,6 +99,8 @@ app.route("/api/maintenance-accounts/summary/list")
 let accountp = require('./accounts/maint-acct-periodic-routes');
 app.route("/api/maintenance-accounts-periodic")
 	.get(accountp.getAll);
+app.route("/api/maintenance-accounts-for")
+	.get(accountp.getMonthlyAccountsFor)
 
 /////////////////////////  FLAT ROUTES  //////////////////////////////
 let flat = require('./flats/flat-routes');
