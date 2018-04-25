@@ -220,7 +220,7 @@ function del(req, res) {
 	}
 	function doDelete(model){
 		logger.debug('/api/maintenance-accounts >> del()...');
-		let modelCopy = model.clone();  // after model deletion, it cannot be accesses, so clone it
+		let modelCopy = model.clone();  // after model deletion, it cannot be accessed, so clone it
 		model.on('destroying', (obj) => {
 			logger.debug("Triggered balance re-calculation on removel of this model");
 			updateBalance(modelCopy);
