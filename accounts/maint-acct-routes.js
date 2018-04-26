@@ -143,7 +143,7 @@ function put(req, res) {
 		});
 	}
 	function sendResponse(model) {
-		return res.json({error: false, data:{message: 'Account Details Updated'}});
+		return res.json({error: false, data:{model: model, message: 'Account Details Updated'}});
 	}
 	function errorToNotify(err) {
 		logger.error(err);
@@ -196,7 +196,7 @@ function post(req, res) {
 		return updateBalance(model); // a private functions shared between post and put calls
 	}
 	function sendResponse(model) {
-		return res.json({error: false, data:{model}});
+		return res.json({error: false, data:{model: model, message: 'Account Successfully Added'}});
 	}
 	function errorToNotify(err) {
 		logger.error(err);
