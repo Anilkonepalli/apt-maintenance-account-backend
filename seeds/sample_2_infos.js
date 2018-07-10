@@ -14,7 +14,7 @@ let sampleData =[
   ['admin@eastgate.in', 'otherEmails', 'y@y.y, z@z.z'],
   ['admin@eastgate.in', 'fourWheelers', 'TN 22 Y 1234'],
   ['admin@eastgate.in', 'twoWheelers', 'TN 01 AC 9876'],
-  ['admin@eastgate.in', 'emergencyContacts', 'administrator, eastgate'],
+  ['admin@eastgate.in', 'emergencyContacts', 'administrator, eastgate']
 ];
 let tableName = 'infos';
 let parentTable = 'users';
@@ -30,8 +30,12 @@ exports.seed = function(knex, Promise) {
   function addSamples(users) {
       this.users = users;
       let sampleRecords = [];
+      let record = null
       sampleData.forEach((each) => {
-        sampleRecords.push( knex(tableName).insert( recordOn(each) ) );
+        record = recordOn(each)
+        if(record){
+          sampleRecords.push( knex(tableName).insert( recordOn(each) ) );
+        }
       });
       return Promise.all(sampleRecords);
   }
@@ -40,6 +44,7 @@ exports.seed = function(knex, Promise) {
   }
   function recordOn(data) {
     let user = this.users.filter(each => each.email === data[0]);
+    if( user.length < 1 ) return null
     return {
       user_id: user[0].id,
       key: data[1],

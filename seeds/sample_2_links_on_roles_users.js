@@ -68,12 +68,16 @@ exports.seed = function(knex, Promise) {
     sampleData.forEach(obj => {
       rid = getRoleIdFor(obj.roleName);
       // console.log('Role id: '); console.log(rid);
-      obj.users.forEach(eachEmailId => {
-        uid = getUserIdFor(eachEmailId);
-        // console.log('user id: '); console.log(uid);
-        link = knex(tableName).insert({role_id: rid, user_id: uid});
-        links.push( link );
-      });
+      if(rid) {
+        obj.emails.forEach(eachEmailId => {
+          uid = getUserIdFor(eachEmailId);
+          // console.log('user id: '); console.log(uid);
+          if(uid) {
+            link = knex(tableName).insert({role_id: rid, user_id: uid});
+            links.push( link );
+          }
+        });
+      }
     });
     return Promise.all(links);
   }
@@ -81,11 +85,17 @@ exports.seed = function(knex, Promise) {
   function getRoleIdFor(roleName){
     let fRoles = roles.filter(each => each.name === roleName);
     // console.log('Role..'); console.log(fRoles);
+    if(fRoles.length < 1) {
+      return null
+    }
     return fRoles[0].id;
   }
   function getUserIdFor(email) {
     let fusers = users.filter(each => each.email === email);
     // console.log('Role..'); console.log(fRoles);
+    if(fusers.length < 1) {
+      return null
+    }
     return fusers[0].id;
   }
 

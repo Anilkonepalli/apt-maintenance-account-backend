@@ -1,84 +1,84 @@
 
 let sampleData = [
   {
-    blockNumber: '0',
+    blockNumber: 'NW',
     flatNumber: 'G1',
-    residents: [ {firstName: 'og1' , lastName: 'user'}, {firstName: 'tg1' , lastName: 'user'}  ]
+    residents: [ {firstName: 'Hari' , lastName: ''}, {firstName: 'Unknown' , lastName: ''}  ]
   },
   {
-    blockNumber: '0',
+    blockNumber: 'NW',
     flatNumber: 'G2',
-    residents: [ {firstName: 'og2' , lastName: 'user'}, {firstName: 'tg2' , lastName: 'user'}  ]
+    residents: [ {firstName: 'Prabhu' , lastName: ''} ]
   },
   {
-    blockNumber: '0',
+    blockNumber: 'NE',
     flatNumber: 'G3',
-    residents: [ {firstName: 'og3' , lastName: 'user'}, {firstName: 'tg3' , lastName: 'user'}  ]
+    residents: [ {firstName: 'Pretina' , lastName: 'David'} ]
   },
   {
-    blockNumber: '0',
+    blockNumber: 'NE',
     flatNumber: 'G4',
-    residents: [ {firstName: 'og4' , lastName: 'user'}, {firstName: 'tg4' , lastName: 'user'}  ]
+    residents: [ {firstName: 'Mohankumar' , lastName: 'A R'}, {firstName: 'Ganesh' , lastName: ''}  ]
   },
   {
-    blockNumber: '0',
+    blockNumber: 'SE',
     flatNumber: 'G5',
-    residents: [ {firstName: 'og5' , lastName: 'user'}, {firstName: 'tg5' , lastName: 'user'}  ]
+    residents: [ {firstName: 'Jerry' , lastName: ''} ]
   },
   {
-    blockNumber: '0',
+    blockNumber: 'SE',
     flatNumber: 'G6',
-    residents: [ {firstName: 'og6' , lastName: 'user'}, {firstName: 'tg6' , lastName: 'user'}  ]
+    residents: [ {firstName: 'Unknown' , lastName: ''}, {firstName: 'Unknown' , lastName: ''}  ]
   },
   {
-    blockNumber: '0',
+    blockNumber: 'SW',
     flatNumber: 'G7',
-    residents: [ {firstName: 'og7' , lastName: 'user'}, {firstName: 'tg7' , lastName: 'user'}  ]
+    residents: [ {firstName: 'Sridhar' , lastName: ''}, {firstName: 'Unknown' , lastName: ''}  ]
   },
   {
-    blockNumber: '0',
+    blockNumber: 'SW',
     flatNumber: 'G8',
-    residents: [ {firstName: 'og8' , lastName: 'user'}, {firstName: 'tg8' , lastName: 'user'}  ]
+    residents: [ {firstName: 'Srinivas' , lastName: ''}, {firstName: 'Unknown' , lastName: ''}  ]
   },
   {
-    blockNumber: '0',
+    blockNumber: 'NW',
     flatNumber: 'F1',
-    residents: [ {firstName: 'of1' , lastName: 'user'}, {firstName: 'tf1' , lastName: 'user'}  ]
+    residents: [ {firstName: 'Muthukumar' , lastName: ''}, {firstName: 'Unknown' , lastName: ''}  ]
   },
   {
-    blockNumber: '0',
+    blockNumber: 'NW',
     flatNumber: 'F2',
-    residents: [ {firstName: 'of2' , lastName: 'user'}, {firstName: 'tf2' , lastName: 'user'}  ]
+    residents: [ {firstName: 'Unknown' , lastName: ''}, {firstName: 'Unknown' , lastName: ''}  ]
   },
   {
-    blockNumber: '0',
+    blockNumber: 'NE',
     flatNumber: 'F3',
-    residents: [ {firstName: 'of3' , lastName: 'user'}, {firstName: 'tf3' , lastName: 'user'}  ]
+    residents: [ {firstName: 'Arunkumar' , lastName: ''}, {firstName: 'Unknown' , lastName: ''}  ]
   },
   {
-    blockNumber: '0',
+    blockNumber: 'NE',
     flatNumber: 'F4',
-    residents: [ {firstName: 'of4' , lastName: 'user'}, {firstName: 'tf4' , lastName: 'user'}  ]
+    residents: [ {firstName: 'Mohankumar' , lastName: 'A R'} ]
   },
   {
-    blockNumber: '0',
+    blockNumber: 'SE',
     flatNumber: 'F5',
-    residents: [ {firstName: 'of5' , lastName: 'user'}, {firstName: 'tf5' , lastName: 'user'}  ]
+    residents: [ {firstName: 'Unknown' , lastName: ''}, {firstName: 'Unknown' , lastName: ''}  ]
   },
   {
-    blockNumber: '0',
+    blockNumber: 'SE',
     flatNumber: 'F6',
-    residents: [ {firstName: 'of6' , lastName: 'user'}, {firstName: 'tf6' , lastName: 'user'}  ]
+    residents: [ {firstName: 'Jayakumar' , lastName: ''} ]
   },
   {
-    blockNumber: '0',
+    blockNumber: 'SW',
     flatNumber: 'F7',
-    residents: [ {firstName: 'of7' , lastName: 'user'}, {firstName: 'tf7' , lastName: 'user'}  ]
+    residents: [ {firstName: 'Ezhilmani' , lastName: ''}, {firstName: 'Unknown' , lastName: ''}  ]
   },
   {
-    blockNumber: '0',
+    blockNumber: 'SW',
     flatNumber: 'F8',
-    residents: [ {firstName: 'of8' , lastName: 'user'}, {firstName: 'tf8' , lastName: 'user'}  ]
+    residents: [ {firstName: 'Kannan' , lastName: ''}, {firstName: 'Unknown' , lastName: ''}  ]
   },
 ];
 
@@ -114,12 +114,17 @@ exports.seed = function(knex, Promise) {
     sampleData.forEach(obj => {
       fid = getFlatIdFor(obj.blockNumber, obj.flatNumber);
       // console.log('Flat id: '); console.log(fid);
-      obj.residents.forEach(eachResident => {
-        rid = getResidentIdFor(eachResident.firstName, eachResident.lastName);
-        // console.log('Resident id: '); console.log(rid);
-        link = knex(tableName).insert({flat_id: fid, resident_id: rid});
-        links.push( link );
-      });
+      if(fid) {
+        obj.residents.forEach(eachResident => {
+          rid = getResidentIdFor(eachResident.firstName, eachResident.lastName);
+          // console.log('Resident id: '); console.log(rid);
+          if(rid) {
+            link = knex(tableName).insert({flat_id: fid, resident_id: rid});
+            links.push( link );
+          }
+        });
+      }
+
     });
     return Promise.all(links);
   }
@@ -127,11 +132,17 @@ exports.seed = function(knex, Promise) {
   function getFlatIdFor(block, flat){
     let fFlats = flats.filter(each => each.block_number === block && each.flat_number === flat);
     // console.log('Flat..'); console.log(fFlats);
+    if(fFlats.length < 1) {
+      return null
+    }
     return fFlats[0].id;
   }
   function getResidentIdFor(first, last) {
     let fResidents = residents.filter(each => each.first_name === first && each.last_name === last);
     // console.log('Resident..'); console.log(fResidents);
+    if(fResidents.length < 1) {
+      return null
+    }
     return fResidents[0].id;
   }
 

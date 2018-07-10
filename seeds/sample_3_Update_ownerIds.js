@@ -51,10 +51,14 @@ exports.seed = function(knex, Promise) {
       firstName = eachResident.first_name;
       lastName = eachResident.last_name;
       userId = getUserId(firstName, lastName);
-      uresident = updateResident(eachResident.id, userId);
-      results.push( uresident );
-      uflat = updateFlat(eachResident.id, userId);
-      if(uflat) results.push( uflat );
+      if(userId) {
+        uresident = updateResident(eachResident.id, userId);
+        results.push( uresident );
+        uflat = updateFlat(eachResident.id, userId);
+        if(uflat) {
+          results.push( uflat );
+        }
+      }
     });
     return Promise.all(results);
   }
@@ -66,6 +70,9 @@ exports.seed = function(knex, Promise) {
 
     // console.log('eachResident...'); console.log(eachResident);
     // console.log('fusers: '); console.log(fusers);
+    if(fusers.length < 1) {
+      return null
+    }
     return fusers[0].id;
   }
 
