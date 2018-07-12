@@ -76,7 +76,10 @@ function forgotPassword(req, res){
 		.fetch()
 		.then(assignResetToken)
 		.then(sendResponse)
-		.catch(errorToNotify);
+		.catch(err => {
+			res.statusMessage = err;
+			res.status(401).send();
+		});
 
 	function assignResetToken(model) {
 		let msg = '';
