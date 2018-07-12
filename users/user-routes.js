@@ -9,6 +9,7 @@ var constants 					= require('../config/constants.json');
 var knex								= Bookshelf.knex;
 
 var Info 							  = require('./info-model');
+var Role 								= require('../authorization/role-model');
 
 var Users 	= Bookshelf.Collection.extend({
 	model: User
@@ -325,6 +326,8 @@ function post(req, res) {
 	.then(getCountForDupCheck)
 	.then(doSave)
 	.then(addInfos)
+	.then(getGuestRole)
+	.then(attachGuestRole)
 	.then(sendResponse)
 	.catch(errorToNotify);
 
@@ -374,6 +377,14 @@ function post(req, res) {
 			promises.push( knex('infos').insert(each) );
 		});
 		return Promise.all(promises);
+	}
+	function getGuestRole(prevResp) {
+		console.log('user-routes >> getGuestRole(prevResp) ', prevResp)
+		return new Role({'name': 'guest'}).fetch()
+	}
+	function attachGuestRole(aRole) {
+		console.log('user-routes >> attachGuestRole(aRole) ', aRole)
+		return this.model.roles().attach(aRole.id)
 	}
 	function sendResponse(model) {
 		let can_send_email = process.env.can_send_email === 'true';
