@@ -10,6 +10,13 @@ var knex								= Bookshelf.knex;
 
 var Info 							  = require('./info-model');
 var Role 								= require('../authorization/role-model');
+var	Flat 								= require('../flats/flat-model');
+
+/*
+var Flats = Bookshelf.Collection.extend({
+	model: Flat
+});
+*/
 
 var Users 	= Bookshelf.Collection.extend({
 	model: User
@@ -104,7 +111,7 @@ function putProfile(req, res) {
 }
 
 function putCommon(req, res){
-	console.log('Rquest obj: ...'); console.log(req);
+	//console.log('Rquest obj: ...'); console.log(req);
 	console.log('req body: ...'); console.log(req.body);
 	console.log('req params: ...'); console.log(req.params);
 	let userName = req.body.name;
@@ -114,7 +121,27 @@ function putCommon(req, res){
 	let password = req.body.password;
 	let infos = req.body.infos;
 	let isSocial = false; // is the user logged in through social network
-	let model;
+	let oldModel;
+	let residentTypeInfo = {
+		added: false,
+		changed: false,
+		deleted: false,
+		value: ''
+	};
+	let flatNumberInfo = {
+		added: false,
+		changed: false,
+		deleted: false,
+		value: '',
+		oldValue: '',
+		blockNumber: '',
+		flatNumber: '',
+		oldBlockNumber: '',
+		oldFlatNumber: ''
+	};
+	let userId = req.params.id;
+	let residentsInDB = [];
+	let flatsDB = [];
 
 	User
 		.forge({id: req.params.id})
@@ -123,11 +150,23 @@ function putCommon(req, res){
 		.then(checkForDuplicate)
 		.then(doUpdate)
 		.then(updateInfos)
+		.then(getResident) // on profile page, change in residentType or Flat number
+											 // are taken into account in enabling crud operations in
+											 // 'residents' and 'FlatToResidentsLink' tables. So,when a newly
+											 // a new user tries to resident type and flat_number,
+											 // those tables are updated; enabling them to see their own
+											 // records in 'Residents' menu option. Hence, Admin
+											 // involvement in setting up such records are avoided.
+		.then(crudResident) // crud refers to create, read, update, delete
+		.then(getResident) // get again for updated resident
+		.then(getFlat)
+		.then(linkFlatToResident)
 		.then(sendResponse)
 		.catch(errorToNotify);
 
 	function doAuth(model) {
 		this.model = model;
+		oldModel = model
 		this.isSocial = this.model.toJSON().social_network_id !== null;
 		return auth.allowsEdit(req.decoded.id, myResourceName, model);
 	}
@@ -162,42 +201,267 @@ function putCommon(req, res){
 			password: encyptedPassword || this.model.get('password')
 		});
 	}
+
 	function updateInfos() {
-		let existingInfo;
 		let promises = [];
-		let aPromise;
 		logger.debug('Updating Infos....'); logger.debug(req.body.infos);
-		req.body.infos && req.body.infos.forEach(eachUi => {
-			let infos = this.model.toJSON().infos;
-			logger.debug('Infos in db...'); logger.debug(infos);
-			existingInfo = infos.filter((eachDb) => eachDb.key === eachUi.key);
-			logger.debug('Existing Info..'); logger.debug(existingInfo);
-			if(existingInfo.length > 0){ // info exists in db, check whether it is changed
-				if(!eachUi.value){ // info is null or empty, then remove from db
-					logger.debug('Removing empty info...'); logger.debug(eachUi);
-					aPromise = knex('infos')
-											.where('user_id', '=', this.model.id)
-											.andWhere('key', '=', eachUi.key)
-											.del();
-					promises.push(aPromise);
-				} else if(existingInfo.value !== eachUi.value) { // value modified w.r.t. value in db
-					logger.debug('Updating modified info...old value: '+existingInfo.value+', to new value: '+eachUi.value);
-					aPromise = knex('infos')
-						.where('user_id', '=', this.model.id)
-						.andWhere('key', '=', eachUi.key)
-						.update({
-							value: eachUi.value
-						});
-					promises.push(aPromise);
-				}
-			} else { // no info in db, so add one
-				eachUi['user_id'] = this.model.id;
-				logger.debug('adding new info...'); logger.debug(eachUi);
-				aPromise = knex('infos').insert(eachUi);
-				promises.push(aPromise);
-			}
-		});
+		req.body.infos && req.body.infos.forEach(eachUi => handleUserInfo(eachUi, promises, this.model))
 		return Promise.all(promises);
+	}
+	function handleUserInfo(eachUi, promises=[], model) {
+		let infos = model.toJSON().infos;
+		logger.debug('Infos in db...'); logger.debug(infos);
+		let existingInfo = infos.filter(eachDb => eachDb.key === eachUi.key);
+		logger.debug('Existing Info..'); logger.debug(existingInfo);
+		if(existingInfo.length > 0){ // info exists in db, check whether it is changed
+			handleInfoChanges(eachUi, existingInfo[0], promises, model)
+		} else { // no info in db, so add one
+			handleInfoAddition(eachUi, promises, model)
+		}
+	}
+	function setInfoStatus(userInfo, action, oldValue=null) {
+		switch(userInfo.key) {
+			case 'residentType':
+				residentTypeInfo[action] = true;
+				residentTypeInfo.value = userInfo.value;
+				break;
+			case 'flatNumber':
+				flatNumberInfo[action] = true;
+				flatNumberInfo.value = userInfo.value;
+				flatNumberInfo.oldValue = oldValue;
+				break;
+			default:
+				break;
+		}
+	}
+	function handleInfoChanges(eachUi, existingInfo, promises=[], model) {
+		let aPromise = null
+		if(!eachUi.value){ // info is null or empty, then remove from db
+			logger.debug('Removing empty info...'); logger.debug(eachUi);
+			aPromise = deleteInfo(model.id, eachUi.key)
+			setInfoStatus(eachUi, 'deleted', existingInfo.value)
+		} else if(existingInfo.value !== eachUi.value) { // value modified w.r.t. value in db
+			logger.debug('Updating modified info...old value: '+existingInfo.value+', to new value: '+eachUi.value);
+			aPromise = saveInfo(model.id, eachUi.key, eachUi.value)
+			setInfoStatus(eachUi, 'changed', existingInfo.value)
+		}
+		if(aPromise) {
+			promises.push(aPromise)
+		}
+	}
+	function handleInfoAddition(eachUi, promises, model) {
+		eachUi['user_id'] = model.id;
+		logger.debug('adding new info...'); logger.debug(eachUi);
+		let aPromise = knex('infos').insert(eachUi);
+		promises.push(aPromise);
+		setInfoStatus(eachUi, 'added')
+	}
+	function deleteInfo(userId, key) {
+		return knex('infos')
+						.where('user_id', '=', userId)
+						.andWhere('key', '=', key)
+						.del();
+	}
+	function saveInfo(userId, key, value) {
+		return knex('infos')
+						.where('user_id', '=', userId)
+						.andWhere('key', '=', key)
+						.update({
+							value: value
+						});
+	}
+	function getResident() {
+		return knex('residents')
+			.where('first_name', '=', firstName)
+			.andWhere('last_name', '=', lastName)
+	}
+	function crudResident(residents) {
+		residentsInDB = residents;
+		residentExistInDB = residents.length == 1
+		logger.debug('user-routes >> updateResidents()...............')
+		logger.debug('residents are: '); logger.debug(residents.length);logger.debug(residents);
+		if( (residentTypeInfo.added && !residentExistInDB) ||
+				(residentTypeInfo.changed && !residentExistInDB)
+		) {
+			logger.debug('for residentType, new row in residents table is added!!')
+			return knex('residents').insert({
+				first_name: firstName,
+				last_name: lastName,
+				is_a: residentTypeInfo.value,
+				owner_id: userId
+			})
+		}
+		if(residentTypeInfo.changed &&
+				residentExistInDB &&
+				['owner', 'tenant'].includes(residentTypeInfo.value) // 'owner', 'tenant' type has records in residents table
+			) {
+				logger.debug('for residentType, row in residents table is updated!!!')
+				return knex('residents')
+					.where('first_name', '=', firstName)
+					.andWhere('last_name', '=', lastName)
+					//.andWhere('is_a', '=', residents[0].is_a)
+					.update({
+						is_a: residentTypeInfo.value
+					})
+		}
+		if(residentTypeInfo.changed &&
+				residentExistInDB &&
+				residentTypeInfo.value === 'NA' // 'NA' cannot have a row in residents table
+			) {
+					let promises = []
+					logger.debug('for residentType, row in residents table is deleted')
+					let aPromise = knex('flats_residents')
+											.where('resident_id', '=', residentsInDB[0].id)
+											.del();
+					promises.push(aPromise)
+					aPromise = knex('residents')
+						.where('first_name', '=', firstName)
+						.andWhere('last_name', '=', lastName)
+						//.andWhere('is_a', '=', residents[0].is_a)
+						.del();
+					promises.push(aPromise)
+					return Promise.all(promises)
+				}
+		logger.debug('above conditions not satisfied.....');
+		logger.debug('residentTypeInfo: ')
+		logger.debug(residentTypeInfo);
+		logger.debug('flatNumberInfo: ')
+		logger.debug(flatNumberInfo)
+		logger.debug('resident exists in DB?'); logger.debug(residentExistInDB?'Yes':'No');
+
+		//logger.debug('model now: '); logger.debug(this.model);
+		logger.debug('first name: '); logger.debug(firstName);
+		logger.debug('last name: '); logger.debug(lastName);
+		return new Promise(resolve => resolve(true))
+	}
+	function getParts(flatNum, separator=' ') {
+		let parts = flatNum.split(' ')
+		let result = {
+			block_number: '',
+			flat_number: ''
+		}
+		if(parts.length == 2) {
+			result = {
+				block_number: parts[0],
+				flat_number: parts[1]
+			}
+		} else if(parts.length == 1) {
+			result = {
+				flat_number: parts[0]
+			}
+		}
+		return result
+	}
+	function isEqual(flatString, aFlat, separator=' ') {
+		logger.debug('user-routes >> isEqual(..)');
+		let parts = flatString.split(separator)
+		if(parts.length == 1 && aFlat.flat_number === parts[0]) {
+			return true
+		}
+		if(parts.length == 2 &&
+			aFlat.block_number === parts[0] &&
+			aFlat.flat_number === parts[1]
+		){
+			return true
+		}
+		return false
+	}
+	function getFlat(resident) {
+		residentsInDB = resident
+		let promises = [];
+		let aPromise = null;
+		if(flatNumberInfo.added || flatNumberInfo.changed) {
+			let data = getParts(flatNumberInfo.value)
+			aPromise = Flat.forge(data).fetch({withRelated: ['residents']})
+			promises.push(aPromise)
+		}
+		if (flatNumberInfo.deleted || flatNumberInfo.changed){
+			let data = getParts(flatNumberInfo.oldValue)
+			aPromise = Flat.forge(data).fetch({withRelated: ['residents']})
+			promises.push(aPromise)
+		}
+		return Promise.all(promises);
+	}
+	function linkFlatToResident(flats) {
+		//logger.debug('Retrieved flat: ', flats);
+		logger.debug('No. of flats:', flats.length)
+
+		// make link
+		if(flatNumberInfo.added && flats.length == 1 && residentsInDB.length == 1 && flats[0]) {
+			let residentId = residentsInDB[0].id
+			let flat = flats[0].toJSON()
+			logger.debug(flat);
+			let existing = flat.residents.filter(each => each.id == residentId)
+			if(existing.length == 0) {
+				logger.debug(`Linking flat ${flat.id} to resident ${residentId}...`)
+				return knex('flats_residents')
+					.insert({flat_id: flat.id, resident_id: residentId})
+			} else {
+				logger.debug(`Cannot add a link as a link on flat ${flat.id} to resident ${residentId} already exists`)
+			}
+		}
+		// remove link
+		if(flatNumberInfo.deleted && flats.length == 1 && residentsInDB.length == 1 && flats[0]) {
+			let residentId = residentsInDB[0].id
+			let flat = flats[0].toJSON()
+			logger.debug(flat);
+			let existing = flat.residents.filter(each => each.id == residentId)
+			if(existing.length == 1) {
+				logger.debug(`De-Linking flat ${flat.id} to resident ${residentId}...`)
+				return knex('flats_residents')
+					.where('flat_id', '=', flat.id)
+					.andWhere('resident_id', '=', residentId)
+					.del()
+			} else {
+				logger.debug(`Cannot De-link, as there is no link exist on flat ${flat.id} to resident ${residentId}`)
+			}
+		}
+		// Update link
+		if(flatNumberInfo.changed && flats.length == 2 && residentsInDB.length == 1 && flats[0] && flats[1]) {
+			let residentId = residentsInDB[0].id
+			let first = flats[0].toJSON()
+			let second = flats[1].toJSON()
+			//logger.debug('first: ', first)
+			//logger.debug('second: ', second)
+			let newFlat = null;
+			let oldFlat = null;
+			if( isEqual(flatNumberInfo.value, first) ) {
+					newFlat = first;
+					oldFlat = second;
+			} else {
+				newFlat = second;
+				oldFlat = first;
+			}
+
+			//logger.debug('FlatInfo: ', flatNumberInfo)
+			//logger.debug('Old Flat: ', oldFlat);
+			//logger.debug('New Flat: ', newFlat);
+
+			let promises = []
+			let aPromise = null;
+			let existing = oldFlat.residents.filter(each => each.id == residentId)
+			if(existing.length == 1) {
+				logger.debug(`De-Linking flat ${oldFlat.id} to resident ${residentId}...`)
+				aPromise = knex('flats_residents')
+										.where('flat_id','=', oldFlat.id)
+										.andWhere('resident_id','=', residentId)
+										.del();
+				promises.push(aPromise);
+			} else {
+				logger.debug(`Cannot De-link, as there is no link exist on flat ${oldFlat.id} to resident ${residentId}`)
+			}
+			existing = newFlat.residents.filter(each => each.id == residentId);
+			if(existing.length == 0) {
+				logger.debug(`Linking flat ${newFlat.id} to resident ${residentId}...`)
+				aPromise = knex('flats_residents').insert({flat_id: newFlat.id, resident_id: residentId});
+				promises.push(aPromise)
+			} else {
+				logger.debug(`Cannot add a link as a link on flat ${newFlat.id} to resident ${residentId} already exists`)
+			}
+			Promise.all(promises)
+		}
+		logger.debug('No link is added/updated/deleted...')
+		return Promise.resolve(false);
 	}
 	function sendResponse() {
 		return res.json({error: false, data:{message: 'User profile updated'}});
