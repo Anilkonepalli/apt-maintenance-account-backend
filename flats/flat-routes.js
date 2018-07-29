@@ -81,6 +81,8 @@ function put(req, res) {
 
 	let blockNumber = req.body.block_number;
 	let flatNumber = req.body.flat_number;
+	let maxOwners = req.body.max_owners;
+	let maxTenants = req.body.max_tenants;
 	let model;
 
 	Flat
@@ -101,7 +103,9 @@ function put(req, res) {
 		logger.debug('granted...'+granted);
 		return Flat
 			.where({block_number: blockNumber,
-						  flat_number: flatNumber })
+						  flat_number: flatNumber,
+						 	max_owners: maxOwners,
+							max_tenants: maxTenants})
 		  .count('id'); // returns Promise containing count
 	}
 	function doUpdate(count){
@@ -112,7 +116,9 @@ function put(req, res) {
 		logger.debug('/api/flats >> put()...updating flat details');
 		return this.model.save({
 			block_number: blockNumber || this.model.get('block_number'),
-			flat_number: flatNumber || this.model.get('flat_number')
+			flat_number: flatNumber || this.model.get('flat_number'),
+			max_owners: maxOwners || this.model.get('max_owners'),
+			max_tenants: maxTenants || this.model.get('max_tenants')
 		});
 	}
 	function sendResponse() {

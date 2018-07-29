@@ -1,6 +1,13 @@
 //  [ flat_number1, flat_number2, ...]
 let sampleData = [
-  'G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8'
+  ['NW', 'G1', 1, 1], ['NW', 'G2', 1, 0],
+  ['NE', 'G3', 1, 0], ['NE', 'G4', 2, 1],
+  ['SE', 'G5', 1, 0], ['SE', 'G6', 1, 1],
+  ['SW', 'G7', 1, 1], ['SW', 'G8', 1, 1],
+  ['NW', 'F1', 1, 1], ['NW', 'F2', 1, 1],
+  ['NE', 'F3', 1, 1], ['NE', 'F4', 2, 0],
+  ['SE', 'F5', 1, 1], ['SE', 'F6', 1, 0],
+  ['SW', 'F7', 2, 0], ['SW', 'F8', 1, 1]
 ];
 let tableName = 'flats';
 
@@ -20,7 +27,10 @@ exports.seed = function(knex, Promise) {
 
   function recordOn(data) {
     return {
-      flat_number: data
+      block_number: data[0],
+      flat_number: data[1],
+      max_owners: data[2],
+      max_tenants: data[3]
     };
   }
 

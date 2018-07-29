@@ -254,6 +254,10 @@ function putCommon(req, res){
 	}
 	function handleInfoAddition(eachUi, promises, model) {
 		eachUi['user_id'] = model.id;
+		if(!eachUi.value) {
+			logger.debug(`Info ${eachUi.key} is NOT ADDED as its value is null`)
+			return ;
+		}
 		logger.debug('adding new info...'); logger.debug(eachUi);
 		let aPromise = knex('infos').insert(eachUi);
 		promises.push(aPromise);
