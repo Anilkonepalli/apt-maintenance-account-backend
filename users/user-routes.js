@@ -145,7 +145,7 @@ function putCommon(req, res){
 
 	User
 		.forge({id: req.params.id})
-		.fetch({require: true, withRelated: ['infos']})
+		.fetch({require: true, withRelated: ['infos', 'roles']})
 		.then(doAuth)
 		.then(checkForDuplicate)
 		.then(doUpdate)
@@ -161,6 +161,8 @@ function putCommon(req, res){
 		.then(getResident) // get again for updated resident
 		.then(getFlat)
 		.then(linkFlatToResident)
+		.then(getRoles)
+		.then(linkUserToRole)
 		.then(sendResponse)
 		.catch(errorToNotify);
 
@@ -224,6 +226,7 @@ function putCommon(req, res){
 			case 'residentType':
 				residentTypeInfo[action] = true;
 				residentTypeInfo.value = userInfo.value;
+				residentTypeInfo.oldValue = oldValue
 				break;
 			case 'flatNumber':
 				flatNumberInfo[action] = true;
@@ -382,47 +385,88 @@ function putCommon(req, res){
 		}
 		return Promise.all(promises);
 	}
+	function asDateObject(dtStr) {
+	  let dtArr = dtStr.split('-')
+	  let dtObj = new Date()
+	  dtObj.setFullYear(dtArr[0])
+	  dtObj.setMonth(dtArr[1])
+	  dtObj.setDate(dtArr[2])
+	  return dtObj
+	}
+	function activeResident(aResident) {
+		// if empty, consider them as active resident
+		if(!aResident.occupied_on && !aResident.vacated_on) {
+			return true;
+		}
+		let startDate = asDateObject(aResident.occupied_on);
+		let endDate = asDateObject(aResident.vacated_on);
+		let today = Date.today();
+		if(today >= startDate && today <= endDate) {
+			logger.debug(`${aResident.id} is a resident now`);
+		} else {
+			logger.debug(`Resident ${aResident.id} is not a resident now`);
+		}
+	}
+
 	function linkFlatToResident(flats) {
 		//logger.debug('Retrieved flat: ', flats);
 		logger.debug('No. of flats:', flats.length)
-
+		let existing = [];
+		let residentOwners = [];
+		let residentTenants = [];
 		// make link
 		if(flatNumberInfo.added && flats.length == 1 && residentsInDB.length == 1 && flats[0]) {
-			let residentId = residentsInDB[0].id
+			let resident = residentsInDB[0]
 			let flat = flats[0].toJSON()
 			logger.debug(flat);
-			let existing = flat.residents.filter(each => each.id == residentId)
+			existing = flat.residents.filter(each => each.id == resident.id)
+			residingOwners = flat.residents.filter(each =>
+				each.is_a === 'owner' && activeResident(each));
+			residingTenants = flat.residents.filter(each =>
+				each.is_a === 'tenant' && activeResident(each));
+			logger.debug('Resident is a: ', resident.is_a);
+			// validate whether resident can be added or not
+			let maxTenants = 0;
+			let maxOwners = 1;
+			let msg = `Cannot add ${resident.is_a} as limit exceeds`;
+			if(resident.is_a === 'tenant' && residingTenants.length >= maxTenants) {
+				logger.debug(msg);
+				logger.debug(`No. of tenants ${residingTenants.length} exceeds limit of ${maxTenants}`);
+				throw new Error(msg);
+			} else if(resident.is_a === 'owner' && residingOwners.length >= maxOwners) {
+				logger.debug(`No. of owners ${residingOwners.length} exceeds limit of ${maxOwners}`);
+				throw new Error(msg);
+			}
+			// add link
 			if(existing.length == 0) {
-				logger.debug(`Linking flat ${flat.id} to resident ${residentId}...`)
+				logger.debug(`Linking flat ${flat.id} to resident ${resident.id}...`)
 				return knex('flats_residents')
-					.insert({flat_id: flat.id, resident_id: residentId})
+					.insert({flat_id: flat.id, resident_id: resident.id})
 			} else {
-				logger.debug(`Cannot add a link as a link on flat ${flat.id} to resident ${residentId} already exists`)
+				logger.debug(`Cannot add a link as a link on flat ${flat.id} to resident ${resident.id} already exists`)
 			}
 		}
 		// remove link
 		if(flatNumberInfo.deleted && flats.length == 1 && residentsInDB.length == 1 && flats[0]) {
-			let residentId = residentsInDB[0].id
+			let resident = residentsInDB[0]
 			let flat = flats[0].toJSON()
 			logger.debug(flat);
-			let existing = flat.residents.filter(each => each.id == residentId)
+			existing = flat.residents.filter(each => each.id == resident.id)
 			if(existing.length == 1) {
-				logger.debug(`De-Linking flat ${flat.id} to resident ${residentId}...`)
+				logger.debug(`De-Linking flat ${flat.id} to resident ${resident.id}...`)
 				return knex('flats_residents')
 					.where('flat_id', '=', flat.id)
-					.andWhere('resident_id', '=', residentId)
+					.andWhere('resident_id', '=', resident.id)
 					.del()
 			} else {
-				logger.debug(`Cannot De-link, as there is no link exist on flat ${flat.id} to resident ${residentId}`)
+				logger.debug(`Cannot De-link, as there is no link exist on flat ${flat.id} to resident ${resident.id}`)
 			}
 		}
 		// Update link
 		if(flatNumberInfo.changed && flats.length == 2 && residentsInDB.length == 1 && flats[0] && flats[1]) {
-			let residentId = residentsInDB[0].id
-			let first = flats[0].toJSON()
-			let second = flats[1].toJSON()
-			//logger.debug('first: ', first)
-			//logger.debug('second: ', second)
+			let resident = residentsInDB[0];
+			let first = flats[0].toJSON();
+			let second = flats[1].toJSON();
 			let newFlat = null;
 			let oldFlat = null;
 			if( isEqual(flatNumberInfo.value, first) ) {
@@ -432,36 +476,49 @@ function putCommon(req, res){
 				newFlat = second;
 				oldFlat = first;
 			}
-
-			//logger.debug('FlatInfo: ', flatNumberInfo)
-			//logger.debug('Old Flat: ', oldFlat);
-			//logger.debug('New Flat: ', newFlat);
-
 			let promises = []
 			let aPromise = null;
-			let existing = oldFlat.residents.filter(each => each.id == residentId)
+			existing = oldFlat.residents.filter(each => each.id == resident.id)
 			if(existing.length == 1) {
-				logger.debug(`De-Linking flat ${oldFlat.id} to resident ${residentId}...`)
+				logger.debug(`De-Linking flat ${oldFlat.id} to resident ${resident.id}...`)
 				aPromise = knex('flats_residents')
 										.where('flat_id','=', oldFlat.id)
-										.andWhere('resident_id','=', residentId)
+										.andWhere('resident_id','=', resident.id)
 										.del();
 				promises.push(aPromise);
 			} else {
-				logger.debug(`Cannot De-link, as there is no link exist on flat ${oldFlat.id} to resident ${residentId}`)
+				logger.debug(`Cannot De-link, as there is no link exist on flat ${oldFlat.id} to resident ${resident.id}`)
 			}
-			existing = newFlat.residents.filter(each => each.id == residentId);
+			existing = newFlat.residents.filter(each => each.id == resident.id);
 			if(existing.length == 0) {
-				logger.debug(`Linking flat ${newFlat.id} to resident ${residentId}...`)
-				aPromise = knex('flats_residents').insert({flat_id: newFlat.id, resident_id: residentId});
+				logger.debug(`Linking flat ${newFlat.id} to resident ${resident.id}...`)
+				aPromise = knex('flats_residents').insert({flat_id: newFlat.id, resident_id: resident.id});
 				promises.push(aPromise)
 			} else {
-				logger.debug(`Cannot add a link as a link on flat ${newFlat.id} to resident ${residentId} already exists`)
+				logger.debug(`Cannot add a link as a link on flat ${newFlat.id} to resident ${resident.id} already exists`)
 			}
 			Promise.all(promises)
 		}
 		logger.debug('No link is added/updated/deleted...')
 		return Promise.resolve(false);
+	}
+	function getRoles() {
+		return knex.select().table('roles');
+	}
+	function linkUserToRole(roles) {
+		logger.debug('user-routes >> linkUserToRole');
+		logger.debug('residentTypeInfo: ', residentTypeInfo);
+		let roleNameNew = residentTypeInfo.value === 'NA' ?
+											 'guest' : residentTypeInfo.value;
+		let roleNameOld = residentTypeInfo.oldValue === 'NA' ?
+											 'guest' : residentTypeInfo.oldValue;
+		let roleNew = roles.find(each => each.name === roleNameNew);
+		let roleOld = roles.find(each => each.name === roleNameOld);
+		if(roleNew && roleOld) { // if both old and new roles available, proceed
+			logger.debug(`Detaching old role id ${roleOld.id} and Attaching new role id ${roleNew.id} in the users-roles link table`);
+			this.model.roles().detach(roleOld.id);
+			this.model.roles().attach(roleNew.id);
+		}
 	}
 	function sendResponse() {
 		return res.json({error: false, data:{message: 'User profile updated'}});
