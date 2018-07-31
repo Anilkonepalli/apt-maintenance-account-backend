@@ -373,11 +373,15 @@ function putCommon(req, res){
 		}
 		return false
 	}
-	function getFlat(resident) {
-		residentsInDB = resident
+	function getFlat(residents) {
+		residentsInDB = residents
 		let promises = [];
 		let aPromise = null;
-		if(flatNumberInfo.added || flatNumberInfo.changed) {
+		if( flatNumberInfo.added ||
+			flatNumberInfo.changed ||
+			(residentTypeInfo.changed &&
+				['owner', 'tenant'].includes(residentTypeInfo.value))
+		) {
 			let data = getParts(flatNumberInfo.value)
 			aPromise = Flat.forge(data).fetch({withRelated: ['residents']})
 			promises.push(aPromise)
@@ -411,28 +415,53 @@ function putCommon(req, res){
 			logger.debug(`Resident ${aResident.id} is not a resident now`);
 		}
 	}
-
+	function doesExceedMaxLimit(flat, resident) {
+		let maxTenants = flat.max_tenants;
+		let maxOwners = flat.max_owners;
+		logger.debug(`Flat Max Owners: ${maxOwners} and Max Tenants: ${maxTenants}`)
+		let residingOwners = flat.residents.filter(each =>
+			each.is_a === 'owner' && activeResident(each));
+		let residingTenants = flat.residents.filter(each =>
+			each.is_a === 'tenant' && activeResident(each));
+		let msg = `Cannot add online ${resident.is_a}s exceeds limit`;
+		if(resident.is_a === 'tenant' && residingTenants.length >= maxTenants) {
+			logger.debug(msg);
+			logger.debug(`No. of tenants ${residingTenants.length} exceeds limit of ${maxTenants}`);
+			return true;
+		} else if(resident.is_a === 'owner' && residingOwners.length >= maxOwners) {
+			logger.debug(`No. of owners ${residingOwners.length} exceeds limit of ${maxOwners}`);
+			return true;
+		}
+		return false;
+	}
 	function linkFlatToResident(flats) {
 		//logger.debug('Retrieved flat: ', flats);
 		logger.debug('No. of flats:', flats.length)
 		let existing = [];
-		let residentOwners = [];
-		let residentTenants = [];
+		//let residingOwners = [];
+		//let residingTenants = [];
 		// make link
-		if(flatNumberInfo.added && flats.length == 1 && residentsInDB.length == 1 && flats[0]) {
+		//	if(flatNumberInfo.added && flats.length == 1 && residentsInDB.length == 1 && flats[0]) {
+		// not deleted or not changed (in other words, added or not changed)
+		if( (!flatNumberInfo.deleted || !flatNumberInfo.changed ) && flats.length == 1 && residentsInDB.length == 1 && flats[0]) {
 			let resident = residentsInDB[0]
 			let flat = flats[0].toJSON()
 			logger.debug(flat);
-			existing = flat.residents.filter(each => each.id == resident.id)
+			let msg = `Cannot add, as no. of online ${resident.is_a} exceeds limit`;
+			if(doesExceedMaxLimit(flat, resident)) {
+				throw new Error(msg)
+			}
+/*
 			residingOwners = flat.residents.filter(each =>
 				each.is_a === 'owner' && activeResident(each));
 			residingTenants = flat.residents.filter(each =>
 				each.is_a === 'tenant' && activeResident(each));
 			logger.debug('Resident is a: ', resident.is_a);
 			// validate whether resident can be added or not
-			let maxTenants = 0;
-			let maxOwners = 1;
-			let msg = `Cannot add ${resident.is_a} as limit exceeds`;
+			let maxTenants = flat.max_tenants;
+			let maxOwners = flat.max_owners;
+			logger.debug(`Flat Max Owners: ${maxOwners} and Max Tenants: ${maxTenants}`)
+			let msg = `Cannot add online ${resident.is_a}s exceeds limit`;
 			if(resident.is_a === 'tenant' && residingTenants.length >= maxTenants) {
 				logger.debug(msg);
 				logger.debug(`No. of tenants ${residingTenants.length} exceeds limit of ${maxTenants}`);
@@ -440,12 +469,14 @@ function putCommon(req, res){
 			} else if(resident.is_a === 'owner' && residingOwners.length >= maxOwners) {
 				logger.debug(`No. of owners ${residingOwners.length} exceeds limit of ${maxOwners}`);
 				throw new Error(msg);
-			}
+			}  */
+			existing = flat.residents.filter(each => each.id == resident.id)
 			// add link
 			if(existing.length == 0) {
 				logger.debug(`Linking flat ${flat.id} to resident ${resident.id}...`)
-				return knex('flats_residents')
-					.insert({flat_id: flat.id, resident_id: resident.id})
+				flat.residents.attach(resident.id)
+				//return knex('flats_residents')
+				//	.insert({flat_id: flat.id, resident_id: resident.id})
 			} else {
 				logger.debug(`Cannot add a link as a link on flat ${flat.id} to resident ${resident.id} already exists`)
 			}
@@ -458,10 +489,11 @@ function putCommon(req, res){
 			existing = flat.residents.filter(each => each.id == resident.id)
 			if(existing.length == 1) {
 				logger.debug(`De-Linking flat ${flat.id} to resident ${resident.id}...`)
-				return knex('flats_residents')
-					.where('flat_id', '=', flat.id)
-					.andWhere('resident_id', '=', resident.id)
-					.del()
+				//return knex('flats_residents')
+					//.where('flat_id', '=', flat.id)
+					//.andWhere('resident_id', '=', resident.id)
+					//.del()
+				flat.residents.detach(resident.id)
 			} else {
 				logger.debug(`Cannot De-link, as there is no link exist on flat ${flat.id} to resident ${resident.id}`)
 			}
@@ -480,30 +512,37 @@ function putCommon(req, res){
 				newFlat = second;
 				oldFlat = first;
 			}
+			let msg = `Cannot change, as no. of online ${resident.is_a}s exceeds limit`;
+			if(doesExceedMaxLimit(newFlat, resident)) {
+				throw new Error(msg)
+			}
 			let promises = []
 			let aPromise = null;
 			existing = oldFlat.residents.filter(each => each.id == resident.id)
 			if(existing.length == 1) {
 				logger.debug(`De-Linking flat ${oldFlat.id} to resident ${resident.id}...`)
-				aPromise = knex('flats_residents')
-										.where('flat_id','=', oldFlat.id)
-										.andWhere('resident_id','=', resident.id)
-										.del();
-				promises.push(aPromise);
+				oldFlat.residents.detach(resident.id)
+				//aPromise = knex('flats_residents')
+										//.where('flat_id','=', oldFlat.id)
+										//.andWhere('resident_id','=', resident.id)
+										//.del();
+				//promises.push(aPromise);
 			} else {
 				logger.debug(`Cannot De-link, as there is no link exist on flat ${oldFlat.id} to resident ${resident.id}`)
 			}
 			existing = newFlat.residents.filter(each => each.id == resident.id);
 			if(existing.length == 0) {
 				logger.debug(`Linking flat ${newFlat.id} to resident ${resident.id}...`)
-				aPromise = knex('flats_residents').insert({flat_id: newFlat.id, resident_id: resident.id});
-				promises.push(aPromise)
+				//aPromise = knex('flats_residents').insert({flat_id: newFlat.id, resident_id: resident.id});
+				//promises.push(aPromise)
+				newFlat.residents.attach(resident.id)
 			} else {
 				logger.debug(`Cannot add a link as a link on flat ${newFlat.id} to resident ${resident.id} already exists`)
 			}
-			Promise.all(promises)
+			//Promise.all(promises)
+			return Promise.resolve(true)
 		}
-		logger.debug('No link is added/updated/deleted...')
+		logger.debug('No link is added/updated/deleted on FlatToResident...')
 		return Promise.resolve(false);
 	}
 	function getRoles() {
@@ -522,6 +561,8 @@ function putCommon(req, res){
 			logger.debug(`Detaching old role id ${roleOld.id} and Attaching new role id ${roleNew.id} in the users-roles link table`);
 			this.model.roles().detach(roleOld.id);
 			this.model.roles().attach(roleNew.id);
+		} else {
+			logger.debug('No link added/changed/deleted on UserToRole')
 		}
 	}
 	function sendResponse() {

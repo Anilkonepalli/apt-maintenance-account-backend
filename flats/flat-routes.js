@@ -15,7 +15,7 @@ var Flats = Bookshelf.Collection.extend({
 function getAll(req, res) {
 	Flats
 		.forge()
-		.fetch()
+		.fetch({withRelated: ['residents']})
 		.then(doAuth)
 		.then(sendResponse)
 		.catch(errorToNotify);
