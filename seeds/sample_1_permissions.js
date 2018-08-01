@@ -1,6 +1,7 @@
 // [ operations, resource, condition, description]
 let sampleData = [
   ['R', 'accounts', null, 'Grants READ ONLY permissions to ANY USERS'],
+  ['R', 'my-accounts', null, 'Grants READ ONLY permissions to ANY USERS'],
   ['RUD', 'users', 'userOwnRecord', 'Grants RUD PERMISSIONS to user\'s OWN RECORDS'],
   ['CRUD', 'accounts', null, 'Grants ALL PERMISSIONS to ANY USERS'],
   ['R', 'accounts', 'userOwnAccounts', 'Grants READ ONLY permissions to USER SPECIFIC record'],

@@ -1,8 +1,12 @@
 var	Bookshelf 					= require('../config/database');
 var	MaintenanceAccount 	= require('./maint-acct-model');
+var Resident 						= require('../residents/model');
+var User                = require('../users/user-model');
 var auth 								= require('../authorization/authorization');
 var _ 									= require('lodash');
 var constants 					= require('../config/constants.json');
+var knex								= Bookshelf.knex;
+
 
 var MaintenanceAccounts = Bookshelf.Collection.extend({
 	model: MaintenanceAccount
@@ -38,6 +42,82 @@ function getAll(req, res) {
 	function sendResponse(models) {
 		logger.debug('maint-acct-routes >>getAll()...sendResponse(models)... ');
 		// logger.debug(models);
+		let sortedModels = _.sortBy(models, [
+				function(model){ return model.recorded_at; }, // sort criteria 1
+				function(model){ return model.id;	}						// sort criteria 2
+			]);
+		res.json(sortedModels);
+	}
+
+	function errorToNotify(err) {
+		logger.error(err);
+		return res.status(500).json({error: true, data: {message: err.message}});
+	}
+}
+
+// on routes that end in /maintenance-accounts/my/accounts
+// ---------------------------------------------------------------------
+function getMyAccounts(req, res) {
+	let residentModel = null;
+	let userModel = null;
+	logger.debug('getMyAccounts(..)');
+	logger.debug('req params: '); logger.debug(req.params);
+
+	User
+		.forge( {id: req.decoded.id} )
+		.fetch()
+		.then(getResidentCount)
+		.then(getResident)
+		.then(doAuth) // is authorized to view?
+		.then(fetchMyAccounts)
+		.then(sendResponse)
+		.catch(errorToNotify);
+
+	function getResidentCount(user) {
+		userModel = user.toJSON()
+		logger.debug('getMyAccounts() of User: ', userModel)
+		logger.debug(`First Name: ${userModel.first_name}, Last Name: ${userModel.last_name}`)
+		return Resident
+			.where({
+				first_name: userModel.first_name,
+				last_name: userModel.last_name
+			})
+			.count('id'); // returns Promise containing count
+	}
+	function getResident(count) {
+		if(count === 0) {
+			let msg = 'No Resident found for the logged user...';
+			logger.error(msg);
+			throw new Error(msg);
+		} else {
+			logger.log(`${count} resident is found`);
+		}
+		return Resident.forge({
+			first_name: userModel.first_name,
+			last_name: userModel.last_name
+		}).fetch({withRelated: 'flats'})
+	}
+	function doAuth(resident) {
+		residentModel = resident.toJSON()
+		logger.debug('doAuth(resident): ', residentModel)
+		return auth.allowsView(req.decoded.id, 'my-accounts', resident);
+	}
+	function fetchMyAccounts(response) {
+		logger.debug('fetchMyAccounts for  resident: ', residentModel)
+		let flatNumbers = residentModel.flats.map(each => each.flat_number);
+		logger.debug('for flatNumbers: ', flatNumbers)
+		if(flatNumbers.length === 0) {
+			let msg = 'No Flat found for this residenter or user';
+			logger.error(msg);
+			throw new Error(msg)
+		}
+		return knex('maintenance_accounts')
+			.whereBetween('recorded_at', [residentModel.occupied_on, residentModel.vacated_on])
+			.whereIn('flat_number', flatNumbers)
+	}
+	// sends Account models after sorting; sorting is based on its recorded_at field and then id field
+	function sendResponse(models) {
+		logger.debug('maint-acct-routes >>getMyAccounts()...sendResponse(models)...count is ', models.length);
 		let sortedModels = _.sortBy(models, [
 				function(model){ return model.recorded_at; }, // sort criteria 1
 				function(model){ return model.id;	}						// sort criteria 2
@@ -385,4 +465,4 @@ function calculateBalanceAndApply(jmodels, currentBalance) {
 	return Promise.all(promises);
 }
 
-module.exports = { getAll, post, get, put, del, getSummaries };
+module.exports = { getAll, post, get, put, del, getSummaries, getMyAccounts };

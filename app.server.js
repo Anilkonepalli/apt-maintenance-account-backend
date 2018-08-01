@@ -94,6 +94,8 @@ app.route("/api/maintenance-accounts/:id")
 app.route("/api/maintenance-accounts/summary/list")
 	.get(account.getSummaries);
 
+app.route("/api/maintenance-accounts/my/accounts")
+	.get(account.getMyAccounts);
 
 /////////////////////////  ACCOUNT PERIODIC ROUTES  //////////////////////////////
 let accountp = require('./accounts/maint-acct-periodic-routes');

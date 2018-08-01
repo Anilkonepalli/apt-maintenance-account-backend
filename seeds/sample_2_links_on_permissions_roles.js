@@ -1,36 +1,19 @@
 
 let sampleData = [
   {
-    roleName: 'guest',
+    roleName: 'tenant',
     permissions: [
-      ['R', 'accounts', null], // read-only permission on 'accounts' module
-      ['R', 'users', null],
-      ['R', 'flats', null],
-      ['R', 'residents', null],
-      ['R', 'roles', null],
-      ['R', 'permissions', null],
-      ['R', 'flats-residents', null],
-      ['R', 'users-roles', null],
-      ['R', 'roles-permissions', null],
-      ['R', 'account-summary', null],
-      ['R', 'balance', null],
-      ['R', 'durations', null]
-    ]
-  },
-  {
-    roleName: 'member-t',
-    permissions: [
-      ['R', 'accounts', 'hasCondition'],
-      ['R', 'flats', null],
-      ['R', 'residents', null],
+      ['R', 'my-accounts', 'hasCondition'],
       ['RU', 'user-profile', 'hasCondition'] // Read and Update permissions on 'user-profile' module
     ]
   },
   {
-    roleName: 'member-o',
+    roleName: 'owner',
     permissions: [
+      ['R', 'accounts', null],
       ['R', 'account-summary', null],
-      ['R', 'balance', null]
+      ['R', 'balance', null],
+      ['R', 'durations', null]
     ]
   },
   {
@@ -47,6 +30,12 @@ let sampleData = [
     roleName: 'manager',
     permissions: [
       ['D', 'accounts', null] // Delete permission on 'accounts' module
+    ]
+  },
+  {
+    roleName: 'guest',
+    permissions: [
+      ['RU', 'user-profile', 'hasCondition']
     ]
   },
   {
