@@ -176,6 +176,6 @@ app.route("/api/durations/:id")
 	.put(duration.put)
 
 //////////// Launch NodeJS server with port #3002
-app.listen(3002, function(){
-	console.log('Express server listening on port %d in %s mode', 3002, process.env.NODE_ENV);
+app.listen(process.env.PORT, function(){
+	console.log('Express server listening on port %d in %s mode', process.env.PORT, process.env.NODE_ENV);
 });
