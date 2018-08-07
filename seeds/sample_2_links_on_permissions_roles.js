@@ -117,7 +117,7 @@ exports.seed = function(knex, Promise) {
       each.operations === arr[0]
     && each.resource === arr[1]
     && each.condition === null);
-    // console.log('Permission w/o condition: '); console.log(fPerms);
+    console.log('Permission w/o condition: '); console.log(fPerms);
     return fPerms[0].id;
   }
   function getPermsIdWithCondition(arr){
@@ -125,7 +125,7 @@ exports.seed = function(knex, Promise) {
       each.operations === arr[0]
     && each.resource === arr[1]
     && each.condition !== null);
-    // console.log('Permission w/ condition: '); console.log(fPerms);
+    console.log('Permission w/ condition: '); console.log(fPerms);
     return fPerms[0].id;
   }
 }
