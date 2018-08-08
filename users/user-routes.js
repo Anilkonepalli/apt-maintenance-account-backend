@@ -682,10 +682,13 @@ function putRoles(req, res) {
 }
 
 
-// on routes that end in /users to post (to add) a new user
+// on routes that end in /users to post (to add / register ) a new user
 // ---------------------------------------------------------------------
 function post(req, res) {
 	logger.debug('adding new user...name: '+req.body.name+', first name: '+req.body.first_name);
+	logger.debug('request protocol: ', req.protocol)
+	logger.debug('host is: ', req.get('host'))
+	logger.debug('originnal url: ', req.originalUrl)
 	let model = null;
 
 	getTotalForMaxCheck()
@@ -755,14 +758,22 @@ function post(req, res) {
 	function sendResponse(model) {
 		let can_send_email = process.env.can_send_email === 'true';
 		res.json({error: false, data:{emailed: can_send_email}});
+		let protocol = req.protocol
+		let host = req.get('host')
+		let originalUrl = req.originalUrl
 		let modelJson = this.model.toJSON();
-		let confirmUrl = process.env.ip_address+'signup/'+modelJson.confirmation_code;
+		//let confirmUrl = process.env.ip_address+'signup/'+modelJson.confirmation_code;
+		let signupUrl = protocol + '://' + host
+		let confirmUrl = signupUrl + '/api/signup/' + modelJson.confirmation_code
+
 		let template = {
-			subject: 'Thanks for Signing up!',
+			subject: 'Thank you for signing up with Raj-n-Gothai Nivas!',
 			body: '',
-			html: 'To complete signup process, please click on the below link: <br><br>'
+			html: 'This email is sent as part of signup process at '+ signupUrl + '.'
+							+ ' To complete signup process, please click on the below link: <br><br>'
 							+ '<a href="' + confirmUrl + '">' + confirmUrl + '</a>'
-							+'.<br><br><i>If the link does not work, copy and paste it into browser url.</i>'
+							+ '.<br><br><i>If the link does not work, copy and paste it into browser url.</i>'
+							+ 'In case no such signup process is initiated, please ignore this email'
 		};
 		logger.debug('Template is: ');
 		logger.debug(template);
