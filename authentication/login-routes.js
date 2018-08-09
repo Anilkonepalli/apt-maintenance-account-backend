@@ -107,9 +107,15 @@ function forgotPassword(req, res){
 	}
 
 	function sendResponse(model){
-		let user = model.toJSON();
 		let can_send_email = process.env.can_send_email === 'true';
-		let confirmUrl = process.env.ip_address+'/login/reset/'+user.confirmation_code;
+		res.json({error: false, data:{emailed: can_send_email}});
+		let protocol = req.secure ? 'https': 'http';
+		let host = req.get('host')
+		let originalUrl = req.originalUrl
+		let modelJson = model.toJSON();
+		//let confirmUrl = process.env.ip_address+'/login/reset/'+modelJson.confirmation_code;
+		let signupUrl = protocol + '://' + host
+		let confirmUrl = signupUrl + '/login/reset/' + modelJson.confirmation_code
 		let template = {
 			subject: 'Password Reset!',
 			body: '',
