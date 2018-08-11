@@ -474,7 +474,7 @@ function putCommon(req, res){
 			// add link
 			if(existing.length == 0) {
 				logger.debug(`Linking flat ${flat.id} to resident ${resident.id}...`)
-				flat.residents.attach(resident.id)
+				flat.residents().attach(resident.id)
 				//return knex('flats_residents')
 				//	.insert({flat_id: flat.id, resident_id: resident.id})
 			} else {
@@ -493,7 +493,7 @@ function putCommon(req, res){
 					//.where('flat_id', '=', flat.id)
 					//.andWhere('resident_id', '=', resident.id)
 					//.del()
-				flat.residents.detach(resident.id)
+				flat.residents().detach(resident.id)
 			} else {
 				logger.debug(`Cannot De-link, as there is no link exist on flat ${flat.id} to resident ${resident.id}`)
 			}
@@ -521,7 +521,7 @@ function putCommon(req, res){
 			existing = oldFlat.residents.filter(each => each.id == resident.id)
 			if(existing.length == 1) {
 				logger.debug(`De-Linking flat ${oldFlat.id} to resident ${resident.id}...`)
-				oldFlat.residents.detach(resident.id)
+				oldFlat.residents().detach(resident.id)
 				//aPromise = knex('flats_residents')
 										//.where('flat_id','=', oldFlat.id)
 										//.andWhere('resident_id','=', resident.id)
@@ -535,7 +535,7 @@ function putCommon(req, res){
 				logger.debug(`Linking flat ${newFlat.id} to resident ${resident.id}...`)
 				//aPromise = knex('flats_residents').insert({flat_id: newFlat.id, resident_id: resident.id});
 				//promises.push(aPromise)
-				newFlat.residents.attach(resident.id)
+				newFlat.residents().attach(resident.id)
 			} else {
 				logger.debug(`Cannot add a link as a link on flat ${newFlat.id} to resident ${resident.id} already exists`)
 			}

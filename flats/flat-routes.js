@@ -28,9 +28,15 @@ function getAll(req, res) {
 		logger.debug('models being sent are: '); logger.debug(models.toJSON());
 		res.json(models);
 	}
+/*
 	function errorToNotify(err) {
 		logger.error(err);
 		res.send({status: 500, data: null, message: err.message});
+	}
+*/
+	function errorToNotify(err) {
+		logger.error(err)
+		return res.status(500).json({error: true, data: {message: err.message}});
 	}
 }
 
