@@ -16,6 +16,7 @@ var providers = {
 
 // application routing - for Social login
 function createSession(request, response){
+	logger.log('debug', 'social login routes >> createSession');
 	var network = request.body.network;
 	var socialToken = request.body.socialToken;
 	var profile_name;
@@ -23,7 +24,6 @@ function createSession(request, response){
 	var profile_email;
 	var userCount;
 	var userModel;
-
 	if( !network || !socialToken){
 		return response.status(400).send("Network name and Social token are needed");
 	}
@@ -69,6 +69,7 @@ function createSession(request, response){
 					logger.log('debug', 'social user account do not exist; saving new user')
 					return new User({ // returns Promise containing new user model
 						name: profile_name,
+						password: '',            // non nullable, so set at least an empty string
 						social_network_id: profile_id,
 						social_network_name: network,
 						email: profile_email,
@@ -79,7 +80,7 @@ function createSession(request, response){
 
 			function getDefaultRole(uModel) {
 				userModel = uModel;
-				return Role.forge({name: process.env.defaultRole}).fetch(); // default role is 'member-t'
+				return Role.forge({name: process.env.defaultRole}).fetch(); // default role is 'guest'
 			}
 
 			function assignDefaultRole(rModel){
