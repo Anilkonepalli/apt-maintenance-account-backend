@@ -80,7 +80,7 @@ function createSession(request, response){
 
 			function getDefaultRole(uModel) {
 				userModel = uModel;
-				return Role.forge({name: process.env.defaultRole}).fetch(); // default role is 'guest'
+				return new Role({'name': process.env.defaultRole}).fetch()
 			}
 
 			function assignDefaultRole(rModel){
@@ -90,8 +90,7 @@ function createSession(request, response){
 				}
 				let roleId = rModel.id;
 				logger.log('debug', 'Linking userId: '+userModel.id+'with roleId: '+roleId);
-				userModel.roles().attach(roleId);
-				return new Promise((resolve) => resolve(true));
+				return userModel.roles().attach(roleId);
 			}
 			function sendJwt(status) {	// implementing inner function3
 					logger.log('debug', 'sendJwt(..)...Login through social network...');

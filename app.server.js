@@ -11,7 +11,7 @@ var transport = new winston.transports.DailyRotateFile({
 	filename: './logs/maint-acct.log',
 	datePattern: 'yyyy-MM-dd-',
 	prepend: true,
-	level: process.env.NODE_ENV === 'development' ? 'debug' : 'info'
+	level: process.env.log_level
 });
 
 global.logger = new winston.Logger({
@@ -19,7 +19,6 @@ global.logger = new winston.Logger({
 	transports: [
 		new (winston.transports.Console)({colorize: true}),
 		transport
-		//new (winston.transports.File)({ filename: constants.logFileName })
 	]
 });
 

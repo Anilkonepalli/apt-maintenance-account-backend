@@ -12,12 +12,6 @@ var Info 							  = require('./info-model');
 var Role 								= require('../authorization/role-model');
 var	Flat 								= require('../flats/flat-model');
 
-/*
-var Flats = Bookshelf.Collection.extend({
-	model: Flat
-});
-*/
-
 var Users 	= Bookshelf.Collection.extend({
 	model: User
 });
@@ -62,8 +56,6 @@ function getInfos(req,res) {
 		.catch(err => res.send(err));
 }
 
-
-
 // on routes that end in /Users/myroles/:id to get an User with associated roles
 // ---------------------------------------------------------------------
 function getRoles(req,res) {
@@ -75,7 +67,6 @@ function getRoles(req,res) {
 		.catch(err => res.send(err));
 }
 
-
 // on routes that end in /Users/allpermissions to get all permissions of user
 // ---------------------------------------------------------------------
 function getAllPermissions(req, res) {
@@ -85,7 +76,6 @@ function getAllPermissions(req, res) {
 		.then(perms => res.json(perms))
 		.catch(err => res.send(err));
 }
-
 
 // on routes that end in /Users/mypermissions/:name to get permissions of 'name' module
 // ---------------------------------------------------------------------
@@ -111,9 +101,6 @@ function putProfile(req, res) {
 }
 
 function putCommon(req, res){
-	//console.log('Rquest obj: ...'); console.log(req);
-	console.log('req body: ...'); console.log(req.body);
-	console.log('req params: ...'); console.log(req.params);
 	let userName = req.body.name;
 	let firstName = req.body.first_name;
 	let lastName = req.body.last_name;
@@ -306,7 +293,6 @@ function putCommon(req, res){
 				return knex('residents')
 					.where('first_name', '=', firstName)
 					.andWhere('last_name', '=', lastName)
-					//.andWhere('is_a', '=', residents[0].is_a)
 					.update({
 						is_a: residentTypeInfo.value
 					})
@@ -324,7 +310,6 @@ function putCommon(req, res){
 					aPromise = knex('residents')
 						.where('first_name', '=', firstName)
 						.andWhere('last_name', '=', lastName)
-						//.andWhere('is_a', '=', residents[0].is_a)
 						.del();
 					promises.push(aPromise)
 					return Promise.all(promises)
@@ -335,8 +320,6 @@ function putCommon(req, res){
 		logger.debug('flatNumberInfo: ')
 		logger.debug(flatNumberInfo)
 		logger.debug('resident exists in DB?'); logger.debug(residentExistInDB?'Yes':'No');
-
-		//logger.debug('model now: '); logger.debug(this.model);
 		logger.debug('first name: '); logger.debug(firstName);
 		logger.debug('last name: '); logger.debug(lastName);
 		return new Promise(resolve => resolve(true))
@@ -435,82 +418,66 @@ function putCommon(req, res){
 		return false;
 	}
 	function linkFlatToResident(flats) {
-		//logger.debug('Retrieved flat: ', flats);
-		logger.debug('No. of flats:', flats.length)
+		logger.debug('No. of flats:', flats.length);
 		let existing = [];
-		//let residingOwners = [];
-		//let residingTenants = [];
 		// make link
-		//	if(flatNumberInfo.added && flats.length == 1 && residentsInDB.length == 1 && flats[0]) {
 		// not deleted or not changed (in other words, added or not changed)
 		if( (!flatNumberInfo.deleted || !flatNumberInfo.changed ) && flats.length == 1 && residentsInDB.length == 1 && flats[0]) {
-			let resident = residentsInDB[0]
-			let flat = flats[0].toJSON()
+			logger.debug('First If condition');
+			let resident = residentsInDB[0];
+			let flat = flats[0].toJSON();
 			logger.debug(flat);
 			let msg = `Cannot add, as no. of online ${resident.is_a} exceeds limit`;
 			if(doesExceedMaxLimit(flat, resident)) {
 				throw new Error(msg)
 			}
-/*
-			residingOwners = flat.residents.filter(each =>
-				each.is_a === 'owner' && activeResident(each));
-			residingTenants = flat.residents.filter(each =>
-				each.is_a === 'tenant' && activeResident(each));
-			logger.debug('Resident is a: ', resident.is_a);
-			// validate whether resident can be added or not
-			let maxTenants = flat.max_tenants;
-			let maxOwners = flat.max_owners;
-			logger.debug(`Flat Max Owners: ${maxOwners} and Max Tenants: ${maxTenants}`)
-			let msg = `Cannot add online ${resident.is_a}s exceeds limit`;
-			if(resident.is_a === 'tenant' && residingTenants.length >= maxTenants) {
-				logger.debug(msg);
-				logger.debug(`No. of tenants ${residingTenants.length} exceeds limit of ${maxTenants}`);
-				throw new Error(msg);
-			} else if(resident.is_a === 'owner' && residingOwners.length >= maxOwners) {
-				logger.debug(`No. of owners ${residingOwners.length} exceeds limit of ${maxOwners}`);
-				throw new Error(msg);
-			}  */
 			existing = flat.residents.filter(each => each.id == resident.id)
+			logger.debug(`No. of existing resident is ${existing}`);
 			// add link
 			if(existing.length == 0) {
 				logger.debug(`Linking flat ${flat.id} to resident ${resident.id}...`)
-				flat.residents().attach(resident.id)
-				//return knex('flats_residents')
-				//	.insert({flat_id: flat.id, resident_id: resident.id})
+				flats[0].residents().attach(resident.id)
 			} else {
 				logger.debug(`Cannot add a link as a link on flat ${flat.id} to resident ${resident.id} already exists`)
 			}
+			return Promise.resolve(true);
 		}
 		// remove link
 		if(flatNumberInfo.deleted && flats.length == 1 && residentsInDB.length == 1 && flats[0]) {
+			logger.debug(`Second If condition`);
 			let resident = residentsInDB[0]
 			let flat = flats[0].toJSON()
 			logger.debug(flat);
 			existing = flat.residents.filter(each => each.id == resident.id)
+			logger.debug(`No. of existing resident is ${existing}`);
 			if(existing.length == 1) {
 				logger.debug(`De-Linking flat ${flat.id} to resident ${resident.id}...`)
-				//return knex('flats_residents')
-					//.where('flat_id', '=', flat.id)
-					//.andWhere('resident_id', '=', resident.id)
-					//.del()
-				flat.residents().detach(resident.id)
+				flat[0].residents().detach(resident.id)
 			} else {
 				logger.debug(`Cannot De-link, as there is no link exist on flat ${flat.id} to resident ${resident.id}`)
 			}
+			return Promise.resolve(true);
 		}
 		// Update link
 		if(flatNumberInfo.changed && flats.length == 2 && residentsInDB.length == 1 && flats[0] && flats[1]) {
+			logger.debug(`Third If condition`);
 			let resident = residentsInDB[0];
 			let first = flats[0].toJSON();
 			let second = flats[1].toJSON();
 			let newFlat = null;
 			let oldFlat = null;
+			let newFlatDB = null;
+			let oldFlatDB = null;
 			if( isEqual(flatNumberInfo.value, first) ) {
 					newFlat = first;
 					oldFlat = second;
+					newFlatDB = flats[0];
+					oldFlatDB = flats[1];
 			} else {
 				newFlat = second;
 				oldFlat = first;
+				newFlatDB = flats[1];
+				oldFlatDB = flats[0];
 			}
 			let msg = `Cannot change, as no. of online ${resident.is_a}s exceeds limit`;
 			if(doesExceedMaxLimit(newFlat, resident)) {
@@ -518,28 +485,22 @@ function putCommon(req, res){
 			}
 			let promises = []
 			let aPromise = null;
-			existing = oldFlat.residents.filter(each => each.id == resident.id)
+			existing = oldFlat.residents.filter(each => each.id == resident.id);
+			logger.debug(`No. of existing oldFlat resident is ${existing}`);
 			if(existing.length == 1) {
 				logger.debug(`De-Linking flat ${oldFlat.id} to resident ${resident.id}...`)
-				oldFlat.residents().detach(resident.id)
-				//aPromise = knex('flats_residents')
-										//.where('flat_id','=', oldFlat.id)
-										//.andWhere('resident_id','=', resident.id)
-										//.del();
-				//promises.push(aPromise);
+				oldFlatDB.residents().detach(resident.id)
 			} else {
 				logger.debug(`Cannot De-link, as there is no link exist on flat ${oldFlat.id} to resident ${resident.id}`)
 			}
 			existing = newFlat.residents.filter(each => each.id == resident.id);
+			logger.debug(`No. of existing newFlat resident is ${existing}`);
 			if(existing.length == 0) {
 				logger.debug(`Linking flat ${newFlat.id} to resident ${resident.id}...`)
-				//aPromise = knex('flats_residents').insert({flat_id: newFlat.id, resident_id: resident.id});
-				//promises.push(aPromise)
-				newFlat.residents().attach(resident.id)
+				newFlatDB.residents().attach(resident.id)
 			} else {
 				logger.debug(`Cannot add a link as a link on flat ${newFlat.id} to resident ${resident.id} already exists`)
 			}
-			//Promise.all(promises)
 			return Promise.resolve(true)
 		}
 		logger.debug('No link is added/updated/deleted on FlatToResident...')
@@ -551,9 +512,11 @@ function putCommon(req, res){
 	function linkUserToRole(roles) {
 		logger.debug('user-routes >> linkUserToRole');
 		logger.debug('residentTypeInfo: ', residentTypeInfo);
-		let roleNameNew = residentTypeInfo.value === 'NA' ?
+		let roleNameNew = (residentTypeInfo.value === 'NA' ||
+		 										residentTypeInfo.value === null) ?
 											 'guest' : residentTypeInfo.value;
-		let roleNameOld = residentTypeInfo.oldValue === 'NA' ?
+		let roleNameOld = (residentTypeInfo.oldValue === 'NA' ||
+		 										residentTypeInfo.oldValue === null) ?
 											 'guest' : residentTypeInfo.oldValue;
 		let roleNew = roles.find(each => each.name === roleNameNew);
 		let roleOld = roles.find(each => each.name === roleNameOld);
@@ -620,8 +583,6 @@ function putInfos(req, res) {
 
 }
 
-
-
 // on routes that end in /roles/myroles/:id to update an existing User with myroles
 // --------------------------------------------------------------------------------------------
 function putRoles(req, res) {
@@ -629,7 +590,6 @@ function putRoles(req, res) {
 	let userModel;
 	logger.debug('Inside user-routes >> putRoles(req,res)...');
 	logger.debug('req params id: '+req.params.id);
-	//User.forge({id: req.params.id}).fetch({require: true, withRelated:['roles']})
 	retrieveModelWithRoles()
 		.then(doAuth)
 		.then(detachExistingRoles)
@@ -657,16 +617,10 @@ function putRoles(req, res) {
 
 	function attachNewRoles(){
 		logger.debug('inside user-routes >> attachNewRoles(model)...');
-		//logger.debug(this.userModel.toJSON());
 		logger.debug(req.body.myrolesIds)
 		return this.userModel.roles().attach(req.body.myrolesIds); // attach new roles
 	}
-/*
-	function sendResponse(aColl) {
-		logger.debug('Inside user-routes >> sendResponse(aColl)...');
-		res.json({error:false, data:{ message: 'My Roles are attached'}});
-	}
-*/
+
 	function sendResponse(model) {
 		let modelJson = model.toJSON();
 		logger.debug('inside user-routes >> sendResponse(model)')
@@ -681,7 +635,6 @@ function putRoles(req, res) {
 
 }
 
-
 // on routes that end in /users to post (to add / register ) a new user
 // ---------------------------------------------------------------------
 function post(req, res) {
@@ -695,8 +648,8 @@ function post(req, res) {
 	.then(getCountForDupCheck)
 	.then(doSave)
 	.then(addInfos)
-	.then(getGuestRole)
-	.then(attachGuestRole)
+	.then(getDefaultRole)
+	.then(attachDefaultRole)
 	.then(sendResponse)
 	.catch(errorToNotify);
 
@@ -747,12 +700,12 @@ function post(req, res) {
 		});
 		return Promise.all(promises);
 	}
-	function getGuestRole(prevResp) {
-		console.log('user-routes >> getGuestRole(prevResp) ', prevResp)
-		return new Role({'name': 'guest'}).fetch()
+	function getDefaultRole(prevResp) {
+		console.log('user-routes >> getDefaultRole(prevResp) ', prevResp)
+		return new Role({'name': process.env.defaultRole}).fetch(); // default role is 'guest'
 	}
-	function attachGuestRole(aRole) {
-		console.log('user-routes >> attachGuestRole(aRole) ', aRole)
+	function attachDefaultRole(aRole) {
+		console.log('user-routes >> attachDefaultRole(aRole) ', aRole)
 		return this.model.roles().attach(aRole.id)
 	}
 	function sendResponse(model) {
@@ -762,7 +715,6 @@ function post(req, res) {
 		let host = req.get('host')
 		let originalUrl = req.originalUrl
 		let modelJson = this.model.toJSON();
-		//let confirmUrl = process.env.ip_address+'signup/'+modelJson.confirmation_code;
 		let signupUrl = protocol + '://' + host
 		let confirmUrl = signupUrl + '/registration-confirm/' + modelJson.confirmation_code
 
@@ -789,7 +741,6 @@ function post(req, res) {
 
 }
 
-
 // on routes that end in /users/:id to delete an user
 // ---------------------------------------------------------------------
 function del(req, res) { // using full form 'delete' causes error, so 'del' is used
@@ -811,7 +762,6 @@ function del(req, res) { // using full form 'delete' causes error, so 'del' is u
 
 	// for now, a work around to delete dependants is done here
 	function getDependants(granted){ // yet to explore a better way to delete dependants with soft delete
-		//userModel = model;
 		logger.debug('user routes >> getDependants(granted)...................id: '+this.model.id)
 		return Infos.forge({user_id: this.model.id}).fetch({require: false}); // require is set to false, so that EmptyResponse/NotFoundError, if any, is rejected
 	}
@@ -824,22 +774,22 @@ function del(req, res) { // using full form 'delete' causes error, so 'del' is u
 		});
 		return Promise.all(promises);
 	}
+
 	function doDeleteUser(){
 		logger.debug('user routes >> doDeleteUser() .......................');
 		return this.model.destroy();
-		/* this.model.destroy()
-			.then( () => res.json({error: true, data: {message: 'User model successfully deleted'} }))
-			.catch( (err) => res.status(500).json({error: true, data: {message: err.message}})); */
 	}
+
 	function sendResponse() {
 		return res.json({error: true, data: {message: 'User model successfully deleted'}});
 	}
+
 	function errorToNotify(err){
 		logger.error(err);
 		res.status(500).json({error: true, data: {message: err.message}});
 	}
-}
 
+}
 
 // on routes that end in /api/signup/:code to confirm newly registered User
 // --------------------------------------------------------------------------------------------
