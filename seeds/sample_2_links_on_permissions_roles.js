@@ -4,6 +4,7 @@ let sampleData = [
     roleName: 'tenant',
     permissions: [
       ['R', 'my-accounts', null],
+      ['R', 'flats', null],
       ['RU', 'user-profile', 'hasCondition'] // Read and Update permissions on 'user-profile' module
     ]
   },
@@ -35,6 +36,7 @@ let sampleData = [
   {
     roleName: 'guest',
     permissions: [
+      ['R', 'flats', null],
       ['RU', 'user-profile', 'hasCondition']
     ]
   },
