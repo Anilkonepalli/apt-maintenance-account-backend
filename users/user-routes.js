@@ -269,6 +269,25 @@ function putCommon(req, res){
 			.where('first_name', '=', firstName)
 			.andWhere('last_name', '=', lastName)
 	}
+	function determineResidentDates() {
+		let occupiedOn = '';
+		let vacatedOn = '';
+		logger.debug(constants.defaultDatesEnabled?'Default Dates Enabled': 'DefaultDates NOT enabled')
+		if(residentTypeInfo.value === "owner" && constants.defaultDatesEnabled) { // for owner occupation and vacation dates are fixed
+			occupiedOn = constants.defaultOccupationDate;
+			vacatedOn = constants.defaultVacateDate;
+		} else { // for tenant, occupation date is taken as current date and vacation date is 2 years from current date
+				let occuDate = new Date();
+				let occuYear = occuDate.getFullYear();
+				logger.debug(`average years of stay ${constants.averageYearsOfStay}`)
+				let vacaYear = occuYear + constants.averageYearsOfStay;
+				let mo = occuDate.getMonth();
+				if (mo < 10) mo = '0' + mo;
+				occupiedOn = `${occuYear}-${mo}-01`;
+				vacatedOn = `${vacaYear}-${mo}-01`;
+		}
+		return {"fromDate": occupiedOn, "toDate": vacatedOn};
+	}
 	function crudResident(residents) {
 		residentsInDB = residents;
 		residentExistInDB = residents.length == 1
@@ -278,12 +297,15 @@ function putCommon(req, res){
 				(residentTypeInfo.changed && !residentExistInDB)
 		) {
 			logger.debug('for residentType, new row in residents table is added!!')
+			let residentDates = determineResidentDates();
 			return knex('residents').insert({
 				first_name: firstName,
 				last_name: lastName,
 				is_a: residentTypeInfo.value,
-				owner_id: userId
-			})
+				owner_id: userId,
+				occupied_on: residentDates.fromDate,
+				vacated_on: residentDates.toDate
+			});
 		}
 		if(residentTypeInfo.changed &&
 				residentExistInDB &&
@@ -391,7 +413,7 @@ function putCommon(req, res){
 		}
 		let startDate = asDateObject(aResident.occupied_on);
 		let endDate = asDateObject(aResident.vacated_on);
-		let today = Date.today();
+		let today = new Date();
 		if(today >= startDate && today <= endDate) {
 			logger.debug(`${aResident.id} is a resident now`);
 		} else {

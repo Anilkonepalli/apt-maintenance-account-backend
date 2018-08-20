@@ -67,12 +67,18 @@ function createSession(request, response){
 					return User.forge({email: profile_email}).fetch(); // returns Promise containing user model
 				} else { // if count is 0, then create new user and save it into system
 					logger.log('debug', 'social user account do not exist; saving new user')
+					let emailSplits = profile_email.split('@');
+					let firstName = emailSplits[0];
+					let domainSplits = emailSplits[1].split('.');
+					let lastName = domainSplits[0];
 					return new User({ // returns Promise containing new user model
 						name: profile_name,
 						password: '',            // non nullable, so set at least an empty string
 						social_network_id: profile_id,
 						social_network_name: network,
 						email: profile_email,
+						first_name: firstName,
+						last_name: lastName,
 						confirmed: 1
 					}).save();
 				}

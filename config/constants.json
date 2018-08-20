@@ -6,15 +6,17 @@
 	"logLevel": "debug",
 	"maxRecordsDisabled": false,
 	"maxRecords": {
-		"accounts": "100",
-		"users": "100",
-		"flats": "16",
-		"residents": "320",
-		"roles": "6",
-		"permissions": "30",
-		"perUser": {
-				"infos": "10"
-		},
+		"accounts": 100000,
+		"users": 100,
+		"flats": 16,
+		"residents": 48,
+		"roles": 6,
+		"permissions": 30,
+		"perUser": { "infos": 10 },
 		"durations": 100
-	}
+		},
+	"defaultDatesEnabled": true,
+	"defaultOccupationDate": "2010-01-01",
+	"defaultVacateDate": "2099-12-31",
+	"averageYearsOfStay": 2
 }
